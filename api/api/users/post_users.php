@@ -2,10 +2,10 @@
 
 if ($acao == "" && $param == ""){
     echo json_encode(["ERRO" => "Caminho não encontrado"]);
+    exit;
 }
 
 if ($acao == "adicionar" && $param == ""){
-
     $sql = "INSERT INTO users (";
 
     $contador = 1;
@@ -32,17 +32,13 @@ if ($acao == "adicionar" && $param == ""){
 
     $sql .= ")";
 
-    //var_dump($sql);
-
     $db = DB::connect();
     $result = $db->prepare($sql);
     $exec = $result->execute();
 
-    //var_dump($exec);
-
     if ($exec) {
         echo json_encode(["dados_usuarios" => "Usuário criado com sucesso!"]);
     } else {
-        echo json_encode(["dados_usuarios" => "Ocorreu um erro inesperado ao inserir dados! Tente novamente mais tarde."]);
+        echo json_encode(["dados_usuarios" => "Ocorreu um erro inesperado! Tente novamente mais tarde."]);
     }
 }
