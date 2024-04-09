@@ -24,6 +24,11 @@ if (isset($path[2])){ $param = $path[2];} else { $param = ''; }
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+$GLOBALS['secretJWT'] = 'htekapi**';
+
 include_once "classes/db.class.php";
+include_once "classes/jwt.class.php";
+include_once "classes/usuarios.class.php";
 include_once "api/users/users.php";
-//include_once "api/chamados/chamados.php";
+include_once "api/usuarios/usuarios.php";
+include_once "api/chamados/chamados.php";

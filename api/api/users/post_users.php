@@ -17,7 +17,7 @@ if ($acao == "adicionar" && $param == ""){
         }
         $contador++;
     }
-
+    
     $sql .= ") VALUES (";
 
     $contador = 1;
