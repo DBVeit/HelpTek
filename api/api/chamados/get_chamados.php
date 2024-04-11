@@ -1,5 +1,5 @@
 <?php
-
+/*
 if ($acao == "" && $param == ""){
     echo json_encode(["ERRO" => "Caminho não encontrado"]);
     exit;

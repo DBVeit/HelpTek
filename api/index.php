@@ -4,31 +4,23 @@ header('Content-type: application/json');
 
 date_default_timezone_set("America/Sao_Paulo");
 
-if (isset($_GET['path'])){
-    $path = explode("/", $_GET['path']);
-}else{
-    echo "Caminho não existe";
-    exit;
-}
-
-if(isset($path[0])){
-    $api = $path[0];
-}else{
-    echo "Caminho não existe";
-    exit;
-}
-
-if (isset($path[0])){ $api = $path[0];} else { echo "Caminho não existe"; exit;}
-if (isset($path[1])){ $acao = $path[1];} else { $acao = ''; }
-if (isset($path[2])){ $param = $path[2];} else { $param = ''; }
-
-$method = $_SERVER['REQUEST_METHOD'];
-
 $GLOBALS['secretJWT'] = 'htekapi**';
 
-include_once "classes/db.class.php";
-include_once "classes/jwt.class.php";
-include_once "classes/usuarios.class.php";
-include_once "api/users/users.php";
-include_once "api/usuarios/usuarios.php";
-include_once "api/chamados/chamados.php";
+include_once "classes/autoload.class.php";
+new Autoload();
+
+$rota = new Rotas();
+
+//Login c/ JWT
+$rota->add('POST','/usuarios/login','Usuarios::login',false);
+
+//Funcoes chamados
+$rota->add('GET','/chamados/listar','Chamados::listarTodos',true);
+$rota->add('GET','/chamados/listar/[PARAM]','Chamados::listarUnico',true);
+$rota->add('POST','/chamados/adicionar','Chamados::adicionar',true);
+$rota->add('POST','/chamados/atualizar/[PARAM]','Chamados::atualizar',true);
+
+//Funcoes usuarios
+
+
+$rota->ir($_GET['path']);
