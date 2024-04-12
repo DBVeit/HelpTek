@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Chamado</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="header">
+        <img src="file:///X:/Arthur%20Reis/Faculdade/2024.1/Projeto%20Final%201/tela%20criação%20chamado/Logo%20HelpTek.png" alt="HelpTek Logo" class="logo">
+        <input type="search" placeholder="Pesquisar aqui" class="search-bar">
+        <button class="new-ticket-btn">Novo chamado</button>
+    </div>
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="welcome-message">
+                Bem vindo, <strong>Demo Admin User</strong> (Admin)
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">Dashboard</a>
+                <a href="#" class="nav-item">Caixa de entrada</a>
+                <a href="#" class="nav-item">Chamados</a>
+                <a href="#" class="nav-item">Criar chamado</a>
+                <a href="#" class="nav-item">Chamados em aberto</a>
+                <a href="#" class="nav-item">Todos os chamados</a>
+                <a href="#" class="nav-item">Chamados descontinuados</a>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <div class="ticket-form-container">
+                <h1>Criar novo chamado</h1>
+                <form id="ticket-form">
+                    <div class="form-group">
+                        <label for="subject">Assunto</label>
+                        <input type="text" id="subject" name="subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Descrição</label>
+                        <textarea id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="start-date">Data de Início</label>
+                        <input type="date" id="start-date" name="start-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="priority">Prioridade</label>
+                        <select id="priority" name="priority">
+                            <option value="baixa">Baixa</option>
+                            <option value="media">Média</option>
+                            <option value="alta">Alta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="attachment">Anexo</label>
+                        <input type="file" id="attachment" name="attachment">
+                    </div>
+                    <button type="submit" class="submit-button">Criar chamado</button>
+                </form>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
