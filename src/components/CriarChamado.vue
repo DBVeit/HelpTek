@@ -22,31 +22,56 @@
           required
         ></textarea>
       </div>
+      <label>Prioridade</label>
       <div class="form-group">
-        <label>Prioridade</label>
-        <select name="gravidade" v-model="ChamadoData.gravidade" required>
-          <option default value="">Gravidade</option>
-          <option value="1">1 - O dano é pouco importante</option>
-          <option value="2">2 - O dano é relativamente importante</option>
-          <option value="3">3 - O dano é importante</option>
-          <option value="4">4 - O dano é muio importante</option>
-          <option value="5">5 - O dano é extremamente importante</option>
+        <select
+          name="gravidade"
+          id="gravidade"
+          v-model="ChamadoData.gravidade"
+          required
+        >
+          <option default value="" disabled>Gravidade</option>
+          <option
+            v-for="gravidade in prioridadesGravidade"
+            :key="gravidade.id_prioridade"
+            :value="gravidade.valor_prioridade"
+          >
+            {{ gravidade.descricao_categoria }}
+          </option>
         </select>
-        <select name="urgencia" v-model="ChamadoData.urgencia" required>
-          <option default value="">Urgência</option>
-          <option value="1">1 - Não há pressa</option>
-          <option value="2">2 - Pode-se aguardar</option>
-          <option value="3">3 - Tomar uma ação relativamente urgente</option>
-          <option value="4">4 - Tomar uma ação urgente</option>
-          <option value="5">5 - Tomar uma ação bastante urgente</option>
+      </div>
+      <div class="form-group">
+        <select
+          name="urgencia"
+          id="urgencia"
+          v-model="ChamadoData.urgencia"
+          required
+        >
+          <option default value="" disabled>Urgência</option>
+          <option
+            v-for="urgencia in prioridadesUrgencia"
+            :key="urgencia.id_prioridade"
+            :value="urgencia.valor_prioridade"
+          >
+            {{ urgencia.descricao_categoria }}
+          </option>
         </select>
-        <select name="tendencia" v-model="ChamadoData.tendencia" required>
-          <option default value="">Tendência</option>
-          <option value="1">1 - Tende à desaparecer completamente</option>
-          <option value="2">2 - Tende à melhorar</option>
-          <option value="3">3 - Tende à permanecer</option>
-          <option value="4">4 - Tende à piorar</option>
-          <option value="5">5 - Tende à piorar muito</option>
+      </div>
+      <div class="form-group">
+        <select
+          name="tendencia"
+          id="tendencia"
+          v-model="ChamadoData.tendencia"
+          required
+        >
+          <option default value="" disabled>Tendência</option>
+          <option
+            v-for="tendencia in prioridadesTendencia"
+            :key="tendencia.id_prioridade"
+            :value="tendencia.valor_prioridade"
+          >
+            {{ tendencia.descricao_categoria }}
+          </option>
         </select>
       </div>
       <div class="form-group">
@@ -74,9 +99,36 @@ export default {
         tendencia: "",
         id_user: id_user,
       },
+      prioridadesGravidade: [],
+      prioridadesUrgencia: [],
+      prioridadesTendencia: [],
     };
   },
+  created() {
+    this.fetchPrioridades();
+  },
   methods: {
+    fetchPrioridades() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/selectPrioridades.php"
+        )
+        .then((response) => {
+          const prioridades = response.data.prioridades;
+          this.prioridadesGravidade = prioridades.filter(
+            (p) => p.categoria_prioridade === "gravidade"
+          );
+          this.prioridadesUrgencia = prioridades.filter(
+            (p) => p.categoria_prioridade === "urgencia"
+          );
+          this.prioridadesTendencia = prioridades.filter(
+            (p) => p.categoria_prioridade === "tendencia"
+          );
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar prioridades: ", error);
+        });
+    },
     onCriarChamado() {
       let data = new FormData();
       data.append("titulo", this.ChamadoData.titulo);

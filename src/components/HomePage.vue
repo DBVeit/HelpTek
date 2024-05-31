@@ -52,8 +52,8 @@
       <main class="main-content">
         <CriarChamado v-if="CriarChamadoForm" />
         <MeusChamados v-if="MeusChamadosList" />
-        <!--<TodosChamados />
-        <Atualizacoes />
+        <TodosOsChamados v-if="TodosOsChamadosList" />
+        <!--<Atualizacoes />
         <Dashboard />
         <Relatorios />
         <Perfil />
@@ -66,6 +66,7 @@
 <script>
 import CriarChamado from "@/components/CriarChamado.vue";
 import MeusChamados from "@/components/MeusChamados.vue";
+import TodosOsChamados from "@/components/TodosOsChamados.vue";
 import axios from "axios";
 
 export default {
@@ -73,6 +74,7 @@ export default {
   components: {
     CriarChamado,
     MeusChamados,
+    TodosOsChamados,
   },
 
   data() {
@@ -84,6 +86,7 @@ export default {
       typeUser: "",
       CriarChamadoForm: false,
       MeusChamadosList: false,
+      TodosOsChamadosList: false,
     };
   },
 
@@ -124,9 +127,15 @@ export default {
       if (menuItem === "Criar chamado") {
         this.CriarChamadoForm = true;
         this.MeusChamadosList = false;
+        this.TodosOsChamadosList = false;
       } else if (menuItem === "Meus chamados") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = true;
+        this.TodosOsChamadosList = false;
+      } else if (menuItem === "Todos os chamados") {
+        this.CriarChamadoForm = false;
+        this.MeusChamadosList = false;
+        this.TodosOsChamadosList = true;
       }
     },
     logout() {

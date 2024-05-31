@@ -34,7 +34,7 @@
             <td class="title">{{ chamados.titulo_chamado }}</td>
             <td>{{ chamados.prioridade_chamado }}</td>
             <td>{{ chamados.data_criacao_fm }}</td>
-            <td>{{ chamados.status_chamado }}</td>
+            <td>{{ chamados.status_chamado_desc }}</td>
             <!--<td>{{ chamados.minutos_espera }}</td>-->
             <td>{{ chamados.data_atualizacao }}</td>
             <td>{{ chamados.data_conclusao }}</td>
@@ -53,8 +53,8 @@
       </table>
     </div>
     <!-- The Modal -->
-    <div class="modal fade" id="myModal">
-      <div class="modal-dialog">
+    <div class="modal fade bd-example-modal-lg" id="myModal">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <!-- Modal Header -->
           <div class="modal-header" style="width: 70%">
@@ -75,7 +75,7 @@
                   type="text"
                   id="subject"
                   v-model="ChamadoData.titulo_chamado"
-                  disabled
+                  :disabled="!isEditing"
                 />
               </div>
               <div class="form-group-modal">
@@ -84,27 +84,76 @@
                   id="description"
                   rows="4"
                   v-model="ChamadoData.descricao_chamado"
-                  disabled
+                  :disabled="!isEditing"
                 ></textarea>
               </div>
               <div class="form-group-modal">
                 <label>Prioridade</label>
-                <select v-model="ChamadoData.gravidade" disabled></select>
-                <select v-model="ChamadoData.urgencia" disabled></select>
-                <select v-model="ChamadoData.tendencia" disabled></select>
+                <select v-model="ChamadoData.gravidade" :disabled="!isEditing">
+                  <option
+                    v-for="gravidade in prioridadesGravidade"
+                    :key="gravidade.id_prioridade"
+                    :value="gravidade.valor_prioridade"
+                  >
+                    {{ gravidade.descricao_categoria }}
+                  </option>
+                </select>
+                <select v-model="ChamadoData.urgencia" :disabled="!isEditing">
+                  <option
+                    v-for="urgencia in prioridadesUrgencia"
+                    :key="urgencia.id_prioridade"
+                    :value="urgencia.valor_prioridade"
+                  >
+                    {{ urgencia.descricao_categoria }}
+                  </option>
+                </select>
+                <select v-model="ChamadoData.tendencia" :disabled="!isEditing">
+                  <option
+                    v-for="tendencia in prioridadesTendencia"
+                    :key="tendencia.id_prioridade"
+                    :value="tendencia.valor_prioridade"
+                  >
+                    {{ tendencia.descricao_categoria }}
+                  </option>
+                </select>
               </div>
               <div>
                 <label>Anexos</label>
               </div>
-              <div>
-                <button type="submit" class="submit-button-modal">
+              <div v-if="!isEditing">
+                <button
+                  type="submit"
+                  class="submit-button-modal"
+                  @click="editarChamado"
+                >
                   Editar
                 </button>
-                <button type="submit" class="submit-button-modal">
+                <button
+                  type="submit"
+                  class="submit-button-modal"
+                  @click="confirmarCancelamento"
+                >
                   Cancelar Chamado
                 </button>
               </div>
+              <div v-else>
+                <button
+                  type="button"
+                  class="submit-button-modal"
+                  @click="salvarChamado"
+                >
+                  Salvar
+                </button>
+              </div>
             </form>
+          </div>
+          <!-- Confirmação de Cancelamento -->
+          <div v-if="isConfirmingCancel" class="confirmation-overlay">
+            <div class="confirmation-box">
+              <p>Você tem certeza que deseja cancelar o chamado?</p>
+              <button @click="cancelarChamado">Sim</button>
+              <button @click="isConfirmingCancel = false">Não</button>
+            </div>
           </div>
         </div>
       </div>
@@ -127,21 +176,31 @@ export default {
         status_chamado: "",
         data_atualizacao: "",
         data_conclusao: "",
+        gravidade: "",
+        urgencia: "",
+        tendencia: "",
       },
       Chamados: [],
       selectedStatus: null,
+      isEditing: false,
+      isConfirmingCancel: false,
+      prioridadesGravidade: [],
+      prioridadesUrgencia: [],
+      prioridadesTendencia: [],
     };
   },
   created() {
     import("../assets/css/component/MeusChamados.css");
     this.onListarChamados();
+    this.fetchPrioridades();
   },
   methods: {
     onListarChamados() {
       const id_user = sessionStorage.getItem("id_user");
+      const permission = sessionStorage.getItem("permission");
       axios
         .get(
-          `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}`
+          `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}&permission=${permission}`
         )
         .then((res) => {
           console.log("Server response:", res.data);
@@ -151,16 +210,96 @@ export default {
           console.log(err);
         });
     },
-    verChamado(id_chamado) {
-      this.ChamadoData = id_chamado;
+    fetchPrioridades() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/selectPrioridades.php"
+        )
+        .then((response) => {
+          const prioridades = response.data.prioridades;
+          this.prioridadesGravidade = prioridades.filter(
+            (p) => p.categoria_prioridade === "gravidade"
+          );
+          this.prioridadesUrgencia = prioridades.filter(
+            (p) => p.categoria_prioridade === "urgencia"
+          );
+          this.prioridadesTendencia = prioridades.filter(
+            (p) => p.categoria_prioridade === "tendencia"
+          );
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar prioridades: ", error);
+        });
     },
-
+    verChamado(chamado) {
+      this.ChamadoData = chamado;
+      this.isEditing = false;
+      this.ChamadoData.gravidade = this.prioridadesGravidade.find(
+        (prioridade) => prioridade.valor_prioridade === chamado.gravidade
+      );
+      this.ChamadoData.urgencia = this.prioridadesUrgencia.find(
+        (prioridade) => prioridade.valor_prioridade === chamado.urgencia
+      );
+      this.ChamadoData.tendencia = this.prioridadesTendencia.find(
+        (prioridade) => prioridade.valor_prioridade === chamado.tendencia
+      );
+    },
+    editarChamado() {
+      this.isEditing = true;
+    },
+    salvarChamado() {
+      const {
+        id_chamado,
+        titulo_chamado,
+        descricao_chamado,
+        prioridade_chamado,
+      } = this.ChamadoData;
+      axios
+        .post(
+          `http://localhost/projeto/helptek/php/api/functions/updateChamado.php`,
+          {
+            id_chamado,
+            titulo_chamado,
+            descricao_chamado,
+            prioridade_chamado,
+          }
+        )
+        .then((response) => {
+          this.isEditing = false;
+          this.onListarChamados();
+        })
+        .catch((error) => {
+          console.error("Erro ao atualizar chamado:", error);
+        });
+    },
+    confirmarCancelamento() {
+      this.isConfirmingCancel = true;
+    },
+    cancelarChamado() {
+      const { id_chamado } = this.ChamadoData;
+      axios
+        .post(
+          `http://localhost/projeto/helptek/php/api/functions/updateChamado.php`,
+          {
+            id_chamado,
+          }
+        )
+        .then((response) => {
+          this.isConfirmingCancel = false;
+          this.onListarChamados();
+          $("#myModal").modal("hide");
+        })
+        .catch((error) => {
+          console.error("Erro ao cancelar chamado:", error);
+        });
+    },
     filterChamados() {
       const id_user = sessionStorage.getItem("id_user");
+      const permission = sessionStorage.getItem("permission");
       if (!this.selectedStatus) return;
       axios
         .get(
-          `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}&status_chamado=${this.selectedStatus}`
+          `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}&permission=${permission}&status_chamado=${this.selectedStatus}`
         )
         //.get(`/api/chamados?status_chamado=${this.selectedStatus}`)
         .then((response) => {

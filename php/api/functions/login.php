@@ -23,7 +23,7 @@ if (isset($_GET['action'])) {
                 $name_userDB = $obj->name_user;//Obtem o atributo name_user
                 $passwordDB = $obj->password_user;//Obtem o atributo password_user
                 $first_nameDB = $obj->first_name;
-                $level_userDB = $obj->level_user;
+                $level_userDB = $obj->id_permissao;
                 $validUsername = true;
                 $validPassword = password_verify($password,$passwordDB);
 
