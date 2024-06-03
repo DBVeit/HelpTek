@@ -30,7 +30,7 @@
         </thead>
         <tbody>
           <tr v-for="chamados in Chamados" :key="chamados.id_chamado">
-            <td>{{ chamados.id_chamado }}</td>
+            <td>{{ chamados.idfr_chamado }}</td>
             <td class="title">{{ chamados.titulo_chamado }}</td>
             <td>{{ chamados.prioridade_chamado }}</td>
             <td>{{ chamados.data_criacao_fm }}</td>
@@ -170,6 +170,7 @@ export default {
     return {
       ChamadoData: {
         id_chamado: "",
+        idfr_chamado: "",
         titulo_chamado: "",
         descricao_chamado: "",
         prioridade_chamado: "",
