@@ -29,7 +29,34 @@ if (isset($_GET['action'])) {
             $sql = "INSERT INTO chamados(`id_user`,`titulo_chamado`,`descricao_chamado`,`gravidade`,`urgencia`,`tendencia`,`prioridade_chamado`) VALUES('$id_user','$titulo','$descricao','$gravidade','$urgencia','$tendencia','$prioridade')";
 
             $result = $mysqli_con->query($sql);
-            $res['msg'] = "Chamado registrado com sucesso!";
+
+            if ($result){
+                $id_chamado = $mysqli_con->insert_id;
+                $data_criacao = date('dmy');
+                $idfr_chamado = "ID0" . $id_chamado . $id_user . $data_criacao;
+                $acao = "USUARIO $id_user REGISTROU O CHAMADO $idfr_chamado";
+
+                $update_sql = "UPDATE chamados SET idfr_chamado = '$idfr_chamado' WHERE id_chamado = '$id_chamado'";
+                $update_result = $mysqli_con->query($update_sql);
+
+                if ($update_result){
+                    $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `idfr_chamado`, `acao`) VALUES('$id_chamado', '$id_user','$idfr_chamado','$acao')";
+                    $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
+
+                    if ($result_acompanhamento){
+                        $res['msg'] = "Chamado registrado com sucesso!";
+                    }else{
+                        $res['error'] = true;
+                        $res['msg'] = "Erro ao registrar acompanhamento";
+                    }
+                }else{
+                    $res['error'] = true;
+                    $res['msg'] = "Erro ao atualizar identificador do chamado!";
+                }
+            }else{
+                $res['error'] = true;
+                $res['msg'] = "Erro ao registrar chamado!";
+            }
         } else{
             $res['error'] = true;
             $res['msg'] = "Erro ao registrar chamado, acionar TI! Cod.171 ID: ".$id_user;

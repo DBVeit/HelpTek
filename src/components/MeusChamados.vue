@@ -162,6 +162,7 @@
 </template>
 <script>
 import axios from "axios";
+import $ from "jquery";
 
 export default {
   name: "MeusChamados",
@@ -252,7 +253,9 @@ export default {
         id_chamado,
         titulo_chamado,
         descricao_chamado,
-        prioridade_chamado,
+        gravidade,
+        urgencia,
+        tendencia,
       } = this.ChamadoData;
       axios
         .post(
@@ -261,7 +264,9 @@ export default {
             id_chamado,
             titulo_chamado,
             descricao_chamado,
-            prioridade_chamado,
+            gravidade,
+            urgencia,
+            tendencia,
           }
         )
         .then((response) => {
