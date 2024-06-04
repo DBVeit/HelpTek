@@ -68,7 +68,7 @@
           </div>
           <!-- Modal body -->
           <div class="modal-body">
-            <form method="" @submit.prevent="">
+            <form method="POST" @submit.prevent="">
               <div class="form-group-modal">
                 <label>Título</label>
                 <input
@@ -170,6 +170,7 @@ export default {
     return {
       ChamadoData: {
         id_chamado: "",
+        id_user: "",
         idfr_chamado: "",
         titulo_chamado: "",
         descricao_chamado: "",
@@ -236,15 +237,9 @@ export default {
     verChamado(chamado) {
       this.ChamadoData = chamado;
       this.isEditing = false;
-      this.ChamadoData.gravidade = this.prioridadesGravidade.find(
-        (prioridade) => prioridade.valor_prioridade === chamado.gravidade
-      );
-      this.ChamadoData.urgencia = this.prioridadesUrgencia.find(
-        (prioridade) => prioridade.valor_prioridade === chamado.urgencia
-      );
-      this.ChamadoData.tendencia = this.prioridadesTendencia.find(
-        (prioridade) => prioridade.valor_prioridade === chamado.tendencia
-      );
+      this.ChamadoData.gravidade = chamado.gravidade;
+      this.ChamadoData.urgencia = chamado.urgencia;
+      this.ChamadoData.tendencia = chamado.tendencia;
     },
     editarChamado() {
       this.isEditing = true;
@@ -252,17 +247,31 @@ export default {
     salvarChamado() {
       const {
         id_chamado,
+        id_user = sessionStorage.getItem("id_user"),
+        idfr_chamado,
         titulo_chamado,
         descricao_chamado,
         gravidade,
         urgencia,
         tendencia,
       } = this.ChamadoData;
+      /*console.log("Dados do chamado:", {
+        id_chamado,
+        id_user,
+        idfr_chamado,
+        titulo_chamado,
+        descricao_chamado,
+        gravidade,
+        urgencia,
+        tendencia,
+      });*/
       axios
         .post(
-          `http://localhost/projeto/helptek/php/api/functions/updateChamado.php`,
+          `http://localhost/projeto/helptek/php/api/functions/updateChamado.php?action=AtualizaChamado`,
           {
             id_chamado,
+            id_user,
+            idfr_chamado,
             titulo_chamado,
             descricao_chamado,
             gravidade,
@@ -270,27 +279,38 @@ export default {
             tendencia,
           }
         )
-        .then((response) => {
-          this.isEditing = false;
-          this.onListarChamados();
+        .then((res) => {
+          console.log("Server response:", res.data);
+          if (res.data.error === true) {
+            alert(res.data.msg);
+          } else {
+            alert(res.data.msg);
+          }
         })
-        .catch((error) => {
-          console.error("Erro ao atualizar chamado:", error);
+        .catch((err) => {
+          console.log(err);
         });
     },
     confirmarCancelamento() {
       this.isConfirmingCancel = true;
     },
     cancelarChamado() {
-      const { id_chamado } = this.ChamadoData;
+      const {
+        id_chamado,
+        id_user = sessionStorage.getItem("id_user"),
+        idfr_chamado,
+      } = this.ChamadoData;
       axios
         .post(
-          `http://localhost/projeto/helptek/php/api/functions/updateChamado.php`,
+          `http://localhost/projeto/helptek/php/api/functions/updateChamado.php?action=CancelaChamado`,
           {
             id_chamado,
+            id_user,
+            idfr_chamado,
           }
         )
-        .then((response) => {
+        .then((res) => {
+          console.log("Server response:", res.data);
           this.isConfirmingCancel = false;
           this.onListarChamados();
           $("#myModal").modal("hide");
