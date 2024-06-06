@@ -52,11 +52,10 @@
         </tbody>
       </table>
     </div>
-    <!-- The Modal -->
-    <div class="modal fade bd-example-modal-lg" id="myModal">
+    <!-- Modal para usuário solicitante -->
+    <div v-if="!isTecnico" class="modal fade bd-example-modal-lg" id="myModal">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
-          <!-- Modal Header -->
           <div class="modal-header" style="width: 70%">
             <h4 class="modal-title">Dados do chamado</h4>
             <button
@@ -66,7 +65,6 @@
               data-bs-dismiss="modal"
             ></button>
           </div>
-          <!-- Modal body -->
           <div class="modal-body">
             <form method="POST" @submit.prevent="">
               <div class="form-group-modal">
@@ -126,14 +124,14 @@
                   class="submit-button-modal"
                   @click="editarChamado"
                 >
-                  Editar
+                  Responder
                 </button>
                 <button
                   type="submit"
                   class="submit-button-modal"
                   @click="confirmarCancelamento"
                 >
-                  Cancelar Chamado
+                  Encaminhar Chamado
                 </button>
               </div>
               <div v-else>
@@ -158,6 +156,90 @@
         </div>
       </div>
     </div>
+    <!-- Modal para usuário técnico -->
+    <!-- Modal para encaminhar chamado -->
+    <div
+      class="modal fade"
+      id="encaminharModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="encaminharModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="encaminharModalLabel">
+              Encaminhar Chamado
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="encaminharChamado">
+              <div class="form-group">
+                <label for="tecnico">Selecione o técnico</label>
+                <select v-model="tecnicoSelecionado" class="form-control">
+                  <option
+                    v-for="tecnico in tecnicos"
+                    :key="tecnico.id"
+                    :value="tecnico.id"
+                  >
+                    {{ tecnico.nome }}
+                  </option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Encaminhar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal para responder chamado -->
+    <div
+      class="modal fade"
+      id="responderModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="responderModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="responderModalLabel">
+              Responder Chamado
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="responderChamado">
+              <div class="form-group">
+                <label for="resposta">Resposta</label>
+                <textarea
+                  v-model="resposta"
+                  class="form-control"
+                  id="resposta"
+                  rows="3"
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Enviar Resposta
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -165,7 +247,7 @@ import axios from "axios";
 import $ from "jquery";
 
 export default {
-  name: "MeusChamados",
+  name: "MeusChamadosTec",
   data() {
     return {
       ChamadoData: {

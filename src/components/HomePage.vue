@@ -23,42 +23,14 @@
               @click.prevent="handleMenuClick(menuItem)"
               >{{ menuItem }}</a
             >
-            <!--<a href="#" class="nav-item">Atualizações</a>
-            <a
-              class="nav-item"
-              @click.prevent="
-                CriarChamadoForm = true;
-                MeusChamadosList = false;
-              "
-              >Criar chamado</a
-            >
-            <a
-              class="nav-item"
-              @click.prevent="
-                MeusChamadosList = true;
-                CriarChamadoForm = false;
-              "
-              >Meus chamados</a
-            >
-            <a href="#" class="nav-item">Todos os chamados</a>
-            <a href="#" class="nav-item">Dashboard</a>
-            <a href="#" class="nav-item">Relatórios</a>
-            <a href="#" class="nav-item">Perfil</a>
-            <a href="#" class="nav-item">Configurações do sistema</a>
-            <a href="#" class="nav-item">Configurações de usuários</a>-->
           </div>
         </nav>
       </aside>
       <main class="main-content">
         <CriarChamado v-if="CriarChamadoForm" />
-        <MeusChamados v-if="MeusChamadosList" />
+        <MeusChamados v-if="MeusChamadosList && !isTecnico" />
+        <MeusChamadosTec v-if="MeusChamadosList && isTecnico" />
         <TodosOsChamados v-if="TodosOsChamadosList" />
-        <!--<Atualizacoes />
-        <Dashboard />
-        <Relatorios />
-        <Perfil />
-        <ConfigSist />
-        <ConfigUsers />-->
       </main>
     </div>
   </div>
@@ -66,6 +38,7 @@
 <script>
 import CriarChamado from "@/components/CriarChamado.vue";
 import MeusChamados from "@/components/MeusChamados.vue";
+import MeusChamadosTec from "@/components/MeusChamadosTec.vue";
 import TodosOsChamados from "@/components/TodosOsChamados.vue";
 import axios from "axios";
 
@@ -74,6 +47,7 @@ export default {
   components: {
     CriarChamado,
     MeusChamados,
+    MeusChamadosTec,
     TodosOsChamados,
   },
 
@@ -87,6 +61,7 @@ export default {
       CriarChamadoForm: false,
       MeusChamadosList: false,
       TodosOsChamadosList: false,
+      isTecnico: false,
     };
   },
 
@@ -103,6 +78,7 @@ export default {
 
     this.nameUser = nameUser || "Usuário";
     this.typeUser = typeUser || "Usuário";
+    this.verificarTipoUsuario();
     this.fetchUserMenus();
   },
 
@@ -137,6 +113,20 @@ export default {
         this.MeusChamadosList = false;
         this.TodosOsChamadosList = true;
       }
+    },
+    verificarTipoUsuario() {
+      // Lógica para verificar se o usuário logado é um técnico
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/verificarTipoUsuario.php?id_user=${this.id_user}`
+        )
+        .then((res) => {
+          this.isTecnico = res.data.isTecnico;
+          console.log(res.data.isTecnico);
+        })
+        .catch((error) => {
+          console.error("Erro ao verificar tipo de usuário: ", error);
+        });
     },
     logout() {
       localStorage.removeItem("token");
