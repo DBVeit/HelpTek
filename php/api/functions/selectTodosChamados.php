@@ -16,16 +16,16 @@ if (isset($_GET['action'])) {
             if ($permission == 3) {
                 if (isset($_GET['status_chamado'])){
                     $status_chamado = $_GET['status_chamado'];
-                    $sql = "SELECT *,DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera FROM chamados WHERE status_chamado = '$status_chamado'";
+                    $sql = "SELECT *,DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera FROM chamados WHERE status_chamado = '$status_chamado' ORDER BY prioridade_chamado DESC";
                 }else{
-                    $sql = "SELECT *,DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera FROM chamados";
+                    $sql = "SELECT *,DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera FROM chamados ORDER BY prioridade_chamado DESC";
                 }
             } elseif ($permission == 2) {
                 if (isset($_GET['status_chamado'])){
                     $status_chamado = $_GET['status_chamado'];
-                    $sql = "SELECT *,DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera FROM chamados WHERE id_user_tecnico='' AND status_chamado = 1";
+                    $sql = "SELECT *,DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera FROM chamados WHERE id_user_tecnico='' AND status_chamado = 1 ORDER BY prioridade_chamado DESC";
                 }else{
-                    $sql = "SELECT *,DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera FROM chamados WHERE status_chamado = 1";
+                    $sql = "SELECT *,DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera FROM chamados WHERE status_chamado = 1 ORDER BY prioridade_chamado DESC";
                 }
             }
 

@@ -52,10 +52,11 @@
         </tbody>
       </table>
     </div>
-    <!-- Modal para usuário solicitante -->
-    <div v-if="!isTecnico" class="modal fade bd-example-modal-lg" id="myModal">
+    <!-- The Modal -->
+    <div class="modal fade bd-example-modal-lg" id="myModal">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
+          <!-- Modal Header -->
           <div class="modal-header" style="width: 70%">
             <h4 class="modal-title">Dados do chamado</h4>
             <button
@@ -63,8 +64,10 @@
               class="btn-close"
               style="padding: 5px"
               data-bs-dismiss="modal"
+              @click="fecharModal"
             ></button>
           </div>
+          <!-- Modal body -->
           <div class="modal-body">
             <form method="POST" @submit.prevent="">
               <div class="form-group-modal">
@@ -73,7 +76,7 @@
                   type="text"
                   id="subject"
                   v-model="ChamadoData.titulo_chamado"
-                  :disabled="!isEditing"
+                  disabled
                 />
               </div>
               <div class="form-group-modal">
@@ -82,12 +85,12 @@
                   id="description"
                   rows="4"
                   v-model="ChamadoData.descricao_chamado"
-                  :disabled="!isEditing"
+                  disabled
                 ></textarea>
               </div>
               <div class="form-group-modal">
                 <label>Prioridade</label>
-                <select v-model="ChamadoData.gravidade" :disabled="!isEditing">
+                <select v-model="ChamadoData.gravidade" disabled>
                   <option
                     v-for="gravidade in prioridadesGravidade"
                     :key="gravidade.id_prioridade"
@@ -96,7 +99,7 @@
                     {{ gravidade.descricao_categoria }}
                   </option>
                 </select>
-                <select v-model="ChamadoData.urgencia" :disabled="!isEditing">
+                <select v-model="ChamadoData.urgencia" disabled>
                   <option
                     v-for="urgencia in prioridadesUrgencia"
                     :key="urgencia.id_prioridade"
@@ -105,7 +108,7 @@
                     {{ urgencia.descricao_categoria }}
                   </option>
                 </select>
-                <select v-model="ChamadoData.tendencia" :disabled="!isEditing">
+                <select v-model="ChamadoData.tendencia" disabled>
                   <option
                     v-for="tendencia in prioridadesTendencia"
                     :key="tendencia.id_prioridade"
@@ -118,123 +121,73 @@
               <div>
                 <label>Anexos</label>
               </div>
-              <div v-if="!isEditing">
-                <button
-                  type="submit"
-                  class="submit-button-modal"
-                  @click="editarChamado"
-                >
-                  Responder
+              <!--Botoes de ação-->
+              <div v-if="!showResponderCampos && !showEncaminharCampos">
+                <button class="submit-button-modal" @click="responderChamado">
+                  Responder Chamado
                 </button>
-                <button
-                  type="submit"
-                  class="submit-button-modal"
-                  @click="confirmarCancelamento"
-                >
+                <button class="submit-button-modal" @click="encaminharChamado">
                   Encaminhar Chamado
                 </button>
               </div>
-              <div v-else>
-                <button
-                  type="button"
-                  class="submit-button-modal"
-                  @click="salvarChamado"
-                >
-                  Salvar
+              <!--Campos responder chamado-->
+              <div v-if="showResponderCampos">
+                <h4 class="modal-title">Responder Chamado</h4>
+                <div class="form-group-modal">
+                  <label>Categoria do Serviço</label>
+                  <select v-model="ChamadoData.categoriaServico">
+                    <option
+                      v-for="categoriaServ in categoriasServico"
+                      :key="categoriaServ.id_categoria_servico"
+                      :value="categoriaServ.id_categoria_servico"
+                    >
+                      {{ categoriaServ.descricao_categoria_servico }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group-modal">
+                  <label>Categoria da Ocorrência</label>
+                  <select v-model="ChamadoData.categoriaOcorrencia">
+                    <option
+                      v-for="categoriaOcor in categoriasOcorrencia"
+                      :key="categoriaOcor.id_categoria_ocorrencia"
+                      :value="categoriaOcor.id_categoria_ocorrencia"
+                    >
+                      {{ categoriaOcor.descricao_categoria_ocorrencia }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group-modal">
+                  <label>Descrição da Solução</label>
+                  <textarea v-model="ChamadoData.descricaoSolucao"></textarea>
+                </div>
+                <button class="submit-button-modal" @click="enviarResposta">
+                  Enviar Resposta
+                </button>
+                <button class="submit-button-modal" @click="cancelar">
+                  Cancelar
                 </button>
               </div>
-            </form>
-          </div>
-          <!-- Confirmação de Cancelamento -->
-          <div v-if="isConfirmingCancel" class="confirmation-overlay">
-            <div class="confirmation-box">
-              <p>Você tem certeza que deseja cancelar o chamado?</p>
-              <button @click="cancelarChamado">Sim</button>
-              <button @click="isConfirmingCancel = false">Não</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Modal para usuário técnico -->
-    <!-- Modal para encaminhar chamado -->
-    <div
-      class="modal fade"
-      id="encaminharModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="encaminharModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="encaminharModalLabel">
-              Encaminhar Chamado
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="encaminharChamado">
-              <div class="form-group">
-                <label for="tecnico">Selecione o técnico</label>
-                <select v-model="tecnicoSelecionado" class="form-control">
-                  <option
-                    v-for="tecnico in tecnicos"
-                    :key="tecnico.id"
-                    :value="tecnico.id"
-                  >
-                    {{ tecnico.nome }}
-                  </option>
-                </select>
+              <!--Campos encaminhar chamado-->
+              <div v-if="showEncaminharCampos">
+                <h4 class="modal-title">Encaminhar Chamado</h4>
+                <div class="form-group-modal">
+                  <label>Selecionar novo responsável</label>
+                  <select v-model="novoTecnicoResponsavel">
+                    <option value="">...</option>
+                  </select>
+                </div>
+                <div class="form-group-modal">
+                  <label>Justificativa do encaminhamento</label>
+                  <textarea v-model="justificativaEncaminhamento"></textarea>
+                </div>
+                <button class="submit-button-modal" @click="enviarChamado">
+                  Enviar
+                </button>
+                <button class="submit-button-modal" @click="cancelar">
+                  Cancelar
+                </button>
               </div>
-              <button type="submit" class="btn btn-primary">Encaminhar</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Modal para responder chamado -->
-    <div
-      class="modal fade"
-      id="responderModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="responderModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="responderModalLabel">
-              Responder Chamado
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="responderChamado">
-              <div class="form-group">
-                <label for="resposta">Resposta</label>
-                <textarea
-                  v-model="resposta"
-                  class="form-control"
-                  id="resposta"
-                  rows="3"
-                ></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary">
-                Enviar Resposta
-              </button>
             </form>
           </div>
         </div>
@@ -244,7 +197,6 @@
 </template>
 <script>
 import axios from "axios";
-import $ from "jquery";
 
 export default {
   name: "MeusChamadosTec",
@@ -264,6 +216,11 @@ export default {
         gravidade: "",
         urgencia: "",
         tendencia: "",
+        categoriaServico: "",
+        categoriaOcorrencia: "",
+        descricaoSolucao: "",
+        novoTecnicoResponsavel: "",
+        justificativaEncaminhamento: "",
       },
       Chamados: [],
       selectedStatus: null,
@@ -272,12 +229,19 @@ export default {
       prioridadesGravidade: [],
       prioridadesUrgencia: [],
       prioridadesTendencia: [],
+      showResponderCampos: false,
+      showEncaminharCampos: false,
+      showBotoesAcao: true,
+      categoriasServico: [],
+      categoriasOcorrencia: [],
     };
   },
   created() {
     import("../assets/css/component/MeusChamados.css");
     this.onListarChamados();
     this.fetchPrioridades();
+    this.fetchCategoriasServico();
+    this.fetchCategoriasOcorrencia();
   },
   methods: {
     onListarChamados() {
@@ -318,6 +282,44 @@ export default {
           console.error("Erro ao buscar prioridades: ", error);
         });
     },
+    fetchCategoriasServico() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/selectCategoriasServico.php"
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.categoriasServico = response.data.categorias_servico;
+          } else {
+            console.error(
+              "Erro ao buscar categorias do serviço:",
+              response.data.msg
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar categorias do serviço:", error);
+        });
+    },
+    fetchCategoriasOcorrencia() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/selectCategoriasOcorrencia.php"
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.categoriasOcorrencia = response.data.categorias_ocorrencia;
+          } else {
+            console.error(
+              "Erro ao buscar categorias de ocorrencia:",
+              response.data.msg
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar categorias de ocorrencia:", error);
+        });
+    },
     verChamado(chamado) {
       this.ChamadoData = chamado;
       this.isEditing = false;
@@ -325,42 +327,38 @@ export default {
       this.ChamadoData.urgencia = chamado.urgencia;
       this.ChamadoData.tendencia = chamado.tendencia;
     },
-    editarChamado() {
-      this.isEditing = true;
+    responderChamado() {
+      this.showResponderCampos = true;
+      this.showEncaminharCampos = false;
+      this.showBotoesAcao = false;
     },
-    salvarChamado() {
+    enviarResposta() {
       const {
         id_chamado,
         id_user = sessionStorage.getItem("id_user"),
         idfr_chamado,
-        titulo_chamado,
-        descricao_chamado,
-        gravidade,
-        urgencia,
-        tendencia,
+        categoriaServico,
+        categoriaOcorrencia,
+        descricaoSolucao,
       } = this.ChamadoData;
-      /*console.log("Dados do chamado:", {
+      console.log("Dados do chamado:", {
         id_chamado,
         id_user,
         idfr_chamado,
-        titulo_chamado,
-        descricao_chamado,
-        gravidade,
-        urgencia,
-        tendencia,
-      });*/
+        categoriaServico,
+        categoriaOcorrencia,
+        descricaoSolucao,
+      });
       axios
         .post(
-          `http://localhost/projeto/helptek/php/api/functions/updateChamado.php?action=AtualizaChamado`,
+          "http://localhost/projeto/helptek/php/api/functions/responderChamado.php",
           {
             id_chamado,
             id_user,
             idfr_chamado,
-            titulo_chamado,
-            descricao_chamado,
-            gravidade,
-            urgencia,
-            tendencia,
+            categoriaServico,
+            categoriaOcorrencia,
+            descricaoSolucao,
           }
         )
         .then((res) => {
@@ -374,34 +372,34 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+      this.showResponderCampos = false;
     },
-    confirmarCancelamento() {
-      this.isConfirmingCancel = true;
+    encaminharChamado() {
+      this.showResponderCampos = false;
+      this.showEncaminharCampos = true;
+      this.showBotoesAcao = false;
     },
-    cancelarChamado() {
-      const {
-        id_chamado,
-        id_user = sessionStorage.getItem("id_user"),
-        idfr_chamado,
-      } = this.ChamadoData;
-      axios
-        .post(
-          `http://localhost/projeto/helptek/php/api/functions/updateChamado.php?action=CancelaChamado`,
-          {
-            id_chamado,
-            id_user,
-            idfr_chamado,
-          }
-        )
-        .then((res) => {
-          console.log("Server response:", res.data);
-          this.isConfirmingCancel = false;
-          this.onListarChamados();
-          $("#myModal").modal("hide");
-        })
-        .catch((error) => {
-          console.error("Erro ao cancelar chamado:", error);
-        });
+    enviarChamado() {
+      console.log("Novo tecnico responsavel:", this.novoTecnicoResponsavel);
+      console.log(
+        "Justifcativa encaminhamento:",
+        this.justificativaEncaminhamento
+      );
+
+      this.showEncaminharCampos = false;
+    },
+    cancelar() {
+      // Limpar os campos e retornar ao estado anterior do modal
+      this.showResponderCampos = false;
+      this.showEncaminharCampos = false;
+      this.categoriaServico = "";
+      this.categoriaOcorrencia = "";
+      this.descricaoSolucao = "";
+    },
+    fecharModal() {
+      this.showResponderCampos = false;
+      this.showEncaminharCampos = false;
+      this.showBotoesAcao = true; // Restaurar a visibilidade dos botões
     },
     filterChamados() {
       const id_user = sessionStorage.getItem("id_user");

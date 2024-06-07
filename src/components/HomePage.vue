@@ -122,7 +122,6 @@ export default {
         )
         .then((res) => {
           this.isTecnico = res.data.isTecnico;
-          console.log(res.data.isTecnico);
         })
         .catch((error) => {
           console.error("Erro ao verificar tipo de usuário: ", error);
