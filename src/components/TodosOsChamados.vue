@@ -1,14 +1,15 @@
 <template>
   <div class="ticket-form-container">
     <h1>Todos os chamados</h1>
-    <div class="filter">
+    <div class="filter" v-if="isGerente">
       Filtros:
       <select v-model="selectedStatus" @change="filterChamados">
         <option selected disabled>Selecionar...</option>
         <option value="1">Em aberto</option>
         <option value="2">Em atendimento</option>
-        <option value="3">Concluídos</option>
-        <option value="0">Cancelados</option>
+        <option value="3">Atendido</option>
+        <option value="4">Concluido</option>
+        <option value="0">Cancelado</option>
       </select>
       <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== null"
         >Limpar filtros</a
@@ -92,11 +93,13 @@
               <div>
                 <label>Anexos</label>
               </div>
-              <div>
+              <div v-if="isTecnico">
                 <button class="submit-button-modal" @click="assumirChamado">
                   Assumir Chamado
                 </button>
-                <button type="submit" class="submit-button-modal">
+              </div>
+              <div v-if="isGerente">
+                <button class="submit-button-modal" @click="encaminharChamado">
                   Encaminhar Chamado
                 </button>
               </div>
@@ -126,11 +129,14 @@ export default {
       },
       Chamados: [],
       selectedStatus: null,
+      isTecnico: false,
+      isGerente: false,
     };
   },
   created() {
     import("../assets/css/component/MeusChamados.css");
     this.onListarChamados();
+    this.checkPermissions();
   },
   methods: {
     onListarChamados() {
@@ -150,6 +156,14 @@ export default {
     },
     verChamado(id_chamado) {
       this.ChamadoData = id_chamado;
+    },
+    checkPermissions() {
+      const permission = sessionStorage.getItem("permission");
+      if (permission === "2") {
+        this.isTecnico = true;
+      } else if (permission === "3") {
+        this.isGerente = true;
+      }
     },
     assumirChamado() {
       const { id_chamado, idfr_chamado } = this.ChamadoData;

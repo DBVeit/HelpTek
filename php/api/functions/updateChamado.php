@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $urgencia = $mysqli_con->real_escape_string($data['urgencia']);
             $tendencia = $mysqli_con->real_escape_string($data['tendencia']);
 
-            $sql_atualiza = "UPDATE chamados SET titulo_chamado = '$titulo', descricao_chamado = '$descricao', gravidade = '$gravidade', urgencia = '$urgencia', tendencia = '$tendencia' WHERE id_chamado = '$id_chamado'";
+            $sql_atualiza = "UPDATE chamados SET titulo_chamado = '$titulo', descricao_chamado = '$descricao', gravidade = '$gravidade', urgencia = '$urgencia', tendencia = '$tendencia', data_atualizacao = NOW() WHERE id_chamado = '$id_chamado'";
 
             $result_atualiza = $mysqli_con->query($sql_atualiza);
 
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_user = $mysqli_con->real_escape_string($data['id_user']);
             $idfr_chamado = $mysqli_con->real_escape_string($data['idfr_chamado']);
 
-            $sql_cancela = "UPDATE chamados SET status_chamado = 0 WHERE id_chamado = '$id_chamado'";
+            $sql_cancela = "UPDATE chamados SET status_chamado = 0, data_atualizacao = NOW() WHERE id_chamado = '$id_chamado'";
 
             $result_cancela = $mysqli_con->query($sql_cancela);
 

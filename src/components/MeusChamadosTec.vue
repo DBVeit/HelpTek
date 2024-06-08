@@ -7,8 +7,9 @@
         <option selected disabled>Selecionar...</option>
         <option value="1">Em aberto</option>
         <option value="2">Em atendimento</option>
-        <option value="3">Concluídos</option>
-        <option value="0">Cancelados</option>
+        <option value="3">Atendido</option>
+        <option value="4">Concluido</option>
+        <option value="0">Cancelado</option>
       </select>
       <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== null"
         >Limpar filtros</a
@@ -36,8 +37,8 @@
             <td>{{ chamados.data_criacao_fm }}</td>
             <td>{{ chamados.status_chamado_desc }}</td>
             <!--<td>{{ chamados.minutos_espera }}</td>-->
-            <td>{{ chamados.data_atualizacao }}</td>
-            <td>{{ chamados.data_conclusao }}</td>
+            <td>{{ chamados.data_atualizacao_fm }}</td>
+            <td>{{ chamados.data_conclusao_fm }}</td>
             <td>
               <button
                 class="bt-chamado"
@@ -169,17 +170,30 @@
                 </button>
               </div>
               <!--Campos encaminhar chamado-->
-              <div v-if="showEncaminharCampos">
+              <div
+                v-if="showEncaminharCampos && ChamadoData.status_chamado != 4"
+              >
                 <h4 class="modal-title">Encaminhar Chamado</h4>
                 <div class="form-group-modal">
                   <label>Selecionar novo responsável</label>
-                  <select v-model="novoTecnicoResponsavel">
-                    <option value="">...</option>
+                  <select v-model="ChamadoData.novoTecnicoResponsavel">
+                    <option value="" disabled>Selecionar...</option>
+                    <option
+                      v-for="tecnico in tecnicos"
+                      :key="tecnico.id_user"
+                      :value="tecnico.id_user"
+                    >
+                      {{ tecnico.idfr_code_user }} - {{ tecnico.name_user }} ({{
+                        tecnico.equipe_user
+                      }})
+                    </option>
                   </select>
                 </div>
                 <div class="form-group-modal">
                   <label>Justificativa do encaminhamento</label>
-                  <textarea v-model="justificativaEncaminhamento"></textarea>
+                  <textarea
+                    v-model="ChamadoData.justificativaEncaminhamento"
+                  ></textarea>
                 </div>
                 <button class="submit-button-modal" @click="enviarChamado">
                   Enviar
@@ -211,6 +225,7 @@ export default {
         prioridade_chamado: "",
         data_criacao: "",
         status_chamado: "",
+        id_user_tecnico: "",
         data_atualizacao: "",
         data_conclusao: "",
         gravidade: "",
@@ -224,6 +239,7 @@ export default {
       },
       Chamados: [],
       selectedStatus: null,
+      tecnicos: [],
       isEditing: false,
       isConfirmingCancel: false,
       prioridadesGravidade: [],
@@ -242,13 +258,14 @@ export default {
     this.fetchPrioridades();
     this.fetchCategoriasServico();
     this.fetchCategoriasOcorrencia();
+    this.fetchUserTecnico();
   },
   methods: {
     onListarChamados() {
       const id_user = sessionStorage.getItem("id_user");
       const permission = sessionStorage.getItem("permission");
-      console.log(id_user);
-      console.log(permission);
+      console.log("ID de usuário: ", id_user);
+      console.log("Permissao de usuario: ", permission);
       axios
         .get(
           `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}&permission=${permission}`
@@ -320,6 +337,18 @@ export default {
           console.error("Erro ao buscar categorias de ocorrencia:", error);
         });
     },
+    fetchUserTecnico() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/getUserTecnico.php"
+        )
+        .then((response) => {
+          this.tecnicos = response.data.tecnicos;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
     verChamado(chamado) {
       this.ChamadoData = chamado;
       this.isEditing = false;
@@ -335,7 +364,8 @@ export default {
     enviarResposta() {
       const {
         id_chamado,
-        id_user = sessionStorage.getItem("id_user"),
+        id_user,
+        id_user_tecnico,
         idfr_chamado,
         categoriaServico,
         categoriaOcorrencia,
@@ -344,6 +374,7 @@ export default {
       console.log("Dados do chamado:", {
         id_chamado,
         id_user,
+        id_user_tecnico,
         idfr_chamado,
         categoriaServico,
         categoriaOcorrencia,
@@ -355,6 +386,7 @@ export default {
           {
             id_chamado,
             id_user,
+            id_user_tecnico,
             idfr_chamado,
             categoriaServico,
             categoriaOcorrencia,
@@ -380,6 +412,46 @@ export default {
       this.showBotoesAcao = false;
     },
     enviarChamado() {
+      const {
+        id_chamado,
+        idfr_chamado,
+        id_user_tecnico,
+        novoTecnicoResponsavel,
+        justificativaEncaminhamento,
+      } = this.ChamadoData;
+      console.log("Dados do chamado:", {
+        id_chamado,
+        idfr_chamado,
+        id_user_tecnico,
+        novoTecnicoResponsavel,
+        justificativaEncaminhamento,
+      });
+      axios
+        .post(
+          `http://localhost/projeto/helptek/php/api/functions/encaminharChamado.php`,
+          {
+            id_chamado: id_chamado,
+            idfr_chamado: idfr_chamado,
+            id_user_tecnico: sessionStorage.getItem("id_user"), // Supondo que o id do técnico está armazenado na sessão
+            novoTecnicoResponsavel: novoTecnicoResponsavel,
+            justificativaEncaminhamento: justificativaEncaminhamento,
+          }
+        )
+        .then((res) => {
+          console.log("Server response:", res.data);
+          if (res.data.error === true) {
+            alert(res.data.msg);
+          } else {
+            alert(res.data.msg);
+            this.onListarChamados(); // Atualiza a lista de chamados após assumir um chamado
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      this.showEncaminharCampos = false;
+    },
+    /*enviarChamado() {
       console.log("Novo tecnico responsavel:", this.novoTecnicoResponsavel);
       console.log(
         "Justifcativa encaminhamento:",
@@ -387,7 +459,7 @@ export default {
       );
 
       this.showEncaminharCampos = false;
-    },
+    },*/
     cancelar() {
       // Limpar os campos e retornar ao estado anterior do modal
       this.showResponderCampos = false;

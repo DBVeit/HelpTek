@@ -11,47 +11,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $categoria_servico = $mysqli_con->real_escape_string($data['categoriaServico']);
     $categoria_ocorrencia = $mysqli_con->real_escape_string($data['categoriaOcorrencia']);
     $descricao_solucao = $mysqli_con->real_escape_string($data['descricaoSolucao']);
-    $id_user_tecnico = $mysqli_con->real_escape_string($data['id_user']);
+    $id_user_tecnico = $mysqli_con->real_escape_string($data['id_user_tecnico']);
+    $id_user = $mysqli_con->real_escape_string($data['id_user']);
 
+    $sql_check_tecnico = "SELECT id_user_tecnico FROM chamados WHERE id_user_tecnico = '$id_user_tecnico' AND id_chamado = '$id_chamado'";
+    $result_check_tecnico = $mysqli_con->query($sql_check_tecnico);
 
-    /*$sql_get_categoria_servico = "SELECT * FROM categoria_servico WHERE id_categoria_servico = '$categoria_servico'";
-    $result_get_categoria_servico = $mysqli_con->query($sql_get_categoria_servico);
+    if ($result_check_tecnico && $result_check_tecnico->num_rows > 0) {
 
-    $sql_get_categoria_ocorrencia = "SELECT * FROM categoria_ocorrencia WHERE id_categoria_ocorrencia = '$categoria_ocorrencia'";
-    $result_get_categoria_ocorrencia = $mysqli_con->query($sql_get_categoria_ocorrencia);*/
+        $sql_get_chamado = "SELECT idfr_chamado, id_user FROM chamados WHERE id_chamado = '$id_chamado'";
+        $result_get_chamado = $mysqli_con->query($sql_get_chamado);
 
+        if ($result_get_chamado && $result_get_chamado->num_rows > 0) {
+            $row = $result_get_chamado->fetch_assoc();
+            $idfr_chamado = $row['idfr_chamado'];
+            $id_user = $row['id_user'];
 
-    $sql_get_chamado = "SELECT idfr_chamado, id_user FROM chamados WHERE id_chamado = '$id_chamado'";
-    $result_get_chamado = $mysqli_con->query($sql_get_chamado);
+            $sql = "UPDATE chamados SET descricao_solucao = '$descricao_solucao', id_categoria_servico = '$categoria_servico', id_categoria_ocorrencia = '$categoria_ocorrencia', id_usuario_atual = '$id_user', data_atualizacao = NOW(), status_chamado = 3 WHERE id_chamado = '$id_chamado'";
+            $result = $mysqli_con->query($sql);
 
-    if ($result_get_chamado && $result_get_chamado->num_rows > 0){
-        $row = $result_get_chamado->fetch_assoc();
-        $idfr_chamado = $row['idfr_chamado'];
-        $id_user = $row['id_user'];
+            if ($result) {
+                $acao = "USUARIO $id_user_tecnico RESPONDEU AO CHAMADO $idfr_chamado";
+                $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `id_user_tecnico`, `idfr_chamado`, `acao`)
+                                        VALUES('$id_chamado', '$id_user','$id_user_tecnico','$idfr_chamado','$acao')";
+                $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
 
-        $sql = "UPDATE chamados SET descricao_solucao = '$descricao_solucao', id_categoria_servico = '$categoria_servico', id_categoria_ocorrencia = '$categoria_ocorrencia' WHERE id_chamado = '$id_chamado'";
-        $result = $mysqli_con->query($sql);
-
-        if ($result) {
-            $acao = "USUARIO $id_user_tecnico RESPONDEU AO CHAMADO $idfr_chamado";
-            $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `id_user_tecnico`, `idfr_chamado`, `acao`)
-                                    VALUES('$id_chamado', '$id_user','$id_user_tecnico','$idfr_chamado','$acao')";
-            $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
-
-            if ($result_acompanhamento) {
-                $res['msg'] = "Chamado respondido com sucesso!";
-            }else {
+                if ($result_acompanhamento) {
+                    $res['msg'] = "Chamado respondido com sucesso!";
+                } else {
+                    $res['error'] = true;
+                    $res['msg'] = "Erro ao registrar acompanhamento: " . $mysqli_con->error;
+                }
+            } else {
                 $res['error'] = true;
-                $res['msg'] = "Erro ao registrar acompanhamento: " . $mysqli_con->error;
+                $res['msg'] = "Erro ao responder chamado: " . $mysqli_con->error;
             }
-        }else{
-            $res['error'] = true;
-            $res['msg'] = "Erro ao responder chamado: " . $mysqli_con->error;
-        }
 
-    }else {
+        } else {
+            $res['error'] = true;
+            $res['msg'] = "Chamado não encontrado!";
+        }
+    } else {
         $res['error'] = true;
-        $res['msg'] = "Chamado não encontrado!";
+        $res['msg'] = "Técnico não encontrado";
     }
 } else {
     $res['error'] = true;

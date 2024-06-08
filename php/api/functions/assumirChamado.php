@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $idfr_chamado = $row['idfr_chamado'];
         $id_user = $row['id_user'];
 
-        $sql = "UPDATE chamados SET id_user_tecnico = '$id_user_tecnico', status_chamado = 2 WHERE id_chamado = '$id_chamado'";
+        $sql = "UPDATE chamados SET id_user_tecnico = '$id_user_tecnico', status_chamado = 2, id_usuario_atual = '$id_user_tecnico', data_atualizacao = NOW() WHERE id_chamado = '$id_chamado'";
         $result = $mysqli_con->query($sql);
 
         if ($result) {

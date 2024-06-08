@@ -7,69 +7,42 @@ $res = array('error' => false, 'msg' => '');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (isset($_GET['action'])) {
-        $action = $_GET['action'];
-        //$action = "AtualizaChamado";
+    $id_chamado = $mysqli_con->real_escape_string($data['id_chamado']);
+    $id_user_tecnico = $mysqli_con->real_escape_string($data['id_user_tecnico']);
+    $novoTecnicoResponsavel = $mysqli_con->real_escape_string($data['novoTecnicoResponsavel']);
 
-        if ($action == "AtualizaChamado") {
-            $id_chamado = $mysqli_con->real_escape_string($data['id_chamado']);
-            $id_user = $mysqli_con->real_escape_string($data['id_user']);
-            $idfr_chamado = $mysqli_con->real_escape_string($data['idfr_chamado']);
-            $titulo = $mysqli_con->real_escape_string($data['titulo_chamado']);
-            $descricao = $mysqli_con->real_escape_string($data['descricao_chamado']);
-            $gravidade = $mysqli_con->real_escape_string($data['gravidade']);
-            $urgencia = $mysqli_con->real_escape_string($data['urgencia']);
-            $tendencia = $mysqli_con->real_escape_string($data['tendencia']);
 
-            $sql_atualiza = "UPDATE chamados SET titulo_chamado = '$titulo', descricao_chamado = '$descricao', gravidade = '$gravidade', urgencia = '$urgencia', tendencia = '$tendencia' WHERE id_chamado = '$id_chamado'";
+    $sql_get_chamado = "SELECT idfr_chamado, id_user FROM chamados WHERE id_chamado = '$id_chamado'";
+    $result_get_chamado = $mysqli_con->query($sql_get_chamado);
 
-            $result_atualiza = $mysqli_con->query($sql_atualiza);
+    if ($result_get_chamado && $result_get_chamado->num_rows > 0){
+        $row = $result_get_chamado->fetch_assoc();
+        $idfr_chamado = $row['idfr_chamado'];
+        $id_user = $row['id_user'];
 
-            if ($result_atualiza) {
-                $acao = "USUARIO $id_user ATUALIZOU O CHAMADO $idfr_chamado";
-                $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `idfr_chamado`, `acao`) VALUES('$id_chamado', '$id_user','$idfr_chamado','$acao')";
-                $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
+        $sql = "UPDATE chamados SET id_user_tecnico = '$novoTecnicoResponsavel', id_usuario_atual = '$novoTecnicoResponsavel', data_atualizacao = NOW() WHERE id_chamado = '$id_chamado'";
+        $result = $mysqli_con->query($sql);
 
-                if ($result_acompanhamento){
-                    $res['msg'] = "Chamado atualizado com sucesso!";
-                } else {
-                    $res['error'] = true;
-                    $res['msg'] = "Erro ao atualizar chamado: " . $mysqli_con->error;
-                }
+        if ($result) {
+            $acao = "USUARIO $id_user_tecnico ENCAMINHOU O CHAMADO $idfr_chamado AO USUARIO $novoTecnicoResponsavel";
+            $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `id_user_tecnico`, `idfr_chamado`, `acao`)
+                                    VALUES('$id_chamado', '$id_user','$id_user_tecnico','$idfr_chamado','$acao')";
+            $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
+
+            if ($result_acompanhamento) {
+                $res['msg'] = "Chamado encaminhado com sucesso!";
+            }else {
+                $res['error'] = true;
+                $res['msg'] = "Erro ao registrar acompanhamento: " . $mysqli_con->error;
             }
-        } else {
+        }else{
             $res['error'] = true;
-            $res['msg'] = "Ação inválida";
+            $res['msg'] = "Erro ao encaminhar chamado: " . $mysqli_con->error;
         }
 
-        if ($action == "CancelaChamado") {
-            $id_chamado = $mysqli_con->real_escape_string($data['id_chamado']);
-            $id_user = $mysqli_con->real_escape_string($data['id_user']);
-            $idfr_chamado = $mysqli_con->real_escape_string($data['idfr_chamado']);
-
-            $sql_cancela = "UPDATE chamados SET status_chamado = 0 WHERE id_chamado = '$id_chamado'";
-
-            $result_cancela = $mysqli_con->query($sql_cancela);
-
-            if ($result_cancela) {
-                $acao = "USUARIO $id_user CANCELOU O CHAMADO $idfr_chamado";
-                $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `idfr_chamado`, `acao`) VALUES('$id_chamado', '$id_user','$idfr_chamado','$acao')";
-                $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
-
-                if ($result_acompanhamento){
-                    $res['msg'] = "Chamado cancelado com sucesso!";
-                } else {
-                    $res['error'] = true;
-                    $res['msg'] = "Erro ao atualizar chamado: " . $mysqli_con->error;
-                }
-            }
-        } else {
-            $res['error'] = true;
-            $res['msg'] = "Ação inválida";
-        }
-    } else {
+    }else {
         $res['error'] = true;
-        $res['msg'] = "Ação não especificada";
+        $res['msg'] = "Chamado não encontrado!";
     }
 } else {
     $res['error'] = true;

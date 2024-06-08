@@ -7,8 +7,9 @@
         <option selected disabled>Selecionar...</option>
         <option value="1">Em aberto</option>
         <option value="2">Em atendimento</option>
-        <option value="3">Concluídos</option>
-        <option value="0">Cancelados</option>
+        <option value="3">Atendido</option>
+        <option value="4">Concluido</option>
+        <option value="0">Cancelado</option>
       </select>
       <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== null"
         >Limpar filtros</a
@@ -36,8 +37,8 @@
             <td>{{ chamados.data_criacao_fm }}</td>
             <td>{{ chamados.status_chamado_desc }}</td>
             <!--<td>{{ chamados.minutos_espera }}</td>-->
-            <td>{{ chamados.data_atualizacao }}</td>
-            <td>{{ chamados.data_conclusao }}</td>
+            <td>{{ chamados.data_atualizacao_fm }}</td>
+            <td>{{ chamados.data_conclusao_fm }}</td>
             <td>
               <button
                 class="bt-chamado"
@@ -201,8 +202,8 @@ export default {
     onListarChamados() {
       const id_user = sessionStorage.getItem("id_user");
       const permission = sessionStorage.getItem("permission");
-      console.log(id_user);
-      console.log(permission);
+      console.log("ID de usuário: ", id_user);
+      console.log("Permissao de usuario: ", permission);
       axios
         .get(
           `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}&permission=${permission}`
