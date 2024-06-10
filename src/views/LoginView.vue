@@ -5,6 +5,7 @@
 <script>
 // @ is an alias to /src
 import LoginForm from "@/components/LoginForm.vue";
+import("../assets/css/view/MainStyles.css");
 
 export default {
   name: "LoginView",

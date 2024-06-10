@@ -1,208 +1,220 @@
 <template>
-  <div class="ticket-form-container">
-    <h1>Meus chamados</h1>
-    <div class="filter">
-      Filtros:
-      <select v-model="selectedStatus" @change="filterChamados">
-        <option selected disabled>Selecionar...</option>
-        <option value="1">Em aberto</option>
-        <option value="2">Em atendimento</option>
-        <option value="3">Atendido</option>
-        <option value="4">Concluido</option>
-        <option value="0">Cancelado</option>
-      </select>
-      <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== null"
-        >Limpar filtros</a
-      >
+  <div>
+    <div class="message-box" v-if="showMessage">
+      <div class="message-content">
+        <span>{{ message }}</span>
+        <button @click="closeMessage">X</button>
+      </div>
     </div>
-    <div>
-      <table cellpadding="5" class="chamados-list-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Titulo</th>
-            <th>Prioridade</th>
-            <th>Data de criação</th>
-            <th>Status</th>
-            <!--<th>Minutos de espera</th>-->
-            <th>Atualizado em</th>
-            <th>Concluído em</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="chamados in Chamados" :key="chamados.id_chamado">
-            <td>{{ chamados.idfr_chamado }}</td>
-            <td class="title">{{ chamados.titulo_chamado }}</td>
-            <td>{{ chamados.prioridade_chamado }}</td>
-            <td>{{ chamados.data_criacao_fm }}</td>
-            <td>{{ chamados.status_chamado_desc }}</td>
-            <!--<td>{{ chamados.minutos_espera }}</td>-->
-            <td>{{ chamados.data_atualizacao_fm }}</td>
-            <td>{{ chamados.data_conclusao_fm }}</td>
-            <td>
+    <div class="page_title">
+      <h1>Meus chamados</h1>
+    </div>
+    <div class="page_content">
+      <div class="filter">
+        Filtros:
+        <select v-model="selectedStatus" @change="filterChamados">
+          <option selected disabled>Selecionar...</option>
+          <option value="1">Em aberto</option>
+          <option value="2">Em atendimento</option>
+          <option value="3">Atendido</option>
+          <option value="4">Concluido</option>
+          <option value="0">Cancelado</option>
+        </select>
+        <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== null"
+          >Limpar filtros</a
+        >
+      </div>
+      <div>
+        <table class="chamados-list-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Titulo</th>
+              <th>Prioridade</th>
+              <th>Data de criação</th>
+              <th>Status</th>
+              <!--<th>Minutos de espera</th>-->
+              <th>Atualizado em</th>
+              <th>Concluído em</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="chamados in Chamados" :key="chamados.id_chamado">
+              <td>{{ chamados.idfr_chamado }}</td>
+              <td class="title">{{ chamados.titulo_chamado }}</td>
+              <td>{{ chamados.prioridade_chamado }}</td>
+              <td>{{ chamados.data_criacao_fm }}</td>
+              <td>{{ chamados.status_chamado_desc }}</td>
+              <!--<td>{{ chamados.minutos_espera }}</td>-->
+              <td>{{ chamados.data_atualizacao_fm }}</td>
+              <td>{{ chamados.data_conclusao_fm }}</td>
+              <td>
+                <button
+                  class="bt-chamado"
+                  data-bs-toggle="modal"
+                  data-bs-target="#myModal"
+                  @click="verChamado(chamados)"
+                >
+                  Ver
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- The Modal -->
+      <div class="modal fade bd-example-modal-lg" id="myModal">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header" style="width: 70%">
+              <h4 class="modal-title">Dados do chamado</h4>
               <button
-                class="bt-chamado"
-                data-bs-toggle="modal"
-                data-bs-target="#myModal"
-                @click="verChamado(chamados)"
-              >
-                Ver
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <!-- The Modal -->
-    <div class="modal fade bd-example-modal-lg" id="myModal">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <!-- Modal Header -->
-          <div class="modal-header" style="width: 70%">
-            <h4 class="modal-title">Dados do chamado</h4>
-            <button
-              type="button"
-              class="btn-close"
-              style="padding: 5px"
-              data-bs-dismiss="modal"
-              @click="fecharModal"
-            ></button>
-          </div>
-          <!-- Modal body -->
-          <div class="modal-body">
-            <form method="POST" @submit.prevent="">
-              <div class="form-group-modal">
-                <label>Título</label>
-                <input
-                  type="text"
-                  id="subject"
-                  v-model="ChamadoData.titulo_chamado"
-                  disabled
-                />
-              </div>
-              <div class="form-group-modal">
-                <label>Descrição</label>
-                <textarea
-                  id="description"
-                  rows="4"
-                  v-model="ChamadoData.descricao_chamado"
-                  disabled
-                ></textarea>
-              </div>
-              <div class="form-group-modal">
-                <label>Prioridade</label>
-                <select v-model="ChamadoData.gravidade" disabled>
-                  <option
-                    v-for="gravidade in prioridadesGravidade"
-                    :key="gravidade.id_prioridade"
-                    :value="gravidade.valor_prioridade"
-                  >
-                    {{ gravidade.descricao_categoria }}
-                  </option>
-                </select>
-                <select v-model="ChamadoData.urgencia" disabled>
-                  <option
-                    v-for="urgencia in prioridadesUrgencia"
-                    :key="urgencia.id_prioridade"
-                    :value="urgencia.valor_prioridade"
-                  >
-                    {{ urgencia.descricao_categoria }}
-                  </option>
-                </select>
-                <select v-model="ChamadoData.tendencia" disabled>
-                  <option
-                    v-for="tendencia in prioridadesTendencia"
-                    :key="tendencia.id_prioridade"
-                    :value="tendencia.valor_prioridade"
-                  >
-                    {{ tendencia.descricao_categoria }}
-                  </option>
-                </select>
-              </div>
-              <div>
-                <label>Anexos</label>
-              </div>
-              <!--Botoes de ação-->
-              <div v-if="!showResponderCampos && !showEncaminharCampos">
-                <button class="submit-button-modal" @click="responderChamado">
-                  Responder Chamado
-                </button>
-                <button class="submit-button-modal" @click="encaminharChamado">
-                  Encaminhar Chamado
-                </button>
-              </div>
-              <!--Campos responder chamado-->
-              <div v-if="showResponderCampos">
-                <h4 class="modal-title">Responder Chamado</h4>
+                type="button"
+                class="btn-close"
+                style="padding: 5px"
+                data-bs-dismiss="modal"
+                @click="fecharModal"
+              ></button>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+              <form method="POST" @submit.prevent="">
                 <div class="form-group-modal">
-                  <label>Categoria do Serviço</label>
-                  <select v-model="ChamadoData.categoriaServico">
-                    <option
-                      v-for="categoriaServ in categoriasServico"
-                      :key="categoriaServ.id_categoria_servico"
-                      :value="categoriaServ.id_categoria_servico"
-                    >
-                      {{ categoriaServ.descricao_categoria_servico }}
-                    </option>
-                  </select>
+                  <label>Título</label>
+                  <input
+                    type="text"
+                    id="subject"
+                    v-model="ChamadoData.titulo_chamado"
+                    disabled
+                  />
                 </div>
                 <div class="form-group-modal">
-                  <label>Categoria da Ocorrência</label>
-                  <select v-model="ChamadoData.categoriaOcorrencia">
-                    <option
-                      v-for="categoriaOcor in categoriasOcorrencia"
-                      :key="categoriaOcor.id_categoria_ocorrencia"
-                      :value="categoriaOcor.id_categoria_ocorrencia"
-                    >
-                      {{ categoriaOcor.descricao_categoria_ocorrencia }}
-                    </option>
-                  </select>
-                </div>
-                <div class="form-group-modal">
-                  <label>Descrição da Solução</label>
-                  <textarea v-model="ChamadoData.descricaoSolucao"></textarea>
-                </div>
-                <button class="submit-button-modal" @click="enviarResposta">
-                  Enviar Resposta
-                </button>
-                <button class="submit-button-modal" @click="cancelar">
-                  Cancelar
-                </button>
-              </div>
-              <!--Campos encaminhar chamado-->
-              <div
-                v-if="showEncaminharCampos && ChamadoData.status_chamado != 4"
-              >
-                <h4 class="modal-title">Encaminhar Chamado</h4>
-                <div class="form-group-modal">
-                  <label>Selecionar novo responsável</label>
-                  <select v-model="ChamadoData.novoTecnicoResponsavel">
-                    <option value="" disabled>Selecionar...</option>
-                    <option
-                      v-for="tecnico in tecnicos"
-                      :key="tecnico.id_user"
-                      :value="tecnico.id_user"
-                    >
-                      {{ tecnico.idfr_code_user }} - {{ tecnico.name_user }} ({{
-                        tecnico.equipe_user
-                      }})
-                    </option>
-                  </select>
-                </div>
-                <div class="form-group-modal">
-                  <label>Justificativa do encaminhamento</label>
+                  <label>Descrição</label>
                   <textarea
-                    v-model="ChamadoData.justificativaEncaminhamento"
+                    id="description"
+                    rows="4"
+                    v-model="ChamadoData.descricao_chamado"
+                    disabled
                   ></textarea>
                 </div>
-                <button class="submit-button-modal" @click="enviarChamado">
-                  Enviar
-                </button>
-                <button class="submit-button-modal" @click="cancelar">
-                  Cancelar
-                </button>
-              </div>
-            </form>
+                <div class="form-group-modal">
+                  <label>Prioridade</label>
+                  <select v-model="ChamadoData.gravidade" disabled>
+                    <option
+                      v-for="gravidade in prioridadesGravidade"
+                      :key="gravidade.id_prioridade"
+                      :value="gravidade.valor_prioridade"
+                    >
+                      {{ gravidade.descricao_categoria }}
+                    </option>
+                  </select>
+                  <select v-model="ChamadoData.urgencia" disabled>
+                    <option
+                      v-for="urgencia in prioridadesUrgencia"
+                      :key="urgencia.id_prioridade"
+                      :value="urgencia.valor_prioridade"
+                    >
+                      {{ urgencia.descricao_categoria }}
+                    </option>
+                  </select>
+                  <select v-model="ChamadoData.tendencia" disabled>
+                    <option
+                      v-for="tendencia in prioridadesTendencia"
+                      :key="tendencia.id_prioridade"
+                      :value="tendencia.valor_prioridade"
+                    >
+                      {{ tendencia.descricao_categoria }}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label>Anexos</label>
+                </div>
+                <!--Botoes de ação-->
+                <div v-if="!showResponderCampos && !showEncaminharCampos">
+                  <button class="submit-button-modal" @click="responderChamado">
+                    Responder Chamado
+                  </button>
+                  <button
+                    class="submit-button-modal"
+                    @click="encaminharChamado"
+                  >
+                    Encaminhar Chamado
+                  </button>
+                </div>
+                <!--Campos responder chamado-->
+                <div v-if="showResponderCampos">
+                  <h4 class="modal-title">Responder Chamado</h4>
+                  <div class="form-group-modal">
+                    <label>Categoria do Serviço</label>
+                    <select v-model="ChamadoData.categoriaServico">
+                      <option
+                        v-for="categoriaServ in categoriasServico"
+                        :key="categoriaServ.id_categoria_servico"
+                        :value="categoriaServ.id_categoria_servico"
+                      >
+                        {{ categoriaServ.descricao_categoria_servico }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group-modal">
+                    <label>Categoria da Ocorrência</label>
+                    <select v-model="ChamadoData.categoriaOcorrencia">
+                      <option
+                        v-for="categoriaOcor in categoriasOcorrencia"
+                        :key="categoriaOcor.id_categoria_ocorrencia"
+                        :value="categoriaOcor.id_categoria_ocorrencia"
+                      >
+                        {{ categoriaOcor.descricao_categoria_ocorrencia }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group-modal">
+                    <label>Descrição da Solução</label>
+                    <textarea v-model="ChamadoData.descricaoSolucao"></textarea>
+                  </div>
+                  <button class="submit-button-modal" @click="enviarResposta">
+                    Enviar Resposta
+                  </button>
+                  <button class="submit-button-modal" @click="cancelar">
+                    Cancelar
+                  </button>
+                </div>
+                <!--Campos encaminhar chamado-->
+                <div
+                  v-if="showEncaminharCampos && ChamadoData.status_chamado != 4"
+                >
+                  <h4 class="modal-title">Encaminhar Chamado</h4>
+                  <div class="form-group-modal">
+                    <label>Selecionar novo responsável</label>
+                    <select v-model="ChamadoData.novoTecnicoResponsavel">
+                      <option value="" disabled>Selecionar...</option>
+                      <option
+                        v-for="tecnico in tecnicos"
+                        :key="tecnico.id_user"
+                        :value="tecnico.id_user"
+                      >
+                        {{ tecnico.idfr_code_user }} -
+                        {{ tecnico.name_user }} ({{ tecnico.equipe_user }})
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group-modal">
+                    <label>Justificativa do encaminhamento</label>
+                    <textarea
+                      v-model="ChamadoData.justificativaEncaminhamento"
+                    ></textarea>
+                  </div>
+                  <button class="submit-button-modal" @click="enviarChamado">
+                    Enviar
+                  </button>
+                  <button class="submit-button-modal" @click="cancelar">
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -250,6 +262,8 @@ export default {
       showBotoesAcao: true,
       categoriasServico: [],
       categoriasOcorrencia: [],
+      showMessage: false,
+      message: "",
     };
   },
   created() {
@@ -261,6 +275,18 @@ export default {
     this.fetchUserTecnico();
   },
   methods: {
+    showAlert(message) {
+      this.fecharModal();
+      this.limparCamposModal();
+      this.message = message;
+      this.showMessage = true;
+      setTimeout(() => {
+        this.showMessage = false;
+      }, 3000); // Ajuste o tempo conforme necessário
+    },
+    closeMessage() {
+      this.showMessage = false;
+    },
     onListarChamados() {
       const id_user = sessionStorage.getItem("id_user");
       const permission = sessionStorage.getItem("permission");
@@ -396,9 +422,9 @@ export default {
         .then((res) => {
           console.log("Server response:", res.data);
           if (res.data.error === true) {
-            alert(res.data.msg);
+            this.showAlert(res.data.msg);
           } else {
-            alert(res.data.msg);
+            this.showAlert(res.data.msg);
           }
         })
         .catch((err) => {
@@ -472,6 +498,9 @@ export default {
       this.showResponderCampos = false;
       this.showEncaminharCampos = false;
       this.showBotoesAcao = true; // Restaurar a visibilidade dos botões
+      this.categoriaServico = "";
+      this.categoriaOcorrencia = "";
+      this.descricaoSolucao = "";
     },
     filterChamados() {
       const id_user = sessionStorage.getItem("id_user");

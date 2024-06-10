@@ -1,89 +1,109 @@
 <template>
-  <div class="container">
-    <div class="login_logo">
-      <img src="../assets/img/LogoHelpTek.png" alt="Logo HelpTek" />
-    </div>
-    <div
-      class="error-message"
-      v-if="errorMessage"
-      :style="{ opacity: errorMessageOpacity }"
-    >
-      {{ errorMessage }}
-    </div>
-    <div id="loginform" v-if="loginform">
-      <form method="POST" class="login-form" @submit.prevent="onLogin()">
-        <div class="input-group">
-          <input
-            type="text"
-            id="username"
-            v-model="User.username"
-            placeholder="Nome de usuário"
-            name="username"
-            autocomplete="off"
-            required
-          />
-        </div>
-        <div class="input-group">
-          <input
-            type="password"
-            id="password"
-            v-model="User.password"
-            placeholder="Senha"
-            name="password"
-            autocomplete="off"
-            required
-          />
-        </div>
-        <div class="forgot-recover">
-          <a
-            class="recover-password"
-            @click.prevent="
-              recoverform = true;
-              loginform = false;
-            "
-            >Recuperar Login</a
-          >
-        </div>
-        <button type="submit">Entrar</button>
-      </form>
-    </div>
-    <div
-      class="recover-message"
-      v-if="recoverMessage"
-      :style="{ opacity: recoverMessageOpacity }"
-    >
-      {{ recoverMessage }}
-    </div>
-    <div id="recoverform" v-if="recoverform">
-      <form method="POST" class="login-form" @submit.prevent="onRecovery()">
-        <div class="input-group">
-          <input
-            type="email"
-            id="email_user"
-            v-model="Rec.emailUser"
-            placeholder="E-Mail"
-            name="email"
-            autocomplete="off"
-            required
-          />
-        </div>
-        <div class="forgot-recover">
-          <label>
-            Preencha o e-mail para recuperar o acesso ou clique
+  <div class="main-div">
+    <header class="login-header">
+      <p>Inovação em serviços HelpDesk</p>
+    </header>
+    <div class="container login-box">
+      <div class="login_logo">
+        <img src="../assets/img/LogoHelpTek.png" alt="Logo HelpTek" />
+      </div>
+      <div
+        class="error-message"
+        v-if="errorMessage"
+        :style="{ opacity: errorMessageOpacity }"
+      >
+        {{ errorMessage }}
+      </div>
+      <div id="loginform" v-if="loginform">
+        <form method="POST" class="login-form" @submit.prevent="onLogin()">
+          <div class="input-group">
+            <input
+              type="text"
+              id="username"
+              v-model="User.username"
+              placeholder="Nome de usuário"
+              name="username"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <input
+              type="password"
+              id="password"
+              v-model="User.password"
+              placeholder="Senha"
+              name="password"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <div class="forgot-recover">
             <a
               class="recover-password"
               @click.prevent="
-                recoverform = false;
-                loginform = true;
+                recoverform = true;
+                loginform = false;
               "
-              >aqui</a
+              >Recuperar Login</a
             >
-            retornar
-          </label>
-        </div>
-        <button type="submit">Enviar</button>
-      </form>
+          </div>
+          <button type="submit">Entrar</button>
+        </form>
+      </div>
+      <div
+        class="recover-message"
+        v-if="recoverMessage"
+        :style="{ opacity: recoverMessageOpacity }"
+      >
+        {{ recoverMessage }}
+      </div>
+      <div id="recoverform" v-if="recoverform">
+        <form method="POST" class="login-form" @submit.prevent="onRecovery()">
+          <div class="input-group">
+            <input
+              type="email"
+              id="email_user"
+              v-model="Rec.emailUser"
+              placeholder="E-Mail"
+              name="email"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <div class="forgot-recover">
+            <label>
+              Preencha o e-mail para recuperar o acesso ou clique
+              <a
+                class="recover-password"
+                @click.prevent="
+                  recoverform = false;
+                  loginform = true;
+                "
+                >aqui</a
+              >
+              retornar
+            </label>
+          </div>
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
     </div>
+    <footer class="login-footer">
+      <div class="footer-basic">
+        <footer>
+          <ul class="list-inline">
+            <li class="list-inline-item"><a href="#">Serviços</a></li>
+            <li class="list-inline-item"><a href="#">Sobre</a></li>
+            <li class="list-inline-item"><a href="#">Termos</a></li>
+            <li class="list-inline-item">
+              <a href="#">Políticas de Privacidade</a>
+            </li>
+          </ul>
+          <p class="copyright">HelpTek © 2024</p>
+        </footer>
+      </div>
+    </footer>
   </div>
 </template>
 <script>
@@ -100,13 +120,16 @@ export default {
       errorMessageOpacity: 1,
       recoverMessage: "",
       recoverMessageOpacity: 1,
+      showMessage: false,
+      message: "",
     };
   },
   methods: {
     onLogin() {
       if (!this.User.username || !this.User.password) {
         //alert("Por favor, preencha todos os campos.");
-        this.errorMessage = "Por favor, preencha todos os campos.";
+        this.showAlert = "Por favor, preencha todos os campos.";
+        //this.errorMessage = "Por favor, preencha todos os campos.";
         return;
       }
 

@@ -14,26 +14,122 @@
               <th>ID</th>
               <th>Nome</th>
               <th>Usuário</th>
-              <th>E-Mail</th>
               <th>Permissão</th>
               <th>Data de criação</th>
               <th>Status</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>ID</td>
-              <td>Nome</td>
-              <td>Usuário</td>
-              <td>E-Mail</td>
-              <td>Permissão</td>
-              <td>Data de criação</td>
-              <td>Status</td>
+            <tr v-for="usuarios in Usuarios" :key="usuarios.id_user">
+              <td>{{ usuarios.idfr_code_user }}</td>
+              <td>{{ usuarios.name_user }}</td>
+              <td>{{ usuarios.username_user }}</td>
+              <td>{{ usuarios.permissao_user_desc }}</td>
+              <td>{{ usuarios.data_criacao_fm }}</td>
+              <td>{{ usuarios.status_user_desc }}</td>
+              <td>
+                <button
+                  class="bt-chamado"
+                  data-bs-toggle="modal"
+                  data-bs-target="#myModal"
+                  @click="verUsuario(usuarios)"
+                >
+                  Ver
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
+      <!--Modal p/ visualizar e editar usuarios-->
+      <div class="modal fade bd-example-modal-lg" id="myModal">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header" style="width: 70%">
+              <h4 class="modal-title">Dados do usuário</h4>
+              <button
+                type="button"
+                class="btn-close"
+                style="padding: 5px"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+              <form method="POST" @submit.prevent="">
+                <div class="form-group-modal">
+                  <label>Nome</label>
+                  <input type="text" v-model="UsuarioData.name_user" disabled />
+                </div>
+                <div class="form-group-modal">
+                  <label>Primeiro Nome</label>
+                  <input
+                    type="text"
+                    v-model="UsuarioData.first_name"
+                    disabled
+                  />
+                </div>
+                <div class="form-group-modal">
+                  <label>E-Mail</label>
+                  <input
+                    type="text"
+                    v-model="UsuarioData.email_user"
+                    disabled
+                  />
+                </div>
+                <div class="form-group-modal">
+                  <label>Permissão</label>
+                  <select v-model="UsuarioData.id_permissao" disabled>
+                    <option
+                      v-for="permissao in permissoesUsuario"
+                      :key="permissao.id_permissao"
+                      :value="permissao.id_permissao"
+                    >
+                      {{ permissao.descricao_permissao }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group-modal">
+                  <label>Usuário</label>
+                  <input
+                    type="text"
+                    v-model="UsuarioData.username_user"
+                    disabled
+                  />
+                </div>
+                <div class="form-group-modal">
+                  <label>Senha</label>
+                  <input
+                    type="password"
+                    v-model="UsuarioData.password_user"
+                    disabled
+                  />
+                </div>
+                <div class="form-group-modal">
+                  <label>Confirma senha</label>
+                  <input
+                    type="password"
+                    v-model="UsuarioData.confirma_senha"
+                    disabled
+                  />
+                </div>
+                <div class="form-group-modal">
+                  <label>Status</label>
+                  <select>
+                    <option value="1">Ativo</option>
+                    <option value="0">Inativo</option>
+                  </select>
+                </div>
+                <!--Botoes de ação-->
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
     <!--Cadastrar usuario-->
     <div v-if="!showList" id="div_form_cadastro">
       <h1>Cadastrar usuário</h1>
@@ -44,7 +140,7 @@
             <input
               type="text"
               name="nome"
-              v-model="UsuarioData.nome"
+              v-model="UsuarioData.name_user"
               required
             />
           </div>
@@ -53,7 +149,7 @@
             <input
               type="text"
               name="primeiro_nome"
-              v-model="UsuarioData.primeiro_nome"
+              v-model="UsuarioData.first_name"
               required
             />
           </div>
@@ -62,7 +158,7 @@
             <input
               type="email"
               name="email"
-              v-model="UsuarioData.email"
+              v-model="UsuarioData.email_user"
               required
             />
           </div>
@@ -71,7 +167,7 @@
             <select
               name="permissao"
               id="permissao"
-              v-model="UsuarioData.permissao"
+              v-model="UsuarioData.id_permissao"
               required
             >
               <option default disabled>Permissao</option>
@@ -89,7 +185,7 @@
             <input
               type="text"
               name="usuario"
-              v-model="UsuarioData.user"
+              v-model="UsuarioData.username_name"
               required
             />
           </div>
@@ -99,7 +195,7 @@
               <input
                 :type="showPassword ? 'text' : 'password'"
                 name="senha"
-                v-model="UsuarioData.senha"
+                v-model="UsuarioData.password_user"
                 required
               />
               <button
@@ -143,8 +239,6 @@
   </div>
 </template>
 <script>
-//import axios from "axios";
-
 import axios from "axios";
 
 export default {
@@ -155,22 +249,45 @@ export default {
       showPassword: false,
       permissoesUsuario: [],
       UsuarioData: {
-        nome: "",
-        primeiro_nome: "",
-        email: "",
-        permissao: "",
-        user: "",
-        senha: "",
+        id_user: "",
+        idfr_code_user: "",
+        name_user: "",
+        first_name: "",
+        email_user: "",
+        id_permissao: "",
+        username_user: "",
+        password_user: "",
         confirma_senha: "",
+        data_criacao: "",
+        status_user: "",
       },
+      Usuarios: [],
     };
   },
   created() {
     import("../assets/css/component/MeusChamados.css");
     import("../assets/css/component/ConfiguracoesUsuarios.css");
+    this.onListarUsuarios();
     this.fetchPermissoes();
   },
   methods: {
+    onListarUsuarios() {
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/selectUsuarios.php?action=selectUsuarios`
+        )
+        .then((res) => {
+          console.log("Server response:", res.data);
+          this.Usuarios = res.data.usuarios;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    verUsuario(usuario) {
+      this.UsuarioData = usuario;
+      this.isEditing = false;
+    },
     toggleView() {
       this.showList = !this.showList;
     },
