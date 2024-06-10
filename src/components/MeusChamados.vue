@@ -202,8 +202,6 @@ export default {
     onListarChamados() {
       const id_user = sessionStorage.getItem("id_user");
       const permission = sessionStorage.getItem("permission");
-      console.log("ID de usuário: ", id_user);
-      console.log("Permissao de usuario: ", permission);
       axios
         .get(
           `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}&permission=${permission}`

@@ -14,9 +14,8 @@
 
 .main-container {
     display: flex;
-    margin-top: 120px;
     height: calc(100vh - 60px);
-    margin-bottom: 80px;
+    overflow-y: auto;
 }
 
 .sidebar {
@@ -62,14 +61,16 @@
 .main-content {
     flex-grow: 1;
     margin-left: 250px;
-    padding-top: 20px;
+    padding-top: 5%;
     align-self: flex-start;
+    position: absolute;
 }
 
 .main-content h1{
     font-size: 23px;
     padding-top: 10px;
     padding-bottom: 10px;
+    margin-bottom: 10px;
 }
 
 .form-group{

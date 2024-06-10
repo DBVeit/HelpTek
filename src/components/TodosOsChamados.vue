@@ -50,18 +50,27 @@
       </table>
     </div>
     <!-- The Modal -->
-    <div class="modal fade" id="myModal">
-      <div class="modal-dialog">
+    <div
+      class="modal fade"
+      id="myModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
         <div class="modal-content">
           <!-- Modal Header -->
           <div class="modal-header" style="width: 70%">
-            <h4 class="modal-title">Dados do chamado</h4>
+            <h5 class="modal-title">Dados do chamado</h5>
             <button
               type="button"
               class="btn-close"
               style="padding: 5px"
               data-bs-dismiss="modal"
-            ></button>
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
           <!-- Modal body -->
           <div class="modal-body">
@@ -86,9 +95,33 @@
               </div>
               <div class="form-group-modal">
                 <label>Prioridade</label>
-                <select v-model="ChamadoData.gravidade" disabled></select>
-                <select v-model="ChamadoData.urgencia" disabled></select>
-                <select v-model="ChamadoData.tendencia" disabled></select>
+                <select v-model="ChamadoData.gravidade" disabled>
+                  <option
+                    v-for="gravidade in prioridadesGravidade"
+                    :key="gravidade.id_prioridade"
+                    :value="gravidade.valor_prioridade"
+                  >
+                    {{ gravidade.descricao_categoria }}
+                  </option>
+                </select>
+                <select v-model="ChamadoData.urgencia" disabled>
+                  <option
+                    v-for="urgencia in prioridadesUrgencia"
+                    :key="urgencia.id_prioridade"
+                    :value="urgencia.valor_prioridade"
+                  >
+                    {{ urgencia.descricao_categoria }}
+                  </option>
+                </select>
+                <select v-model="ChamadoData.tendencia" disabled>
+                  <option
+                    v-for="tendencia in prioridadesTendencia"
+                    :key="tendencia.id_prioridade"
+                    :value="tendencia.valor_prioridade"
+                  >
+                    {{ tendencia.descricao_categoria }}
+                  </option>
+                </select>
               </div>
               <div>
                 <label>Anexos</label>
@@ -119,6 +152,8 @@ export default {
     return {
       ChamadoData: {
         id_chamado: "",
+        id_user: "",
+        idfr_chamado: "",
         titulo_chamado: "",
         descricao_chamado: "",
         prioridade_chamado: "",
@@ -126,17 +161,24 @@ export default {
         status_chamado: "",
         data_atualizacao: "",
         data_conclusao: "",
+        gravidade: "",
+        urgencia: "",
+        tendencia: "",
       },
       Chamados: [],
       selectedStatus: null,
       isTecnico: false,
       isGerente: false,
+      prioridadesGravidade: [],
+      prioridadesUrgencia: [],
+      prioridadesTendencia: [],
     };
   },
   created() {
     import("../assets/css/component/MeusChamados.css");
     this.onListarChamados();
     this.checkPermissions();
+    this.fetchPrioridades();
   },
   methods: {
     onListarChamados() {
@@ -154,8 +196,32 @@ export default {
           console.log(err);
         });
     },
-    verChamado(id_chamado) {
-      this.ChamadoData = id_chamado;
+    fetchPrioridades() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/selectPrioridades.php"
+        )
+        .then((response) => {
+          const prioridades = response.data.prioridades;
+          this.prioridadesGravidade = prioridades.filter(
+            (p) => p.categoria_prioridade === "gravidade"
+          );
+          this.prioridadesUrgencia = prioridades.filter(
+            (p) => p.categoria_prioridade === "urgencia"
+          );
+          this.prioridadesTendencia = prioridades.filter(
+            (p) => p.categoria_prioridade === "tendencia"
+          );
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar prioridades: ", error);
+        });
+    },
+    verChamado(chamado) {
+      this.ChamadoData = chamado;
+      this.ChamadoData.gravidade = chamado.gravidade;
+      this.ChamadoData.urgencia = chamado.urgencia;
+      this.ChamadoData.tendencia = chamado.tendencia;
     },
     checkPermissions() {
       const permission = sessionStorage.getItem("permission");

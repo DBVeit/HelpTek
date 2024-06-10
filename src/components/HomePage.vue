@@ -31,6 +31,7 @@
         <MeusChamados v-if="MeusChamadosList && !isTecnico" />
         <MeusChamadosTec v-if="MeusChamadosList && isTecnico" />
         <TodosOsChamados v-if="TodosOsChamadosList" />
+        <ConfiguracoesUsuarios v-if="ConfigUsuarios" />
       </main>
     </div>
   </div>
@@ -40,8 +41,8 @@ import CriarChamado from "@/components/CriarChamado.vue";
 import MeusChamados from "@/components/MeusChamados.vue";
 import MeusChamadosTec from "@/components/MeusChamadosTec.vue";
 import TodosOsChamados from "@/components/TodosOsChamados.vue";
+import ConfiguracoesUsuarios from "@/components/ConfiguracoesUsuarios.vue";
 import axios from "axios";
-
 export default {
   name: "HomePage",
   components: {
@@ -49,6 +50,7 @@ export default {
     MeusChamados,
     MeusChamadosTec,
     TodosOsChamados,
+    ConfiguracoesUsuarios,
   },
 
   data() {
@@ -61,6 +63,7 @@ export default {
       CriarChamadoForm: false,
       MeusChamadosList: false,
       TodosOsChamadosList: false,
+      ConfigUsuarios: false,
       isTecnico: false,
     };
   },
@@ -104,14 +107,22 @@ export default {
         this.CriarChamadoForm = true;
         this.MeusChamadosList = false;
         this.TodosOsChamadosList = false;
+        this.ConfigUsuarios = false;
       } else if (menuItem === "Meus chamados") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = true;
         this.TodosOsChamadosList = false;
+        this.ConfigUsuarios = false;
       } else if (menuItem === "Todos os chamados") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
         this.TodosOsChamadosList = true;
+        this.ConfigUsuarios = false;
+      } else if (menuItem === "Configuracoes de usuarios") {
+        this.CriarChamadoForm = false;
+        this.MeusChamadosList = false;
+        this.TodosOsChamadosList = false;
+        this.ConfigUsuarios = true;
       }
     },
     verificarTipoUsuario() {

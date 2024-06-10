@@ -25,7 +25,6 @@
     color: white;
 }
 
-
 .bt-chamado{
     height: 30px;
     width: 60px;
@@ -35,6 +34,19 @@
 
 .modal{
     width: 100%;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-close {
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
 }
 
 .btn-dismiss-modal{
