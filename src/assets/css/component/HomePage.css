@@ -15,7 +15,6 @@
 .main-container {
     display: flex;
     height: calc(100vh - 60px);
-    overflow-y: auto;
 }
 
 .sidebar {
@@ -63,7 +62,6 @@
     margin-left: 250px;
     padding-top: 5%;
     align-self: flex-start;
-    position: absolute;
 }
 
 .main-content h1{

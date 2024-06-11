@@ -4,13 +4,14 @@ body {
     padding: 0;
 }
 
+/*Texto com o titulo da pagina*/
 .page_title{
     top: 0;
     font-size: 23px;
     margin-top: 10px;
     margin-bottom: 10px;
     position: sticky;
-    z-index: 999; /* para garantir que o título fique acima do conteúdo */
+    z-index: 999;
 }
 
 .page_content{
@@ -45,4 +46,52 @@ body {
     font-size: 20px;
     cursor: pointer;
     margin-left: 10px;
+}
+
+
+/*Table chamados*/
+.chamados-list-table{
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 600px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    table-layout: auto;
+    width: 98%;
+}
+
+.chamados-list-table th{
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background-color: #ff5757;
+    color: white;
+}
+
+.chamados-list-table thead tr{
+    background-color: #ff5757;
+    color: white;
+    border-radius: 10px;
+}
+
+.chamados-list-table td,th{
+    border: 1px #ddd;
+    padding: 12px 15px;
+}
+
+.chamados-list-table tbody tr{
+    border-bottom: 1px solid #ddd;
+}
+
+.chamados-list-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.chamados-list-table tbody tr:last-of-type {
+    border-bottom: 2px solid #ff5757;
+}
+
+.chamados-list-table tr:hover {
+    background-color: #ddd;
 }

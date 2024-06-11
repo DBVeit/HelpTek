@@ -9,7 +9,7 @@
     <div class="page_title">
       <h1>Meus chamados</h1>
     </div>
-    <div class="page_content">
+    <div class="">
       <div class="filter">
         Filtros:
         <select v-model="selectedStatus" @change="filterChamados">
@@ -36,6 +36,7 @@
               <!--<th>Minutos de espera</th>-->
               <th>Atualizado em</th>
               <th>Concluído em</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -75,7 +76,9 @@
                 style="padding: 5px"
                 data-bs-dismiss="modal"
                 @click="fecharModal"
-              ></button>
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
             </div>
             <!-- Modal body -->
             <div class="modal-body">
@@ -196,7 +199,7 @@
                         :value="tecnico.id_user"
                       >
                         {{ tecnico.idfr_code_user }} -
-                        {{ tecnico.name_user }} ({{ tecnico.equipe_user }})
+                        {{ tecnico.name_user }} ({{ tecnico.id_user }})
                       </option>
                     </select>
                   </div>

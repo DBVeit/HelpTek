@@ -19,7 +19,7 @@
         >
       </div>
       <div>
-        <table cellpadding="5" class="chamados-list-table">
+        <table class="chamados-list-table">
           <thead>
             <tr>
               <th>ID</th>
@@ -27,6 +27,7 @@
               <th>Prioridade</th>
               <th>Data de criação</th>
               <th>Status</th>
+              <th></th>
               <!--<th>Minutos de espera</th>-->
             </tr>
           </thead>
@@ -129,9 +130,24 @@
                 <div>
                   <label>Anexos</label>
                 </div>
-                <div v-if="isTecnico">
-                  <button class="submit-button-modal" @click="assumirChamado">
+                <div v-if="isTecnico && !confirmacaoAssumirChamado">
+                  <button
+                    class="submit-button-modal"
+                    @click="exibirConfirmacao"
+                  >
                     Assumir Chamado
+                  </button>
+                </div>
+                <div v-if="confirmacaoAssumirChamado">
+                  <p>Tem certeza de que deseja assumir este chamado?</p>
+                  <button
+                    class="btn btn-secondary"
+                    @click="cancelarAssumirChamado"
+                  >
+                    Não
+                  </button>
+                  <button class="btn btn-primary" @click="assumirChamado">
+                    Sim
                   </button>
                 </div>
                 <div v-if="isGerente">
@@ -179,6 +195,7 @@ export default {
       prioridadesGravidade: [],
       prioridadesUrgencia: [],
       prioridadesTendencia: [],
+      confirmacaoAssumirChamado: false,
     };
   },
   created() {
@@ -238,6 +255,12 @@ export default {
         this.isGerente = true;
       }
     },
+    exibirConfirmacao() {
+      this.confirmacaoAssumirChamado = true;
+    },
+    cancelarAssumirChamado() {
+      this.confirmacaoAssumirChamado = false;
+    },
     assumirChamado() {
       const { id_chamado, idfr_chamado } = this.ChamadoData;
       console.log("Dados do chamado:", {
@@ -255,6 +278,7 @@ export default {
         .then((res) => {
           console.log("Server response:", res.data);
           if (res.data.error === true) {
+            this.fecharModal();
             alert(res.data.msg);
           } else {
             alert(res.data.msg);
@@ -264,6 +288,18 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+    fecharModal() {
+      const modal = document.getElementById("myModal");
+      if (modal) {
+        modal.classList.remove("show");
+        modal.style.display = "none";
+        const modalBackdrop = document.querySelector(".modal-backdrop");
+        if (modalBackdrop) {
+          modalBackdrop.remove();
+        }
+        document.body.classList.remove("modal-open");
+      }
     },
     filterChamados() {
       const id_user = sessionStorage.getItem("id_user");
