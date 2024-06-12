@@ -90,3 +90,17 @@
     box-shadow: none;
     font-size: 32px;
 }
+
+.modal-body {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.actions_modal {
+    display: flex;
+    gap: 10px; /* Ajuste o espaço entre os botões conforme necessário */
+    width: 100%;
+    margin-top: 20px; /* Ajuste conforme necessário */
+    margin-right: 20px;
+}

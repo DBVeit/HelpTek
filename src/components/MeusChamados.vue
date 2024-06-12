@@ -16,7 +16,7 @@
       >
     </div>
     <div>
-      <table cellpadding="5" class="chamados-list-table">
+      <table class="chamados-list-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -27,6 +27,7 @@
             <!--<th>Minutos de espera</th>-->
             <th>Atualizado em</th>
             <th>Concluído em</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -69,6 +70,11 @@
           </div>
           <!-- Modal body -->
           <div class="modal-body">
+            <div class="message-box" v-if="showMessage">
+              <div class="message-content">
+                <span>{{ message }}</span>
+              </div>
+            </div>
             <form method="POST" @submit.prevent="">
               <div class="form-group-modal">
                 <label>Título</label>
@@ -121,7 +127,7 @@
               <div>
                 <label>Anexos</label>
               </div>
-              <div v-if="!isEditing">
+              <div class="actions_modal" v-if="!isEditing">
                 <button
                   type="submit"
                   class="submit-button-modal"
@@ -191,6 +197,8 @@ export default {
       prioridadesGravidade: [],
       prioridadesUrgencia: [],
       prioridadesTendencia: [],
+      showMessage: false,
+      message: "",
     };
   },
   created() {
@@ -283,9 +291,9 @@ export default {
         .then((res) => {
           console.log("Server response:", res.data);
           if (res.data.error === true) {
-            alert(res.data.msg);
+            this.showAlert(res.data.msg);
           } else {
-            alert(res.data.msg);
+            this.showAlert(res.data.msg);
           }
         })
         .catch((err) => {
@@ -313,6 +321,7 @@ export default {
         .then((res) => {
           console.log("Server response:", res.data);
           this.isConfirmingCancel = false;
+          this.showAlert(res.data.msg);
           this.onListarChamados();
           $("#myModal").modal("hide");
         })
@@ -340,6 +349,24 @@ export default {
       this.selectedStatus = null;
       this.onListarChamados();
       // Limpar a lista de chamados filtrados
+    },
+    showAlert(message) {
+      this.message = message;
+      this.showMessage = true;
+      setTimeout(() => {
+        this.showMessage = false;
+      }, 8000);
+    },
+    clearFormFields() {
+      this.ChamadoData.titulo = "";
+      this.ChamadoData.descricao = "";
+      this.ChamadoData.gravidade = "";
+      this.ChamadoData.urgencia = "";
+      this.ChamadoData.tendencia = "";
+      this.$refs.attachment.value = "";
+    },
+    closeMessage() {
+      this.showMessage = false;
     },
   },
 };

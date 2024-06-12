@@ -72,8 +72,10 @@
 }
 
 .form-group{
-    width: 900px;
+    width: 85%;
     padding: 6px;
+    margin-left: 60px;
+    bottom: auto;
 }
 
 .form-group label {
@@ -90,4 +92,12 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
+}
+
+.form-group button{
+    margin-bottom: 20px;
+}
+
+.submit-button-chamado{
+
 }
