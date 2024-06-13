@@ -6,7 +6,7 @@ class DBConnect
     {
         $host = "localhost";
         $user = "root";
-        $pass = "180317";
+        $pass = "";
         $database = "helptek";
 
         return new mysqli($host,$user,$pass,$database) or die();

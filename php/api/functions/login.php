@@ -71,6 +71,16 @@ if (isset($_GET['action'])) {
                     $res['first_name'] = $_SESSION['user_fname'];
                     $res['level_user'] = $level;
                     $res['user_permission'] = $_SESSION['user_level'];
+                    $updateQuery = "UPDATE users SET user_logado = 1, token_user = '$token' WHERE id_user = '$idDB'";
+                    $mysqli_con->query($updateQuery);
+                    if ($updateQuery){
+                        $res['msg'] = "Token de usuário atualizado com sucesso!";
+                        $res['code'] = 200;
+                    } else {
+                        $res['error'] = true;
+                        $res['msg'] = "Erro ao atualizar token!";
+                        $res['code'] = 401;
+                    }
                 } else { //Do contrario...
                     $res['error'] = true;
                     $res['msg'] = "Usuário e/ou senha inválidos!";
