@@ -63,7 +63,7 @@ if (isset($_GET['action'])) {
                         $res['chamados'] = $chamados;
                     } else {
                         $res['error'] = false;
-                        $res['msg'] = "Não há dados para exibição";
+                        $res['msg'] = "Não existem dados para visualização";
                     }
                 }else {
                     $res['error'] = true;

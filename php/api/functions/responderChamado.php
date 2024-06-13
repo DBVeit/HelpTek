@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
 
                 if ($result_acompanhamento) {
-                    $res['msg'] = "Chamado respondido com sucesso!";
+                    $res['msg'] = "Atendimento registrado com sucesso!";
                 } else {
                     $res['error'] = true;
                     $res['msg'] = "Erro ao registrar acompanhamento: " . $mysqli_con->error;

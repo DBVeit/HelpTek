@@ -53,6 +53,9 @@
           </tr>
         </tbody>
       </table>
+      <div class="recover-message" v-if="recoverMessage">
+        {{ recoverMessage }}
+      </div>
     </div>
     <!-- The Modal -->
     <div class="modal fade bd-example-modal-lg" id="myModal">
@@ -66,7 +69,9 @@
               class="btn-close"
               style="padding: 5px"
               data-bs-dismiss="modal"
-            ></button>
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
           <!-- Modal body -->
           <div class="modal-body">
@@ -127,21 +132,49 @@
               <div>
                 <label>Anexos</label>
               </div>
-              <div class="actions_modal" v-if="!isEditing">
-                <button
-                  type="submit"
-                  class="submit-button-modal"
-                  @click="editarChamado"
-                >
-                  Editar
-                </button>
-                <button
-                  type="submit"
-                  class="submit-button-modal"
-                  @click="confirmarCancelamento"
-                >
-                  Cancelar Chamado
-                </button>
+              <div class="form-group-modal">
+                <select v-model="ChamadoData.id_categoria_servico" disabled>
+                  <option
+                    v-for="categoriaServ in categoriasServico"
+                    :key="categoriaServ.id_categoria_servico"
+                    :value="categoriaServ.id_categoria_servico"
+                  >
+                    {{ categoriaServ.descricao_categoria_servico }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group-modal">
+                <label>Categoria da Ocorrência</label>
+                <select v-model="ChamadoData.id_categoria_ocorrencia" disabled>
+                  <option
+                    v-for="categoriaOcor in categoriasOcorrencia"
+                    :key="categoriaOcor.id_categoria_ocorrencia"
+                    :value="categoriaOcor.id_categoria_ocorrencia"
+                  >
+                    {{ categoriaOcor.descricao_categoria_ocorrencia }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group-modal">
+                <label>Descrição da Solução</label>
+                <textarea
+                  v-model="ChamadoData.descricao_solucao"
+                  disabled
+                ></textarea>
+              </div>
+              <div class="confirmation-overlay" v-if="!isEditing">
+                <div class="confirmation-box">
+                  <button type="submit" class="btEditar" @click="editarChamado">
+                    Editar
+                  </button>
+                  <button
+                    type="submit"
+                    class="btCancelar"
+                    @click="confirmarCancelamento"
+                  >
+                    Cancelar
+                  </button>
+                </div>
               </div>
               <div v-else>
                 <button
@@ -157,9 +190,11 @@
           <!-- Confirmação de Cancelamento -->
           <div v-if="isConfirmingCancel" class="confirmation-overlay">
             <div class="confirmation-box">
-              <p>Você tem certeza que deseja cancelar o chamado?</p>
-              <button @click="cancelarChamado">Sim</button>
-              <button @click="isConfirmingCancel = false">Não</button>
+              <p>Deseja cancelar o chamado?</p>
+              <button @click="cancelarChamado" class="cancelaSim">Sim</button>
+              <button @click="isConfirmingCancel = false" class="cancelaNao">
+                Não
+              </button>
             </div>
           </div>
         </div>
@@ -189,6 +224,11 @@ export default {
         gravidade: "",
         urgencia: "",
         tendencia: "",
+        id_categoria_servico: "",
+        id_categoria_ocorrencia: "",
+        categoriaServico: "",
+        categoriaOcorrencia: "",
+        descricao_solucao: "",
       },
       Chamados: [],
       selectedStatus: null,
@@ -197,6 +237,9 @@ export default {
       prioridadesGravidade: [],
       prioridadesUrgencia: [],
       prioridadesTendencia: [],
+      categoriasServico: [],
+      categoriasOcorrencia: [],
+      recoverMessage: "",
       showMessage: false,
       message: "",
     };
@@ -205,6 +248,8 @@ export default {
     import("../assets/css/component/MeusChamados.css");
     this.onListarChamados();
     this.fetchPrioridades();
+    this.fetchCategoriasServico();
+    this.fetchCategoriasOcorrencia();
   },
   methods: {
     onListarChamados() {
@@ -215,8 +260,13 @@ export default {
           `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}&permission=${permission}`
         )
         .then((res) => {
-          console.log("Server response:", res.data);
-          this.Chamados = res.data.chamados;
+          if (res.data.error === true) {
+            console.log("Server response:", res.data.msg);
+            this.recoverMessage = res.data.msg;
+          } else {
+            console.log("Server response:", res.data);
+            this.Chamados = res.data.chamados;
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -241,6 +291,44 @@ export default {
         })
         .catch((error) => {
           console.error("Erro ao buscar prioridades: ", error);
+        });
+    },
+    fetchCategoriasServico() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/selectCategoriasServico.php"
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.categoriasServico = response.data.categorias_servico;
+          } else {
+            console.error(
+              "Erro ao buscar categorias do serviço:",
+              response.data.msg
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar categorias do serviço:", error);
+        });
+    },
+    fetchCategoriasOcorrencia() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/selectCategoriasOcorrencia.php"
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.categoriasOcorrencia = response.data.categorias_ocorrencia;
+          } else {
+            console.error(
+              "Erro ao buscar categorias de ocorrencia:",
+              response.data.msg
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar categorias de ocorrencia:", error);
         });
     },
     verChamado(chamado) {
@@ -311,7 +399,7 @@ export default {
       } = this.ChamadoData;
       axios
         .post(
-          `http://localhost/projeto/helptek/php/api/functions/updateChamado.php?action=CancelaChamado`,
+          `http://localhost/projeto/helptek/php/api/functions/cancelaChamado.php?action=CancelaChamado`,
           {
             id_chamado,
             id_user,

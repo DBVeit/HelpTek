@@ -59,7 +59,7 @@ if (isset($_GET['action'])) {
             }
         } else{
             $res['error'] = true;
-            $res['msg'] = "Erro ao registrar chamado, acionar TI! Cod.171 ID: ".$id_user;
+            $res['msg'] = "Erro ao registrar chamado, acionar TI";
         }
 
     }else{

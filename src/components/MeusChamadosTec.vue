@@ -1,11 +1,5 @@
 <template>
   <div>
-    <div class="message-box" v-if="showMessage">
-      <div class="message-content">
-        <span>{{ message }}</span>
-        <button @click="closeMessage">X</button>
-      </div>
-    </div>
     <div class="page_title">
       <h1>Meus chamados</h1>
     </div>
@@ -82,6 +76,12 @@
             </div>
             <!-- Modal body -->
             <div class="modal-body">
+              <div class="message-box" v-if="showMessage">
+                <div class="message-content">
+                  <span>{{ message }}</span>
+                  <button @click="closeMessage">X</button>
+                </div>
+              </div>
               <form method="POST" @submit.prevent="">
                 <div class="form-group-modal">
                   <label>Título</label>
@@ -135,16 +135,24 @@
                   <label>Anexos</label>
                 </div>
                 <!--Botoes de ação-->
-                <div v-if="!showResponderCampos && !showEncaminharCampos">
-                  <button class="submit-button-modal" @click="responderChamado">
-                    Responder Chamado
-                  </button>
-                  <button
-                    class="submit-button-modal"
-                    @click="encaminharChamado"
-                  >
-                    Encaminhar Chamado
-                  </button>
+                <div
+                  v-if="!showResponderCampos && !showEncaminharCampos"
+                  class="confirmation-overlay"
+                >
+                  <div class="confirmation-box">
+                    <button
+                      class="submit-button-modal"
+                      @click="responderChamado"
+                    >
+                      Responder Chamado
+                    </button>
+                    <button
+                      class="submit-button-modal"
+                      @click="encaminharChamado"
+                    >
+                      Encaminhar Chamado
+                    </button>
+                  </div>
                 </div>
                 <!--Campos responder chamado-->
                 <div v-if="showResponderCampos">
@@ -177,12 +185,19 @@
                     <label>Descrição da Solução</label>
                     <textarea v-model="ChamadoData.descricaoSolucao"></textarea>
                   </div>
-                  <button class="submit-button-modal" @click="enviarResposta">
-                    Enviar Resposta
-                  </button>
-                  <button class="submit-button-modal" @click="cancelar">
-                    Cancelar
-                  </button>
+                  <div class="confirmation-overlay">
+                    <div class="confirmation-box">
+                      <button
+                        class="submit-button-modal"
+                        @click="enviarResposta"
+                      >
+                        Enviar Resposta
+                      </button>
+                      <button class="submit-button-modal" @click="cancelar">
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <!--Campos encaminhar chamado-->
                 <div
@@ -204,17 +219,24 @@
                     </select>
                   </div>
                   <div class="form-group-modal">
-                    <label>Justificativa do encaminhamento</label>
+                    <label>Justificativa do encaminhamento*</label>
                     <textarea
                       v-model="ChamadoData.justificativaEncaminhamento"
                     ></textarea>
                   </div>
-                  <button class="submit-button-modal" @click="enviarChamado">
-                    Enviar
-                  </button>
-                  <button class="submit-button-modal" @click="cancelar">
-                    Cancelar
-                  </button>
+                  <div class="confirmation-overlay">
+                    <div class="confirmation-box">
+                      <button
+                        class="submit-button-modal"
+                        @click="enviarChamado"
+                      >
+                        Enviar
+                      </button>
+                      <button class="submit-button-modal" @click="cancelar">
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>
@@ -280,7 +302,6 @@ export default {
   methods: {
     showAlert(message) {
       this.fecharModal();
-      this.limparCamposModal();
       this.message = message;
       this.showMessage = true;
       setTimeout(() => {
@@ -469,9 +490,9 @@ export default {
         .then((res) => {
           console.log("Server response:", res.data);
           if (res.data.error === true) {
-            alert(res.data.msg);
+            this.showAlert(res.data.msg);
           } else {
-            alert(res.data.msg);
+            this.showAlert(res.data.msg);
             this.onListarChamados(); // Atualiza a lista de chamados após assumir um chamado
           }
         })

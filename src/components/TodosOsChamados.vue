@@ -78,6 +78,11 @@
             </div>
             <!-- Modal body -->
             <div class="modal-body">
+              <div class="message-box" v-if="showMessage">
+                <div class="message-content">
+                  <span>{{ message }}</span>
+                </div>
+              </div>
               <form method="" @submit.prevent="">
                 <div class="form-group-modal">
                   <label>Título</label>
@@ -138,17 +143,23 @@
                     Assumir Chamado
                   </button>
                 </div>
-                <div v-if="confirmacaoAssumirChamado">
-                  <p>Tem certeza de que deseja assumir este chamado?</p>
-                  <button
-                    class="btn btn-secondary"
-                    @click="cancelarAssumirChamado"
-                  >
-                    Não
-                  </button>
-                  <button class="btn btn-primary" @click="assumirChamado">
-                    Sim
-                  </button>
+                <div
+                  v-if="confirmacaoAssumirChamado"
+                  class="confirmation-overlay"
+                  style="width: 74%"
+                >
+                  <div class="confirmation-box">
+                    <p>Deseja assumir este chamado?</p>
+                    <button class="btAssumirSim" @click="assumirChamado">
+                      Sim
+                    </button>
+                    <button
+                      class="btAssumirNao"
+                      @click="cancelarAssumirChamado"
+                    >
+                      Não
+                    </button>
+                  </div>
                 </div>
                 <div v-if="isGerente">
                   <button
@@ -196,6 +207,9 @@ export default {
       prioridadesUrgencia: [],
       prioridadesTendencia: [],
       confirmacaoAssumirChamado: false,
+      recoverMessage: "",
+      showMessage: false,
+      message: "",
     };
   },
   created() {
@@ -272,17 +286,17 @@ export default {
           {
             id_chamado: id_chamado,
             idfr_chamado: idfr_chamado,
-            id_user_tecnico: sessionStorage.getItem("id_user"), // Supondo que o id do técnico está armazenado na sessão
+            id_user_tecnico: sessionStorage.getItem("id_user"),
           }
         )
         .then((res) => {
           console.log("Server response:", res.data);
           if (res.data.error === true) {
+            this.showAlert(res.data.msg);
             this.fecharModal();
-            alert(res.data.msg);
           } else {
-            alert(res.data.msg);
-            this.onListarChamados(); // Atualiza a lista de chamados após assumir um chamado
+            this.showAlert(res.data.msg);
+            this.onListarChamados();
           }
         })
         .catch((err) => {
@@ -320,6 +334,13 @@ export default {
       this.selectedStatus = null;
       this.onListarChamados();
       // Limpar a lista de chamados filtrados
+    },
+    showAlert(message) {
+      this.message = message;
+      this.showMessage = true;
+      setTimeout(() => {
+        this.showMessage = false;
+      }, 8000);
     },
   },
 };
