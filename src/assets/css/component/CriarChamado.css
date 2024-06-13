@@ -1,0 +1,30 @@
+.ticket-form-container {
+    background-color: #e9ecef;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-form-container h1{
+    font-size: 10px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.submit-button {
+    padding: 10px 50px;
+    border: none;
+    background-color: #ff5757;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    display: block;
+    width: fit-content;
+    margin: auto;
+}
+
+.submit-button:hover {
+    background-color: #e04e4e;
+}

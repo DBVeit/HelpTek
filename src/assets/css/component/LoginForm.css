@@ -1,0 +1,128 @@
+body {
+    background-color: #ff5757;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: "Open Sans", sans-serif;
+}
+
+.container {
+    width: 640px;
+    height: 525px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.login_logo {
+    width: 226px;
+    height: 90px;
+    margin-bottom: 35px;
+    display: flex;
+    justify-content: center;
+}
+
+.login_logo img {
+    max-width: 100%;
+    height: auto;
+}
+
+.input-group {
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.input-group label {
+    font-size: 22px;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.input-group input {
+    width: 563px;
+    height: 45px;
+    border-radius: 5px;
+    border: none;
+    padding: 10px;
+    font-size: 22px;
+    margin-top: 8px;
+    background-color: #ffbcbc;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.input-group input::placeholder {
+    color: #fff;
+    font-size: 22px;
+}
+
+.forgot-recover {
+    text-align: center;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.forgot-recover span,
+.forgot-recover a {
+    display: inline-block;
+}
+
+.recover-password {
+    color: #ff5757;
+    font-size: 16px;
+    margin-left: 8px;
+    text-decoration: none;
+    transition-duration: 0.5s;
+}
+
+.recover-password:hover{
+    cursor: pointer;
+    text-decoration: underline;
+    color: red;
+    transition-duration: 0.5s;
+}
+
+button {
+    width: 230px;
+    height: 60px;
+    background-color: #ff5757;
+    color: #fff;
+    font-size: 32px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: auto;
+    align-self: center;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.error-message{
+    background-color: #ffbcbc;
+    border-radius: 5px;
+    padding: 2px 8px 2px 8px;
+    color: red;
+    font-weight: bold;
+    transition: opacity 0.5s ease;
+}
+
+.recover-message{
+    background-color: #ffbcbc;
+    border-radius: 5px;
+    padding: 2px 8px 2px 8px;
+    color: red;
+    font-weight: bold;
+    transition: opacity 0.9s ease;
+}

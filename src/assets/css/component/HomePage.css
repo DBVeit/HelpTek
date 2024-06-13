@@ -1,0 +1,94 @@
+.new-ticket-btn {
+    background-color: #ff5757;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 50px;
+}
+
+.new-ticket-btn:hover {
+    background-color: #e04e4e;
+}
+
+.main-container {
+    display: flex;
+    margin-top: 120px;
+    height: calc(100vh - 60px);
+    margin-bottom: 80px;
+}
+
+.sidebar {
+    background-color: #333;
+    color: white;
+    width: 220px;
+    height: 100%;
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    overflow-y: auto;
+    font-size: 14px;
+}
+
+.welcome-message {
+    padding: 20px;
+    background-color: white;
+    color: #ff5757;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.nav-menu {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-item {
+    padding: 15px 20px;
+    text-decoration: none;
+    color: white;
+    display: block;
+    transition: background-color 0.3s;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background-color: #444;
+    cursor: pointer;
+}
+
+.main-content {
+    flex-grow: 1;
+    margin-left: 250px;
+    padding-top: 20px;
+    align-self: flex-start;
+}
+
+.main-content h1{
+    font-size: 23px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.form-group{
+    width: 900px;
+    padding: 6px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
