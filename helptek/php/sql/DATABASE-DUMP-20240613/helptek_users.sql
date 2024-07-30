@@ -1,0 +1,40 @@
+
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users` (
+  `id_user` int unsigned NOT NULL AUTO_INCREMENT,
+  `idfr_code_user` varchar(50) DEFAULT NULL,
+  `name_user` varchar(45) NOT NULL,
+  `first_name` varchar(45) DEFAULT NULL,
+  `username_user` varchar(45) NOT NULL,
+  `email_user` varchar(45) NOT NULL,
+  `password_user` varchar(256) NOT NULL,
+  `id_permissao` int DEFAULT NULL,
+  `level_user` enum('1','2','3','4') NOT NULL DEFAULT '1',
+  `status_user` tinyint NOT NULL DEFAULT '1',
+  `date_user` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `funcao_user` varchar(45) DEFAULT NULL,
+  `equipe_user` varchar(45) DEFAULT NULL,
+  `token_user` longtext,
+  `troca_senha` enum('1','0') DEFAULT '1',
+  `user_logado` enum('1','0') DEFAULT '0',
+  PRIMARY KEY (`id_user`),
+  UNIQUE KEY `username_user_UNIQUE` (`username_user`),
+  UNIQUE KEY `email_user_UNIQUE` (`email_user`),
+  UNIQUE KEY `id_user_UNIQUE` (`id_user`),
+  UNIQUE KEY `idfr_code_user_UNIQUE` (`idfr_code_user`),
+  KEY `fk_id_permissao_idx` (`id_permissao`),
+  KEY `fk_permissao_user_idx` (`id_permissao`),
+  CONSTRAINT `fk_permissao_user` FOREIGN KEY (`id_permissao`) REFERENCES `permissoes` (`id_permissao`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,'A01060424','Administrador','Admin','admin','help-tek-sys@outlook.com','$2y$10$VTbiCn9BRI5NW.TUSOV7hOn0Vvm8yjaB/LD5rUmeuCnh5KLAY5gdO',2,'4',1,'2024-04-06 00:00:00','ADMIN','ADMIN',NULL,'1','0'),(2,'A02060424','Administrador 2','Admin2','ADMIN2','htek2@helptek.com','$2y$10$VTbiCn9BRI5NW.TUSOV7hOn0Vvm8yjaB/LD5rUmeuCnh5KLAY5gdO',4,'4',1,'2024-04-06 17:49:16','ADMIN','ADMIN','eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwMDIiLCJuYW1lIjoiQWRtaW5pc3RyYWRvciAyIiwiZXhwaXJlc19pbiI6MTcxMjkyNTcxNH0.ryfn000KUFPkwsfCjEzBW6CNSBptQIYLJAkxGBYTfcM','0','0'),(3,'A03060424','Administrador 3',NULL,'ADMIN3','htek3@helptek.com','pass123',4,'4',1,'2024-04-06 17:53:34','ADMIN','ADMIN','eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwMDMiLCJuYW1lIjoiQWRtaW5pc3RyYWRvciAzIiwiZXhwaXJlc19pbiI6MTcxMjY4MTQ1NX0.RFcq366mrv5X6LtDf4Mb_s_zQersh6NNa1sYVrjPwvg','0','0'),(4,'S04060424','Davi Veit','Davi','davi.veit','davi.veit@htek.com','$2y$10$VTbiCn9BRI5NW.TUSOV7hOn0Vvm8yjaB/LD5rUmeuCnh5KLAY5gdO',1,'4',1,'2024-04-06 23:21:34','ADMIN','ADMIN',NULL,'0','0'),(7,'A07060424','Davi Veit',NULL,'davi.veit3','davi.veit3@htek.com','xkwjeg57',4,'4',1,'2024-04-06 23:27:58','ADMIN','ADMIN',NULL,'0','0'),(8,'A08070424','Davi Veit',NULL,'davi.veit8','davi.veit8@htek.com','xkwjeg57',4,'4',1,'2024-04-07 22:12:13','ADMIN','ADMIN',NULL,'0','0'),(9,'A09070424','Davi Veit',NULL,'davi.veit9','davi.veit9@htek.com','$2y$10$kKtxcAy8CA02fbc96S1UUubfWnooEJu9k9Z2ncHzxKs4d66NXYguC',4,'4',1,'2024-04-07 23:06:28','ADMIN','ADMIN',NULL,'1','0'),(10,'A010070424','Davi Veit2',NULL,'davi.veit2','davi.veit2@htek.com','dcd077c7a01461bc76d62579372a3fa0',4,'4',1,'2024-04-07 23:07:02',NULL,NULL,NULL,'0','0'),(11,'T011100624','Davi Beringer Veit','Davi','DBVEIT','davi@helptek.com.br','$2y$10$OWhCOtn8p6tE1EOHrZSINeO1gN7VoK/sK5ahFqqcfybqvshtf8siW',2,'2',1,'2024-06-10 10:55:43',NULL,NULL,NULL,'1','0');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+
+/*Avaliação*/
+ALTER TABLE `users`
+ADD COLUMN `b_day` DATE DEFAULT NULL AFTER `username_user`;
