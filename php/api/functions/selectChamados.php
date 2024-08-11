@@ -38,6 +38,7 @@ if (isset($_GET['action'])) {
                     if ($num > 0) {
                         while ($row = $result->fetch_assoc()) {
                             $status_chamado_ret = $row['status_chamado'];
+                            $prioridade_chamado_ret = $row['prioridade_chamado'];
                             switch ($status_chamado_ret){
                                 case 1:
                                     $status_desc = "Em aberto";
@@ -55,7 +56,22 @@ if (isset($_GET['action'])) {
                                     $status_desc = "Cancelado";
                                     break;
                             }
+                            switch ($prioridade_chamado_ret){
+                                case $prioridade_chamado_ret <= 20:
+                                    $prioridade_desc = "Baixa";
+                                    break;
+                                case $prioridade_chamado_ret > 20 && $prioridade_chamado_ret <= 60:
+                                    $prioridade_desc = "Média";
+                                    break;
+                                case $prioridade_chamado_ret > 60 && $prioridade_chamado_ret <= 100:
+                                    $prioridade_desc = "Alta";
+                                    break;
+                                case $prioridade_chamado_ret > 100:
+                                    $prioridade_desc = "Crítica";
+                                    break;
+                            }
                             $row['status_chamado_desc'] = $status_desc;
+                            $row['prioridade_chamado_desc'] = $prioridade_desc;
                             $chamados[] = $row;
                         }
                         $res['error'] = false;

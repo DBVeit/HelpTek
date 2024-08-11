@@ -35,7 +35,20 @@ if (isset($_GET['action'])) {
 
                 //sendMail();
 
-                $res['msg'] = "E-Mail para recuperação de acesso enviado, verifique sua caixa de entrada. Nova senha: ".$newpass;
+                // Envia o e-mail
+                $to = $emailUser;
+                $subject = "Recuperação de Senha";
+                $message = "Sua nova senha é: " . $newpass;
+                $headers = "From: contato.helptek@gmail.com";
+
+                if (mail($to, $subject, $message, $headers)) {
+                    $res['msg'] = "E-Mail para recuperação de acesso enviado, verifique sua caixa de entrada.";
+                } else {
+                    $res['error'] = true;
+                    $res['msg'] = "Erro ao enviar o e-mail.";
+                }
+
+                //$res['msg'] = "E-Mail para recuperação de acesso enviado, verifique sua caixa de entrada. Nova senha: ".$newpass;
             }else{
                 $res['error'] = true;
                 $res['msg'] = "E-Mail não encontrado!";

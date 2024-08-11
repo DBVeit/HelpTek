@@ -96,3 +96,9 @@ body {
 .chamados-list-table tr:hover {
     background-color: #ddd;
 }
+
+.form-tip{
+    color: red;
+    font-size: 12px;
+    text-decoration: none;
+}

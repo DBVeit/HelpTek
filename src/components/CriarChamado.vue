@@ -31,7 +31,13 @@
           ></textarea>
         </div>
         <div class="form-group">
-          <label>Prioridade *</label>
+          <label
+            >Prioridade *
+            <a class="form-tip"
+              >(Será calculada sistemicamente com base em
+              GravidadeXUrgênciaXTendência)</a
+            ></label
+          >
         </div>
         <div class="form-group">
           <select
@@ -89,6 +95,7 @@
           <input type="file" id="attachment" name="anexo" />
         </div>
         <div class="form-group">
+          <p class="form-tip">* Campos de preenchimento obrigatório</p>
           <button type="submit" class="submit-button-chamado">Enviar</button>
         </div>
       </form>
@@ -151,6 +158,12 @@ export default {
       data.append("urgencia", this.ChamadoData.urgencia);
       data.append("tendencia", this.ChamadoData.tendencia);
       data.append("id_user", this.ChamadoData.id_user);
+      // Cria um objeto para armazenar os dados
+      let dataEntries = {};
+      data.forEach((value, key) => {
+        dataEntries[key] = value;
+      });
+      console.log(dataEntries); // Exibe o objeto com os dados
       axios
         .post(
           "http://localhost/projeto/helptek/php/api/functions/insertChamado.php?action=InsertChamado",

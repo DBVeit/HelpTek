@@ -24,7 +24,6 @@
             <th>Prioridade</th>
             <th>Data de criação</th>
             <th>Status</th>
-            <!--<th>Minutos de espera</th>-->
             <th>Atualizado em</th>
             <th>Concluído em</th>
             <th></th>
@@ -34,10 +33,9 @@
           <tr v-for="chamados in Chamados" :key="chamados.id_chamado">
             <td>{{ chamados.idfr_chamado }}</td>
             <td class="title">{{ chamados.titulo_chamado }}</td>
-            <td>{{ chamados.prioridade_chamado }}</td>
+            <td>{{ chamados.prioridade_chamado_desc }}</td>
             <td>{{ chamados.data_criacao_fm }}</td>
             <td>{{ chamados.status_chamado_desc }}</td>
-            <!--<td>{{ chamados.minutos_espera }}</td>-->
             <td>{{ chamados.data_atualizacao_fm }}</td>
             <td>{{ chamados.data_conclusao_fm }}</td>
             <td>
@@ -230,6 +228,7 @@ export default {
         categoriaServico: "",
         categoriaOcorrencia: "",
         descricao_solucao: "",
+        valor: "",
       },
       Chamados: [],
       selectedStatus: null,
@@ -458,5 +457,19 @@ export default {
       this.showMessage = false;
     },
   },
+  /*computed: {
+    prioridadeTexto() {
+      const prioridade = this.ChamadoData.prioridade_chamado;
+      if (prioridade <= 20) {
+        return "Baixa";
+      } else if (prioridade <= 60) {
+        return "Média";
+      } else if (prioridade <= 100) {
+        return "Alta";
+      } else {
+        return "Crítica";
+      }
+    },
+  },*/
 };
 </script>
