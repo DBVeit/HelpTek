@@ -240,6 +240,7 @@
 </template>
 <script>
 import axios from "axios";
+import CryptoJS from "crypto-js";
 
 export default {
   name: "ConfiguracoesUsuarios",
@@ -333,13 +334,24 @@ export default {
     },
     onCriarUsuario() {
       let data = new FormData();
+
+      // eslint-disable-next-line no-undef
+      const encryptedPassword = CryptoJS.SHA256(
+        this.UsuarioData.password_user
+      ).toString();
+
+      // eslint-disable-next-line no-undef
+      const encryptedPasswordConf = CryptoJS.SHA256(
+        this.UsuarioData.confirma_senha
+      ).toString();
+
       data.append("nome", this.UsuarioData.name_user);
       data.append("primeiro_nome", this.UsuarioData.first_name);
       data.append("email", this.UsuarioData.email_user);
       data.append("permissao", this.UsuarioData.id_permissao);
       data.append("user", this.UsuarioData.username_user);
-      data.append("senha", this.UsuarioData.password_user);
-      data.append("confirma_senha", this.UsuarioData.confirma_senha);
+      data.append("senha", encryptedPassword);
+      data.append("confirma_senha", encryptedPasswordConf);
       // Cria um objeto para armazenar os dados
       let dataEntries = {};
       data.forEach((value, key) => {

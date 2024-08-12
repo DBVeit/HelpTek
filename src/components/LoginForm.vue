@@ -152,6 +152,8 @@
 </template>
 <script>
 import axios from "axios";
+import CryptoJS from "crypto-js";
+
 export default {
   name: "LoginForm",
   data() {
@@ -182,16 +184,24 @@ export default {
       }
 
       let data = new FormData();
+
+      // eslint-disable-next-line no-undef
+      const encryptedPassword = CryptoJS.SHA256(this.User.password).toString();
+
       data.append("username", this.User.username);
-      data.append("password", this.User.password);
+      data.append("password", encryptedPassword);
+      // Cria um objeto para armazenar os dados
+      let dataEntries = {};
+      data.forEach((value, key) => {
+        dataEntries[key] = value;
+      });
+      console.log(dataEntries); // Exibe o objeto com os dados
       axios
         .post(
           "http://localhost/projeto/helptek/php/api/functions/login.php?action=login",
           data
         )
         .then((res) => {
-          console.log(res.data); // REMOVER
-          console.log("Server response:", res.data.code); // REMOVER
           if (res.data.code !== 200) {
             this.errorMessage = res.data.msg;
             this.fadeOutErrorMessage();
@@ -229,18 +239,12 @@ export default {
           dataRec
         )
         .then((res) => {
-          console.log("Server response:", res.data); // REMOVER
           if (res.data.error === true) {
-            //console.log("Error: ", res.data.code);
             this.recoverMessage = res.data.msg;
             this.fadeOutErrorRecMsg();
-            //alert(res.data.msg);
           } else {
-            //console.log("Success", res.data.code);
             this.recoverMessage = res.data.msg;
             this.fadeOutSuccessRecMsg();
-            //alert(res.data.msg);
-            //this.$router.push("/");
           }
         })
         .catch((err) => {

@@ -22,11 +22,12 @@ if (isset($_GET['action'])) {
         $senha_confirmada = $senha === $confirma_senha ? true : false;
 
         if ($senha_confirmada) {
-            $senha_hash = password_hash($senha_confirmada, PASSWORD_DEFAULT);
+            //$senha_hash = password_hash($senha_confirmada, PASSWORD_DEFAULT);
+            $sql = "INSERT INTO users(`name_user`,`first_name`,`username_user`,`email_user`,`password_user`,`id_permissao`,`level_user`) 
+                    VALUES('$nome','$primeiro_nome','$user','$email','$senha','$permissao','$permissao')";
         }
 
-        $sql = "INSERT INTO users(`name_user`,`first_name`,`username_user`,`email_user`,`password_user`,`id_permissao`,`level_user`) 
-                    VALUES('$nome','$primeiro_nome','$user','$email','$senha_hash','$permissao','$permissao')";
+
 
         $result = $mysqli_con->query($sql);
 

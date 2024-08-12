@@ -13,7 +13,8 @@ if (isset($_GET['action'])) {
             $username = $mysqli_con->real_escape_string($_POST['username']);
             $password = $mysqli_con->real_escape_string($_POST['password']);
 
-            $sql = "SELECT * FROM users WHERE username_user='$username' AND status_user=1";//Buscar pelo usuario informado
+
+            $sql = "SELECT * FROM users WHERE username_user='$username' AND password_user='$password' AND status_user=1";//Buscar pelo usuario informado
             $result = $mysqli_con->query($sql);//Executa a query e armazena em $result
             $obj = $result->fetch_object();//Retorna o registro de $result como um objeto
 
@@ -25,7 +26,13 @@ if (isset($_GET['action'])) {
                 $first_nameDB = $obj->first_name;
                 $level_userDB = $obj->id_permissao;
                 $validUsername = true;
-                $validPassword = password_verify($password,$passwordDB);
+
+                if ($passwordDB == $password){
+                    $validPassword = true;
+                }else{
+                    $validPassword = false;
+                }
+
 
                 session_start();
 
