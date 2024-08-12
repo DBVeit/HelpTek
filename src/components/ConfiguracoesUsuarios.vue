@@ -1,5 +1,10 @@
 <template>
   <div id="div_config_usuarios">
+    <div class="message-box" v-if="showMessage">
+      <div class="message-content">
+        <span>{{ message }}</span>
+      </div>
+    </div>
     <div v-if="showList" id="div_list_usuarios">
       <h1>Configurações de usuários</h1>
       <div class="actions_ConfigUser">
@@ -130,7 +135,7 @@
       </div>
     </div>
 
-    <!--Cadastrar usuario-->
+    <!---------------------------------Cadastrar usuario--------------------------------->
     <div v-if="!showList" id="div_form_cadastro">
       <h1>Cadastrar usuário</h1>
       <div class="form_cadastro">
@@ -145,7 +150,7 @@
             />
           </div>
           <div class="form-group-users">
-            <label>Primeiro Nome</label>
+            <label>Apelido</label>
             <input
               type="text"
               name="primeiro_nome"
@@ -263,6 +268,8 @@ export default {
         status_user: "",
       },
       Usuarios: [],
+      showMessage: false,
+      message: "",
     };
   },
   created() {
@@ -366,14 +373,22 @@ export default {
         .then((res) => {
           console.log("Server response:", res.data);
           if (res.data.error == true) {
-            alert(res.data.msg);
+            this.showAlert(res.data.msg);
+            //this.clearFormFields();
           } else {
-            alert(res.data.msg);
+            this.showAlert(res.data.msg);
           }
         })
         .catch((err) => {
           console.log(err);
         });
+    },
+    showAlert(message) {
+      this.message = message;
+      this.showMessage = true;
+      setTimeout(() => {
+        this.showMessage = false;
+      }, 8000);
     },
   },
 };
