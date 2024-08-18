@@ -149,3 +149,8 @@
     transition-duration: 0.2s;
 }
 
+.form-danger-msg {
+    font-size: 12px;
+    color: red;
+}
+

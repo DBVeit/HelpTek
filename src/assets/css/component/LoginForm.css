@@ -68,7 +68,7 @@
     transition-duration: 0.5s;
 }
 
-button {
+.button-submit-login {
     width: 230px;
     height: 60px;
     background-color: #ff5757;

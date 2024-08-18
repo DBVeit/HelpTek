@@ -53,7 +53,7 @@
                 >Recuperar Login</a
               >
             </div>
-            <button type="submit">Entrar</button>
+            <button type="submit" class="button-submit-login">Entrar</button>
           </form>
         </div>
         <!--Alterar senha-->
@@ -128,7 +128,7 @@
                 retornar
               </label>
             </div>
-            <button type="submit">Enviar</button>
+            <button type="submit" class="button-submit-login">Enviar</button>
           </form>
         </div>
       </div>
