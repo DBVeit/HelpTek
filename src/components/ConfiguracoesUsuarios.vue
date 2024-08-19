@@ -9,7 +9,7 @@
       <h1>Configurações de usuários</h1>
       <div class="actions_ConfigUser">
         <button
-          class="btn_CadastrarUsuario"
+          class="submit-button"
           data-bs-toggle="modal"
           data-bs-target="#modalCadastro"
           @click="abrirModalCadastro"
@@ -40,13 +40,31 @@
               <td>{{ usuarios.status_user_desc }}</td>
               <td>
                 <button
-                  class="bt-chamado"
-                  style="font-size: 15px"
+                  class="bt-users-actions"
                   data-bs-toggle="modal"
                   data-bs-target="#myModal"
                   @click="verUsuario(usuarios)"
+                  title="Ver/Editar"
                 >
                   <i class="bi bi-eye"></i>
+                </button>
+                <button
+                  class="bt-users-actions"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalRedefinirSenha"
+                  @click="verUsuario(usuarios)"
+                  title="Redefinir senha"
+                >
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <button
+                  class="bt-users-actions"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalDesativaAtivaUsuario"
+                  @click="verUsuario(usuarios)"
+                  title="Desativar usuário"
+                >
+                  <i class="bi bi-person-dash-fill"></i>
                 </button>
               </td>
             </tr>
@@ -58,41 +76,45 @@
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <!-- Modal Header -->
-            <div class="modal-header" style="width: 70%">
+            <div class="modal-header">
               <h4 class="modal-title">Dados do usuário</h4>
-              <button
-                type="button"
-                class="btn-close"
-                style="padding: 5px"
-                data-bs-dismiss="modal"
-              ></button>
+              <button type="button" class="btn-close" data-bs-dismiss="modal">
+                <span aria-hidden="true">&times;</span>
+              </button>
             </div>
             <!-- Modal body -->
             <div class="modal-body">
               <form method="POST" @submit.prevent="">
                 <div class="form-group-modal">
                   <label>Nome</label>
-                  <input type="text" v-model="UsuarioData.name_user" disabled />
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="UsuarioData.name_user"
+                  />
                 </div>
                 <div class="form-group-modal">
                   <label>Primeiro Nome</label>
                   <input
                     type="text"
+                    class="form-control"
                     v-model="UsuarioData.first_name"
-                    disabled
                   />
                 </div>
                 <div class="form-group-modal">
                   <label>E-Mail</label>
                   <input
-                    type="text"
+                    type="email"
+                    class="form-control"
                     v-model="UsuarioData.email_user"
-                    disabled
                   />
                 </div>
                 <div class="form-group-modal">
                   <label>Permissão</label>
-                  <select v-model="UsuarioData.id_permissao" disabled>
+                  <select
+                    class="form-select"
+                    v-model="UsuarioData.id_permissao"
+                  >
                     <option
                       v-for="permissao in permissoesUsuario"
                       :key="permissao.id_permissao"
@@ -103,37 +125,19 @@
                   </select>
                 </div>
                 <div class="form-group-modal">
-                  <label>Usuário</label>
-                  <input
-                    type="text"
-                    v-model="UsuarioData.username_user"
-                    disabled
-                  />
+                  <div class="form-buttons">
+                    <button type="submit" class="submit-button">
+                      Salvar Alterações
+                    </button>
+                    <button
+                      type="button"
+                      class="cancel-button"
+                      data-bs-dismiss="modal"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
                 </div>
-                <div class="form-group-modal">
-                  <label>Senha</label>
-                  <input
-                    type="password"
-                    v-model="UsuarioData.password_user"
-                    disabled
-                  />
-                </div>
-                <div class="form-group-modal">
-                  <label>Confirma senha</label>
-                  <input
-                    type="password"
-                    v-model="UsuarioData.confirma_senha"
-                    disabled
-                  />
-                </div>
-                <div class="form-group-modal">
-                  <label>Status</label>
-                  <select>
-                    <option value="1">Ativo</option>
-                    <option value="0">Inativo</option>
-                  </select>
-                </div>
-                <!--Botoes de ação-->
               </form>
             </div>
           </div>
@@ -141,6 +145,117 @@
       </div>
     </div>
     <!---------------------------Modal p/ visualizar e editar usuarios----------------------------->
+    <!---------------------------Modal p/ redefinicao de senha----------------------------->
+    <div class="modal fade bd-example-modal-lg" id="modalRedefinirSenha">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Redefinir senha</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <!-- Modal body -->
+          <div class="modal-body">
+            <form method="POST" @submit.prevent="">
+              <div class="form-group-modal">
+                <div class="form-group-modal">
+                  <label>Senha *</label>
+                  <input
+                    :type="showPassword ? 'text' : 'password'"
+                    class="form-control"
+                    name="senha"
+                    v-model="NovoUsuario.password_user"
+                    @input="validatePassword"
+                  />
+                  <span class="form-danger-msg"
+                    >*A senha deve conter ter no mínimo 8 caracteres,
+                    considerando letras maiúsculas e minúsculas, números e
+                    caracteres especiais.
+                  </span>
+                  <i
+                    v-if="NovoUsuario.password_user"
+                    :class="passwordValidationMessage"
+                  ></i>
+                  <span
+                    class="form-danger-msg"
+                    v-if="!NovoUsuario.password_user && showErrors"
+                    ><br />*Preechimento obrigatório!
+                  </span>
+                </div>
+                <div class="form-group-modal">
+                  <label>Confirmar Senha *</label>
+                  <input
+                    :type="showPassword ? 'text' : 'password'"
+                    class="form-control"
+                    name="confirma_senha"
+                    v-model="NovoUsuario.confirma_senha"
+                    @input="validatePasswordMatch"
+                  />
+                  <span
+                    class="form-danger-msg"
+                    v-if="!NovoUsuario.confirma_senha && showErrors"
+                    >*Preechimento obrigatório!</span
+                  >
+                  <span class="form-danger-msg" v-if="passwordMatchMessage">{{
+                    passwordMatchMessage
+                  }}</span>
+                </div>
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input check-passw"
+                    id="togglePasswordVisibility"
+                    v-model="showPassword"
+                  />
+                  <label
+                    class="form-check-label check-passw"
+                    for="togglePasswordVisibility"
+                  >
+                    Mostrar senha
+                  </label>
+                </div>
+                <div class="form-buttons">
+                  <button type="submit" class="submit-button">
+                    Salvar Alterações
+                  </button>
+                  <button
+                    type="button"
+                    class="cancel-button"
+                    data-bs-dismiss="modal"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!---------------------------Modal p/ redefinicao de senha----------------------------->
+    <!---------------------------Modal p/ desativar/ativar usuario----------------------------->
+    <div class="modal fade bd-example-modal-lg" id="modalDesativaAtivaUsuario">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Desativar/Ativar usuário</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <!-- Modal body -->
+          <div class="modal-body">
+            <form method="POST" @submit.prevent="">
+              <!--Botoes de ação-->
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!---------------------------Modal p/ desativar/ativar usuario----------------------------->
     <!---------------------------------Modal Cadastrar usuario--------------------------------->
     <div class="modal fade bd-example-modal-lg" id="modalCadastro">
       <div class="modal-dialog modal-lg">
@@ -148,15 +263,9 @@
           <!-- Modal Header -->
           <div class="modal-header">
             <h4 class="modal-title">Cadastrar usuário</h4>
-            <button class="close" data-dismiss="modal" aria-label="Close">
+            <button type="button" class="btn-close" data-bs-dismiss="modal">
               <span aria-hidden="true">&times;</span>
             </button>
-            <!--<button
-              type="button"
-              class="btn-close"
-              style="padding: 5px"
-              data-bs-dismiss="modal"
-            ></button>-->
           </div>
           <!-- Modal body -->
           <div class="modal-body">
@@ -262,7 +371,7 @@
                 <span
                   class="form-danger-msg"
                   v-if="!NovoUsuario.password_user && showErrors"
-                  >*Preechimento obrigatório!
+                  ><br />*Preechimento obrigatório!
                 </span>
               </div>
               <div class="form-group-modal">
@@ -286,13 +395,15 @@
               <div class="form-check">
                 <input
                   type="checkbox"
-                  class="form-check-input"
+                  class="form-check-input check-passw"
                   id="togglePasswordVisibility"
                   v-model="showPassword"
                 />
-                <label class="form-check-label" for="togglePasswordVisibility">
+                <label
+                  class="form-check-label check-passw"
+                  for="togglePasswordVisibility"
+                >
                   Mostrar senha
-                  <!--<i class="bi bi-eye" id="togglePassword"></i>-->
                 </label>
               </div>
               <div class="form-group-modal">
@@ -315,113 +426,6 @@
       </div>
     </div>
     <!---------------------------------Modal Cadastrar usuario--------------------------------->
-    <!---------------------------------Cadastrar usuario--------------------------------->
-    <div v-if="!showList" id="div_form_cadastro">
-      <h1>Cadastrar usuário</h1>
-      <div class="form_cadastro">
-        <form method="POST" @submit.prevent="onCriarUsuario()">
-          <div class="form-group-users">
-            <label>Nome Completo *</label>
-            <input
-              type="text"
-              name="nome"
-              v-model="UsuarioData.name_user"
-              required
-            />
-          </div>
-          <div class="form-group-users">
-            <label>Apelido *</label>
-            <input
-              type="text"
-              name="primeiro_nome"
-              v-model="UsuarioData.first_name"
-              required
-            />
-          </div>
-          <div class="form-group-users">
-            <label>E-Mail *</label>
-            <input
-              type="email"
-              name="email"
-              v-model="UsuarioData.email_user"
-              required
-            />
-          </div>
-          <div class="form-group-users">
-            <label>Permissão *</label>
-            <select
-              name="permissao"
-              id="permissao"
-              v-model="UsuarioData.id_permissao"
-              required
-            >
-              <option default disabled>Permissao</option>
-              <option
-                v-for="permissao in permissoesUsuario"
-                :key="permissao.id_permissao"
-                :value="permissao.id_permissao"
-              >
-                {{ permissao.descricao_permissao }}
-              </option>
-            </select>
-          </div>
-          <div class="form-group-users">
-            <label>Usuário *</label>
-            <input
-              type="text"
-              name="usuario"
-              v-model="UsuarioData.username_user"
-              required
-            />
-          </div>
-          <div class="form-group-users">
-            <label>Senha</label>
-            <div class="password-input">
-              <input
-                :type="showPassword ? 'text' : 'password'"
-                name="senha"
-                v-model="UsuarioData.password_user"
-                required
-              />
-              <button
-                type="button"
-                class="toggle-pass"
-                @click="togglePasswordVisibility"
-              >
-                {{ showPassword ? "Esconder" : "Mostrar" }}
-              </button>
-            </div>
-          </div>
-          <div class="form-group-users">
-            <label>Confirmar Senha *</label>
-            <div class="password-input">
-              <input
-                :type="showPassword ? 'text' : 'password'"
-                name="confirma_senha"
-                v-model="UsuarioData.confirma_senha"
-                required
-              />
-              <button
-                type="button"
-                class="toggle-pass"
-                @click="togglePasswordVisibility"
-              >
-                {{ showPassword ? "Esconder" : "Mostrar" }}
-              </button>
-            </div>
-          </div>
-          <div class="form-buttons">
-            <button type="submit" class="submit-button">
-              Confirmar Cadastro
-            </button>
-            <button type="button" @click="toggleView" class="cancel-button">
-              Cancelar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-    <!---------------------------------Cadastrar usuario--------------------------------->
   </div>
 </template>
 <script>
