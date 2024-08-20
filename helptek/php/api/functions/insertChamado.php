@@ -11,7 +11,6 @@ if (isset($_GET['action'])) {
         var_dump($_POST);
         $titulo = $mysqli_con->real_escape_string($_POST['titulo']);
         $descricao = $mysqli_con->real_escape_string($_POST['descricao']);
-        $cidadeC = $mysqli_con->real_escape_string($_POST['cidade']);
         $gravidade = $mysqli_con->real_escape_string($_POST['gravidade']);
         $urgencia = $mysqli_con->real_escape_string($_POST['urgencia']);
         $tendencia = $mysqli_con->real_escape_string($_POST['tendencia']);
@@ -28,8 +27,8 @@ if (isset($_GET['action'])) {
         if ($res_select->num_rows == 1) {
             $id_user = $obj->id_user;
 
-            $sql = "INSERT INTO chamados(`id_user`,`titulo_chamado`,`cidade`,`descricao_chamado`,`gravidade`,`urgencia`,`tendencia`,`prioridade_chamado`)
-            VALUES('$id_user','$titulo','$cidadeC','$descricao','$gravidade','$urgencia','$tendencia','$prioridade')";
+            $sql = "INSERT INTO chamados(`id_user`,`titulo_chamado`,`descricao_chamado`,`gravidade`,`urgencia`,`tendencia`,`prioridade_chamado`)
+            VALUES('$id_user','$titulo','$descricao','$gravidade','$urgencia','$tendencia','$prioridade')";
 
             $result = $mysqli_con->query($sql);
 

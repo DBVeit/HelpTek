@@ -1,5 +1,5 @@
 <?php
-$to = "contato.helptek@gmail.com"; // Substitua pelo seu endereço de e-mail
+$to = "contato.helptek@gmail.com"; 
 $subject = "Teste de Envio de Email";
 $message = "Este é um e-mail de teste.";
 $headers = 'From: contato.helptek@gmail.com' . "\r\n" .
