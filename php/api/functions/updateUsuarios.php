@@ -10,22 +10,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_GET['action'])) {
         $action = $_GET['action'];
 
-        if ($action == "AtualizaChamado") {
-            $id_chamado = $mysqli_con->real_escape_string($data['id_chamado']);
+        if ($action == "AtualizaUsuario") {
             $id_user = $mysqli_con->real_escape_string($data['id_user']);
-            $idfr_chamado = $mysqli_con->real_escape_string($data['idfr_chamado']);
-            $titulo = $mysqli_con->real_escape_string($data['titulo_chamado']);
-            $descricao = $mysqli_con->real_escape_string($data['descricao_chamado']);
-            $gravidade = $mysqli_con->real_escape_string($data['gravidade']);
-            $urgencia = $mysqli_con->real_escape_string($data['urgencia']);
-            $tendencia = $mysqli_con->real_escape_string($data['tendencia']);
+            $name_user = $mysqli_con->real_escape_string($data['name_user']);
+            $first_name = $mysqli_con->real_escape_string($data['first_name']);
+            $email_user = $mysqli_con->real_escape_string($data['email_user']);
+            $id_permissao = $mysqli_con->real_escape_string($data['id_permissao']);
 
-            $sql_atualiza = "UPDATE chamados SET titulo_chamado = '$titulo', descricao_chamado = '$descricao', gravidade = '$gravidade', urgencia = '$urgencia', tendencia = '$tendencia', data_atualizacao = NOW() WHERE id_chamado = '$id_chamado'";
+            //$sql_select_user = "SELECT name_user,first_name,email_user,id_permissao FROM users WHERE id_user='$id_user'";
+
+            //$result_sql_select_user = $mysqli_con->query($sql_select_user);
+
+            //while
+
+            $sql_atualiza = "UPDATE users SET name_user = '$name_user', first_name = '$first_name', email_user = '$email_user', id_permissao = '$id_permissao' WHERE id_user = '$id_user'";
 
             $result_atualiza = $mysqli_con->query($sql_atualiza);
 
             if ($result_atualiza) {
-                $acao = "USUARIO $id_user ATUALIZOU O CHAMADO $idfr_chamado";
+                /*$acao = "USUARIO $id_user ATUALIZOU O CHAMADO $idfr_chamado";
                 $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `idfr_chamado`, `acao`) VALUES('$id_chamado', '$id_user','$idfr_chamado','$acao')";
                 $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
 
@@ -34,7 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $res['error'] = true;
                     $res['msg'] = "Erro ao atualizar chamado: " . $mysqli_con->error;
-                }
+                }*/
+
+                $res['msg'] = "Dados de usuário atualizados com sucesso!";
+            } else {
+                $res['error'] = "Erro ao atualizar dados usuário!";
             }
         } else {
             $res['error'] = true;

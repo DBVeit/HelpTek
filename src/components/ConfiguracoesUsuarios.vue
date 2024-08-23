@@ -12,7 +12,7 @@
           class="submit-button"
           data-bs-toggle="modal"
           data-bs-target="#modalCadastro"
-          @click="abrirModalCadastro"
+          @click="abrirModal"
         >
           Cadastrar usuário
         </button>
@@ -43,7 +43,10 @@
                   class="bt-users-actions"
                   data-bs-toggle="modal"
                   data-bs-target="#myModal"
-                  @click="verUsuario(usuarios)"
+                  @click="
+                    verUsuario(usuarios);
+                    abrirModal();
+                  "
                   title="Ver/Editar"
                 >
                   <i class="bi bi-eye"></i>
@@ -84,33 +87,49 @@
             </div>
             <!-- Modal body -->
             <div class="modal-body">
-              <form method="POST" @submit.prevent="">
+              <form method="POST" @submit.prevent="salvarEditarUsuario()">
                 <div class="form-group-modal">
-                  <label>Nome</label>
+                  <label>Nome *</label>
                   <input
                     type="text"
                     class="form-control"
                     v-model="UsuarioData.name_user"
                   />
+                  <span
+                    class="form-danger-msg"
+                    v-if="!UsuarioData.name_user && showErrors"
+                    >*Preechimento obrigatório!</span
+                  >
                 </div>
                 <div class="form-group-modal">
-                  <label>Primeiro Nome</label>
+                  <label>Apelido *</label>
                   <input
                     type="text"
                     class="form-control"
+                    maxlength="15"
                     v-model="UsuarioData.first_name"
                   />
+                  <span
+                    class="form-danger-msg"
+                    v-if="!UsuarioData.first_name && showErrors"
+                    >*Preechimento obrigatório!</span
+                  >
                 </div>
                 <div class="form-group-modal">
-                  <label>E-Mail</label>
+                  <label>E-Mail *</label>
                   <input
                     type="email"
                     class="form-control"
                     v-model="UsuarioData.email_user"
                   />
+                  <span
+                    class="form-danger-msg"
+                    v-if="!UsuarioData.email_user && showErrors"
+                    >*Preechimento obrigatório!</span
+                  >
                 </div>
                 <div class="form-group-modal">
-                  <label>Permissão</label>
+                  <label>Permissão *</label>
                   <select
                     class="form-select"
                     v-model="UsuarioData.id_permissao"
@@ -123,11 +142,32 @@
                       {{ permissao.descricao_permissao }}
                     </option>
                   </select>
+                  <span
+                    class="form-danger-msg"
+                    v-if="!UsuarioData.id_permissao && showErrors"
+                    >*Preechimento obrigatório!</span
+                  >
                 </div>
                 <div class="form-group-modal">
-                  <div class="form-buttons">
-                    <button type="submit" class="submit-button">
+                  <div class="form-buttons" v-if="!isEditing">
+                    <button
+                      type="submit"
+                      class="submit-button"
+                      @click="editarDadosUsuario"
+                    >
                       Salvar Alterações
+                    </button>
+                  </div>
+                  <div class="form-buttons" v-else>
+                    <span class="form-danger-msg"
+                      >Deseja salvar as alterações?</span
+                    >
+                    <button
+                      type="button"
+                      class="submit-button-modal"
+                      @click="salvarEditarUsuario"
+                    >
+                      Confirmar
                     </button>
                     <button
                       type="button"
@@ -149,14 +189,12 @@
     <div class="modal fade bd-example-modal-lg" id="modalRedefinirSenha">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
-          <!-- Modal Header -->
           <div class="modal-header">
             <h4 class="modal-title">Redefinir senha</h4>
             <button type="button" class="btn-close" data-bs-dismiss="modal">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <!-- Modal body -->
           <div class="modal-body">
             <form method="POST" @submit.prevent="">
               <div class="form-group-modal">
@@ -206,12 +244,12 @@
                   <input
                     type="checkbox"
                     class="form-check-input check-passw"
-                    id="togglePasswordVisibility"
+                    id="togglePasswordVisibility_pass"
                     v-model="showPassword"
                   />
                   <label
                     class="form-check-label check-passw"
-                    for="togglePasswordVisibility"
+                    for="togglePasswordVisibility_pass"
                   >
                     Mostrar senha
                   </label>
@@ -239,18 +277,14 @@
     <div class="modal fade bd-example-modal-lg" id="modalDesativaAtivaUsuario">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
-          <!-- Modal Header -->
           <div class="modal-header">
             <h4 class="modal-title">Desativar/Ativar usuário</h4>
             <button type="button" class="btn-close" data-bs-dismiss="modal">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <!-- Modal body -->
           <div class="modal-body">
-            <form method="POST" @submit.prevent="">
-              <!--Botoes de ação-->
-            </form>
+            <form method="POST" @submit.prevent=""></form>
           </div>
         </div>
       </div>
@@ -260,14 +294,17 @@
     <div class="modal fade bd-example-modal-lg" id="modalCadastro">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
-          <!-- Modal Header -->
           <div class="modal-header">
             <h4 class="modal-title">Cadastrar usuário</h4>
             <button type="button" class="btn-close" data-bs-dismiss="modal">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <!-- Modal body -->
+          <div class="message-box" v-if="showMessage">
+            <div class="message-content">
+              <span>{{ message }}</span>
+            </div>
+          </div>
           <div class="modal-body">
             <form method="POST" @submit.prevent="onCriarUsuario()">
               <div class="form-group-modal">
@@ -467,6 +504,11 @@ export default {
       showErrors: false,
       passwordValidationMessage: "",
       passwordMatchMessage: "",
+      isEditing: false,
+      originalUsuario: {},
+      usuarioAtual: {},
+      validaSenha: false,
+      matchSenha: false,
     };
   },
   created() {
@@ -493,6 +535,8 @@ export default {
     verUsuario(usuario) {
       this.UsuarioData = usuario;
       this.isEditing = false;
+      this.originalUsuario = { usuario };
+      this.usuarioAtual = { usuario };
     },
     // Visualizar ou esconder listagem
     toggleView() {
@@ -537,10 +581,8 @@ export default {
       ) {
         // Não prosseguir se houver erros
         return;
-      }
-
-      // Validação de senha
-      if (this.passwordValidationMessage || this.passwordMatchMessage) {
+      } else if (this.validaSenha == false || this.matchSenha == false) {
+        // Validação de senha
         return;
       }
 
@@ -576,10 +618,10 @@ export default {
         .then((res) => {
           console.log("Server response:", res.data);
           if (res.data.error == true) {
-            this.showAlert(res.data.msg);
+            this.showAlertError(res.data.msg);
             //this.clearFormFields();
           } else {
-            this.showAlert(res.data.msg);
+            this.showAlertSuccess(res.data.msg);
             this.closeModal(); // Fecha o modal
           }
         })
@@ -588,7 +630,15 @@ export default {
         });
     },
     // Mensagem de retorno do back-end
-    showAlert(message) {
+    showAlertSuccess(message) {
+      this.message = message;
+      this.showMessage = true;
+      setTimeout(() => {
+        this.showMessage = false;
+      }, 8000);
+    },
+    // Mensagem de retorno do back-end
+    showAlertError(message) {
       this.message = message;
       this.showMessage = true;
       setTimeout(() => {
@@ -603,18 +653,23 @@ export default {
 
       if (!password) {
         this.passwordValidationMessage = "";
+        this.validaSenha = false;
       } else if (!passwordRegex.test(password)) {
         this.passwordValidationMessage = "bi bi-x text-danger";
+        this.validaSenha = false;
       } else {
         this.passwordValidationMessage = "bi bi-check2 text-success";
+        this.validaSenha = true;
       }
     },
     // Validação de senhas inseridas / comparação
     validatePasswordMatch() {
       if (this.NovoUsuario.password_user !== this.NovoUsuario.confirma_senha) {
         this.passwordMatchMessage = "As senhas não coincidem.";
+        this.matchSenha = false;
       } else {
         this.passwordMatchMessage = "";
+        this.matchSenha = true;
       }
     },
     // Limpar campos ao abrir modal
@@ -630,23 +685,77 @@ export default {
       };
     },
     // Código para abrir o modal
-    abrirModalCadastro() {
+    abrirModal() {
       this.resetNovoUsuario();
       this.showErrors = false;
       this.showPassword = false;
       this.passwordMatchMessage = "";
+      //this.verUsuario(this.UsuarioData);
     },
     // Código para fechar o modal após cadastro
     closeModal() {
       const closeButton = document.querySelector(
-        '#modalCadastro [data-bs-dismiss="modal"]'
+        '#modalCadastro [data-bs-dismiss="modal"], #myModal [data-bs-dismiss="modal"]'
       );
       if (closeButton) {
         closeButton.click();
       }
       this.onListarUsuarios();
+      this.verUsuario(this.UsuarioData);
       this.showPassword = false;
       this.passwordMatchMessage = "";
+      // Restaura os dados originais se o modal for fechado sem salvar
+      //this.usuarioAtual = { ...this.originalUsuario };
+    },
+    // Edição de dados do usuário
+    salvarEditarUsuario() {
+      this.showErrors = true;
+
+      // Verifique se há algum campo obrigatório vazio
+      if (
+        !this.UsuarioData.name_user ||
+        !this.UsuarioData.first_name ||
+        !this.UsuarioData.email_user ||
+        !this.UsuarioData.id_permissao
+      ) {
+        // Não prosseguir se houver erros
+        return;
+      }
+
+      const { id_user, name_user, first_name, email_user, id_permissao } =
+        this.UsuarioData;
+      axios
+        .post(
+          `http://localhost/projeto/helptek/php/api/functions/updateUsuarios.php?action=AtualizaUsuario`,
+          {
+            id_user,
+            name_user,
+            first_name,
+            email_user,
+            id_permissao,
+          }
+        )
+        .then((res) => {
+          console.log("Server response:", res.data);
+          if (res.data.error === true) {
+            this.showAlert(res.data.msg);
+          } else {
+            this.showAlert(res.data.msg);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    editarDadosUsuario() {
+      this.isEditing = true;
+    },
+    salvarAlteracoesModal() {
+      // Código para salvar as alterações
+      // Se salvo, o modal não precisa restaurar os dados
+      // Atualize o originalUsuario com os novos dados
+      //this.originalUsuario = { ...this.usuarioAtual };
+      //this.closeModal();
     },
   },
 };

@@ -40,12 +40,31 @@
             <td>{{ chamados.data_conclusao_fm }}</td>
             <td>
               <button
-                class="bt-chamado"
+                class="bt-acoes-chamado"
                 data-bs-toggle="modal"
-                data-bs-target="#myModal"
+                data-bs-target="#modalVisualizarEditarChamado"
                 @click="verChamado(chamados)"
+                title="Ver/Editar"
               >
-                Ver
+                <i class="bi bi-eye"></i>
+              </button>
+              <button
+                class="bt-acoes-chamado"
+                data-bs-toggle="modal"
+                data-bs-target="#modalAvaliarResposta"
+                @click="verChamado(chamados)"
+                title="Avaliar resposta"
+              >
+                <i class="bi bi-star-half"></i>
+              </button>
+              <button
+                class="bt-acoes-chamado"
+                data-bs-toggle="modal"
+                data-bs-target="#modalCancelarChamado"
+                @click="verUsuario(usuarios)"
+                title="Cancelar"
+              >
+                <i class="bi bi-trash"></i>
               </button>
             </td>
           </tr>
@@ -55,8 +74,11 @@
         {{ recoverMessage }}
       </div>
     </div>
-    <!-- The Modal -->
-    <div class="modal fade bd-example-modal-lg" id="myModal">
+    <!----------------------Modal p/ visualizar e editar informações do chamado---------------------->
+    <div
+      class="modal fade bd-example-modal-lg"
+      id="modalVisualizarEditarChamado"
+    >
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <!-- Modal Header -->
@@ -130,8 +152,63 @@
               <div>
                 <label>Anexos</label>
               </div>
-              <h4 class="modal-title">Retorno do atendimento</h4>
+              <div class="confirmation-overlay" v-if="!isEditing">
+                <div class="confirmation-box">
+                  <button type="submit" class="btEditar" @click="editarChamado">
+                    Editar
+                  </button>
+                </div>
+              </div>
+              <div v-else>
+                <button
+                  type="button"
+                  class="submit-button-modal"
+                  @click="salvarChamado"
+                >
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+          <!-- Confirmação de Cancelamento -->
+          <div v-if="isConfirmingCancel" class="confirmation-overlay">
+            <div class="confirmation-box">
+              <p>Deseja cancelar o chamado?</p>
+              <button @click="cancelarChamado" class="cancelaSim">Sim</button>
+              <button @click="isConfirmingCancel = false" class="cancelaNao">
+                Não
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!----------------------Modal p/ visualizar e editar informações do chamado---------------------->
+    <!-----------------------Modal p/ visualizar e avaliar resposta do chamado----------------------->
+    <div class="modal fade bd-example-modal-lg" id="modalAvaliarResposta">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header" style="width: 70%">
+            <h4 class="modal-title">Avaliar resposta</h4>
+            <button
+              type="button"
+              class="btn-close"
+              style="padding: 5px"
+              data-bs-dismiss="modal"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="message-box" v-if="showMessage">
+              <div class="message-content">
+                <span>{{ message }}</span>
+              </div>
+            </div>
+            <form method="POST" @submit.prevent="">
+              <h5 class="modal-title">Retorno do atendimento</h5>
               <div class="form-group-modal">
+                <label>Categoria do Serviço</label>
                 <select v-model="ChamadoData.id_categoria_servico" disabled>
                   <option
                     v-for="categoriaServ in categoriasServico"
@@ -164,14 +241,7 @@
               <div class="confirmation-overlay" v-if="!isEditing">
                 <div class="confirmation-box">
                   <button type="submit" class="btEditar" @click="editarChamado">
-                    Editar
-                  </button>
-                  <button
-                    type="submit"
-                    class="btCancelar"
-                    @click="confirmarCancelamento"
-                  >
-                    Cancelar
+                    Avaliar
                   </button>
                 </div>
               </div>
@@ -186,6 +256,32 @@
               </div>
             </form>
           </div>
+        </div>
+      </div>
+    </div>
+    <!-----------------------Modal p/ visualizar e avaliar resposta do chamado----------------------->
+    <!----------------------------------Modal p/ cancelar o chamado---------------------------------->
+    <div class="modal fade bd-example-modal-lg" id="modalCancelarChamado">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header" style="width: 70%">
+            <h4 class="modal-title">Cancelar chamado</h4>
+            <button
+              type="button"
+              class="btn-close"
+              style="padding: 5px"
+              data-bs-dismiss="modal"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="message-box" v-if="showMessage">
+              <div class="message-content">
+                <span>{{ message }}</span>
+              </div>
+            </div>
+          </div>
           <!-- Confirmação de Cancelamento -->
           <div v-if="isConfirmingCancel" class="confirmation-overlay">
             <div class="confirmation-box">
@@ -199,6 +295,7 @@
         </div>
       </div>
     </div>
+    <!----------------------------------Modal p/ cancelar o chamado---------------------------------->
   </div>
 </template>
 <script>

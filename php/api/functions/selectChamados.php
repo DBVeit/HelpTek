@@ -47,7 +47,7 @@ if (isset($_GET['action'])) {
                                     $status_desc = "Em atendimento";
                                     break;
                                 case 3:
-                                    $status_desc = "Atendido";
+                                    $status_desc = "Respondido";
                                     break;
                                 case 4:
                                     $status_desc = "Concluido";
