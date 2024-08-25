@@ -99,5 +99,128 @@
 }
 
 .submit-button-chamado{
+    background-color: #ff5757;
+    border: none;
+    cursor: pointer;
+    color: white;
+    border-radius: 4px;
+    width: 190px;
+    height: 40px;
+    font-size: 18px;
+    margin-bottom: 10px;
+    line-height: initial;
+    transition-duration: 0.2s;
+}
 
+.anexo-button{
+    background-color: #ff5757;
+    border: none;
+    cursor: pointer;
+    color: white;
+    border-radius: 4px;
+}
+
+input[type="file"]::file-selector-button {
+    background-color: #ff5757;
+    border: none;
+    cursor: pointer;
+    color: white;
+    border-radius: 4px;
+}
+
+/* Chrome, Edge & Safari */
+input[type="file"]::-webkit-file-upload-button {
+    background-color: #ff5757;
+    border: none;
+    cursor: pointer;
+    color: white;
+    border-radius: 4px;
+}
+
+.submit-button-chamado:hover, .anexo-button:hover, input[type="file"]::-webkit-file-upload-button, input[type="file"]::file-selector-button {
+    background-color: #e04e4e;
+    transition-duration: 0.2s;
+}
+
+.criar-chamado-form-confirm{
+    margin: auto;
+    padding: 40px 10px 40px 10px;
+    width: 25%;
+}
+
+/*.anexo-grid{
+    margin-top: 10px;
+    background-color: white;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.anexo-grid tbody tr{
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.anexo-grid td{
+    border: 1px #ddd;
+    padding: 5px 5px;
+}*/
+
+/*Table chamados*/
+.anexo-grid{
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin: 20px 0;
+    font-size: 13px;
+    font-family: sans-serif;
+    min-width: 600px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    table-layout: auto;
+    width: 50%;
+}
+
+.anexo-grid th{
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background-color: #ff5757;
+    color: white;
+}
+
+.anexo-grid thead tr{
+    background-color: #ff5757;
+    color: white;
+    border-radius: 10px;
+}
+
+.anexo-grid tbody tr{
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.anexo-grid td{
+    border: 1px #ddd;
+    padding: 8px 8px;
+}
+
+.anexo-grid tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.anexo-grid tbody tr:last-of-type {
+    border-bottom: 2px solid #ff5757;
+}
+
+.bt-remove-anexo {
+    border: none;
+    border-radius: 4px;
+    background-color: #f3f3f3;
+    font-size: 20px;
+}
+
+.bt-remove-anexo:hover{
+    background-color: #ddd;
 }

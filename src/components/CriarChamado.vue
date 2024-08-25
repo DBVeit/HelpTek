@@ -17,8 +17,10 @@
             id="subject"
             name="titulo"
             v-model="ChamadoData.titulo"
-            required
           />
+          <span class="form-tip" v-if="!ChamadoData.titulo && showErrors"
+            >*Preechimento obrigatório!</span
+          >
         </div>
         <div class="form-group">
           <label>Descrição *</label>
@@ -27,8 +29,10 @@
             name="descricao"
             rows="4"
             v-model="ChamadoData.descricao"
-            required
           ></textarea>
+          <span class="form-tip" v-if="!ChamadoData.descricao && showErrors"
+            >*Preechimento obrigatório!</span
+          >
         </div>
         <div class="form-group">
           <label
@@ -44,7 +48,6 @@
             name="gravidade"
             id="gravidade"
             v-model="ChamadoData.gravidade"
-            required
           >
             <option default value="" disabled>Gravidade</option>
             <option
@@ -55,14 +58,12 @@
               {{ gravidade.descricao_categoria }}
             </option>
           </select>
+          <span class="form-tip" v-if="!ChamadoData.gravidade && showErrors"
+            >*Preechimento obrigatório!</span
+          >
         </div>
         <div class="form-group">
-          <select
-            name="urgencia"
-            id="urgencia"
-            v-model="ChamadoData.urgencia"
-            required
-          >
+          <select name="urgencia" id="urgencia" v-model="ChamadoData.urgencia">
             <option default value="" disabled>Urgência</option>
             <option
               v-for="urgencia in prioridadesUrgencia"
@@ -72,13 +73,15 @@
               {{ urgencia.descricao_categoria }}
             </option>
           </select>
+          <span class="form-tip" v-if="!ChamadoData.urgencia && showErrors"
+            >*Preechimento obrigatório!</span
+          >
         </div>
         <div class="form-group">
           <select
             name="tendencia"
             id="tendencia"
             v-model="ChamadoData.tendencia"
-            required
           >
             <option default value="" disabled>Tendência</option>
             <option
@@ -89,13 +92,42 @@
               {{ tendencia.descricao_categoria }}
             </option>
           </select>
+          <span class="form-tip" v-if="!ChamadoData.tendencia && showErrors"
+            >*Preechimento obrigatório!</span
+          >
         </div>
         <div class="form-group">
           <label>Anexo</label>
-          <input type="file" id="attachment" name="anexo" />
+          <input
+            type="file"
+            id="attachment"
+            ref="attachment"
+            name="anexo"
+            @change="handleFileUpload"
+            multiple
+          />
+          <table class="anexo-grid" v-if="anexos.length > 0">
+            <thead>
+              <tr>
+                <th>Arquivo</th>
+                <th>Tamanho</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(anexo, index) in anexos" :key="index">
+                <td>{{ anexo.name }}</td>
+                <td>{{ anexo.size }} bytes</td>
+                <td>
+                  <button class="bt-remove-anexo" @click="removeAnexo(index)">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="form-group">
-          <p class="form-tip">* Campos de preenchimento obrigatório</p>
+        <div class="criar-chamado-form-confirm">
           <button type="submit" class="submit-button-chamado">Enviar</button>
         </div>
       </form>
@@ -123,6 +155,8 @@ export default {
       prioridadesTendencia: [],
       showMessage: false,
       message: "",
+      showErrors: false,
+      anexos: [], // Array para armazenar os arquivos anexados
     };
   },
   created() {
@@ -152,18 +186,39 @@ export default {
     },
     onCriarChamado() {
       let data = new FormData();
+
+      // Verifique se há algum campo obrigatório vazio
+      if (
+        !this.ChamadoData.titulo ||
+        !this.ChamadoData.descricao ||
+        !this.ChamadoData.gravidade ||
+        !this.ChamadoData.urgencia ||
+        !this.ChamadoData.tendencia
+      ) {
+        // Não prosseguir se houver erros
+        this.showErrors = true;
+        return;
+      }
+
+      this.showErrors = false;
+
       data.append("titulo", this.ChamadoData.titulo);
       data.append("descricao", this.ChamadoData.descricao);
       data.append("gravidade", this.ChamadoData.gravidade);
       data.append("urgencia", this.ChamadoData.urgencia);
       data.append("tendencia", this.ChamadoData.tendencia);
       data.append("id_user", this.ChamadoData.id_user);
+      // Adiciona os arquivos ao FormData
+      this.anexos.forEach((anexo, index) => {
+        data.append(`anexo${index}`, anexo);
+      });
+
       // Cria um objeto para armazenar os dados
-      let dataEntries = {};
+      /*let dataEntries = {};
       data.forEach((value, key) => {
         dataEntries[key] = value;
       });
-      console.log(dataEntries); // Exibe o objeto com os dados
+      console.log(dataEntries);*/ // Exibe o objeto com os dados
       axios
         .post(
           "http://localhost/projeto/helptek/php/api/functions/insertChamado.php?action=InsertChamado",
@@ -171,11 +226,11 @@ export default {
         )
         .then((res) => {
           console.log("Server response:", res.data);
-          if (res.data.error == true) {
+          if (res.data.error === true) {
             this.showAlert(res.data.msg);
-            this.clearFormFields();
           } else {
             this.showAlert(res.data.msg);
+            this.clearFormFields();
           }
         })
         .catch((err) => {
@@ -196,9 +251,16 @@ export default {
       this.ChamadoData.urgencia = "";
       this.ChamadoData.tendencia = "";
       this.$refs.attachment.value = "";
+      this.anexos = []; // Limpa a lista de anexos
     },
-    closeMessage() {
-      this.showMessage = false;
+    handleFileUpload(event) {
+      const files = event.target.files;
+      for (let i = 0; i < files.length; i++) {
+        this.anexos.push(files[i]);
+      }
+    },
+    removeAnexo(index) {
+      this.anexos.splice(index, 1); // Remove o anexo da lista
     },
   },
 };

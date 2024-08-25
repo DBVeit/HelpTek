@@ -44,6 +44,30 @@ if (isset($_GET['action'])) {
                     $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
 
                     if ($result_acompanhamento){
+                        $upload_dir = "../../public/uploads/"; // Diretório onde os arquivos serão armazenados
+                        if (!file_exists($upload_dir)) {
+                            mkdir($upload_dir, 0777, true);
+                        }
+
+                        $total_arquivos = count($_FILES);
+                        for ($i = 0; $i < $total_arquivos; $i++) {
+                            $file_key = "anexo" . $i;
+                            if (isset($_FILES[$file_key])) {
+                                $file_name = $_FILES[$file_key]['name'];
+                                $file_tmp = $_FILES[$file_key]['tmp_name'];
+                                $file_size = $_FILES[$file_key]['size'];
+
+                                $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+                                $new_file_name = uniqid() . '.' . $file_ext;
+                                $file_dest = $upload_dir . $new_file_name;
+
+                                if (move_uploaded_file($file_tmp, $file_dest)) {
+                                    $sql_file = "INSERT INTO anexos_chamados (`id_chamado`, `nome_arquivo`, `caminho_arquivo`, `tamanho_arquivo`) VALUES('$id_chamado', '$file_name', '$file_dest', '$file_size')";
+                                    $mysqli_con->query($sql_file);
+                                }
+                            }
+                        }
+
                         $res['msg'] = "Chamado registrado com sucesso!";
                     }else{
                         $res['error'] = true;
