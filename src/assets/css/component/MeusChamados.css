@@ -149,3 +149,19 @@
     border-radius: 4px;
     background-color: #f3f3f3;
 }
+
+.green {
+    color: limegreen;
+}
+
+.yellow {
+    color: yellow;
+}
+
+.red {
+    color: red;
+}
+
+.black {
+    color: black;
+}
