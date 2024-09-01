@@ -13,20 +13,20 @@ if (isset($_GET['action'])) {
         $gravidade = $mysqli_con->real_escape_string($_POST['gravidade']);
         $urgencia = $mysqli_con->real_escape_string($_POST['urgencia']);
         $tendencia = $mysqli_con->real_escape_string($_POST['tendencia']);
-        //$anexo = $mysqli_con->real_escape_string($_POST['anexo']);
 
         $prioridade = (intval($gravidade)*intval($urgencia)*intval($tendencia));
 
         $id_user = $_POST['id_user'];
 
-        $select = "SELECT id_user FROM users WHERE id_user = '$id_user'";
+        $select = "SELECT id_user, idfr_code_user FROM users WHERE id_user = '$id_user'";
         $res_select = $mysqli_con->query($select);
         $obj = $res_select->fetch_object();
 
         if ($res_select->num_rows == 1) {
             $id_user = $obj->id_user;
+            $idfr_code_user = $obj->idfr_code_user;
 
-            $sql = "INSERT INTO chamados(`id_user`,`titulo_chamado`,`descricao_chamado`,`gravidade`,`urgencia`,`tendencia`,`prioridade_chamado`) VALUES('$id_user','$titulo','$descricao','$gravidade','$urgencia','$tendencia','$prioridade')";
+            $sql = "INSERT INTO chamados(`id_user`,`titulo_chamado`,`descricao_chamado`,`gravidade`,`urgencia`,`tendencia`,`prioridade_chamado`,`data_atualizacao`,`id_usuario_atual`,`total_acoes`) VALUES('$id_user','$titulo','$descricao','$gravidade','$urgencia','$tendencia','$prioridade',NOW(),$id_user,1)";
 
             $result = $mysqli_con->query($sql);
 
@@ -34,13 +34,13 @@ if (isset($_GET['action'])) {
                 $id_chamado = $mysqli_con->insert_id;
                 $data_criacao = date('dmy');
                 $idfr_chamado = "ID0" . $id_chamado . $id_user . $data_criacao;
-                $acao = "USUARIO $id_user REGISTROU O CHAMADO $idfr_chamado";
+                $acao = "USUARIO $idfr_code_user REGISTROU O CHAMADO $idfr_chamado";
 
                 $update_sql = "UPDATE chamados SET idfr_chamado = '$idfr_chamado' WHERE id_chamado = '$id_chamado'";
                 $update_result = $mysqli_con->query($update_sql);
 
                 if ($update_result){
-                    $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `idfr_chamado`, `acao`) VALUES('$id_chamado', '$id_user','$idfr_chamado','$acao')";
+                    $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `idfr_code_user`, `idfr_chamado`, `acao`, `descricao_acao`, `id_usuario_acao`, `status_chamado`) VALUES('$id_chamado', '$id_user','$idfr_code_user','$idfr_chamado','$acao','$descricao','$id_user',1)";
                     $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
 
                     if ($result_acompanhamento){

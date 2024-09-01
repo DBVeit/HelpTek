@@ -67,7 +67,7 @@
                 class="bt-acoes-chamado"
                 data-bs-toggle="modal"
                 data-bs-target="#modalHistoricoChamado"
-                @click="verChamado(chamados)"
+                @click="onVisualizarHistoricoChamado(chamados)"
                 title="Histórico do atendimento"
               >
                 <i class="bi bi-card-list"></i>
@@ -78,11 +78,11 @@
                 data-bs-target="#modalCancelarChamado"
                 @click="verChamado(chamados)"
                 title="Cancelar"
-                v-if="chamados.status_chamado != 4"
+                v-if="
+                  chamados.status_chamado != 4 && chamados.status_chamado != 0
+                "
               >
                 <i class="bi bi-trash"></i>
-                <!--<i class="bi bi-check-circle-fill"></i>
-                <i class="bi bi-exclamation-triangle-fill"></i>-->
               </button>
             </td>
           </tr>
@@ -99,14 +99,12 @@
     >
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
-          <!-- Modal Header -->
           <div class="modal-header">
             <h4 class="modal-title">Dados do chamado</h4>
             <button type="button" class="btn-close" data-bs-dismiss="modal">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <!-- Modal body -->
           <div class="modal-body">
             <div class="message-box" v-if="showMessage">
               <div class="message-content">
@@ -167,7 +165,15 @@
               </div>
               <div class="confirmation-overlay" v-if="!isEditing">
                 <div class="confirmation-box">
-                  <button type="submit" class="btEditar" @click="editarChamado">
+                  <button
+                    type="submit"
+                    class="btEditar"
+                    @click="editarChamado"
+                    v-if="
+                      ChamadoData.status_chamado != 4 &&
+                      ChamadoData.status_chamado != 0
+                    "
+                  >
                     Editar
                   </button>
                 </div>
@@ -182,16 +188,6 @@
                 </button>
               </div>
             </form>
-          </div>
-          <!-- Confirmação de Cancelamento -->
-          <div v-if="isConfirmingCancel" class="confirmation-overlay">
-            <div class="confirmation-box">
-              <p>Deseja cancelar o chamado?</p>
-              <button @click="cancelarChamado" class="cancelaSim">Sim</button>
-              <button @click="isConfirmingCancel = false" class="cancelaNao">
-                Não
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -302,6 +298,45 @@
       </div>
     </div>
     <!-----------------------Modal p/ visualizar e avaliar resposta do chamado----------------------->
+    <!-----------------------Modal p/ visualizar histórico do chamado----------------------->
+    <div class="modal fade bd-example-modal-lg" id="modalHistoricoChamado">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Histórico do atendimento</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <table
+              class="historico-table"
+              v-for="historico in Historico"
+              :key="historico.id_acompanhamento"
+            >
+              <tr>
+                <td rowspan="2" class="historico-info-i">
+                  <i class="bi bi-person-circle"></i>
+                </td>
+                <td class="historico-info1">
+                  {{ historico.data_acao_fm }} <br />
+                  {{ historico.name_user }}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Ação:</label> <label>{{ historico.acao }}</label>
+                  <br />
+                  <label> Descrição:</label>
+                  <label> {{ historico.descricao_acao }}</label>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-----------------------Modal p/ visualizar histórico do chamado----------------------->
     <!----------------------------------Modal p/ cancelar o chamado---------------------------------->
     <div class="modal fade bd-example-modal-lg" id="modalCancelarChamado">
       <div class="modal-dialog modal-lg">
@@ -313,21 +348,28 @@
             </button>
           </div>
           <div class="modal-body">
-            <div class="message-box" v-if="showMessage">
-              <div class="message-content">
-                <span>{{ message }}</span>
+            <form method="POST" @submit.prevent="">
+              <div>
+                <h5 class="modal-title">
+                  Deseja realmente cancelar o chamado?
+                </h5>
+                <div class="form-group-modal">
+                  <label>Observação *</label>
+                  <textarea
+                    name="observacao"
+                    v-model="ChamadoData.observacao"
+                    maxlength="255"
+                  ></textarea>
+                </div>
+                <button
+                  type="button"
+                  class="submit-button-modal"
+                  @click="onCancelarChamado"
+                >
+                  Confirmar
+                </button>
               </div>
-            </div>
-          </div>
-          <!-- Confirmação de Cancelamento -->
-          <div v-if="isConfirmingCancel" class="confirmation-overlay">
-            <div class="confirmation-box">
-              <p>Deseja cancelar o chamado?</p>
-              <button @click="cancelarChamado" class="cancelaSim">Sim</button>
-              <button @click="isConfirmingCancel = false" class="cancelaNao">
-                Não
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -337,7 +379,6 @@
 </template>
 <script>
 import axios from "axios";
-import $ from "jquery";
 
 export default {
   name: "MeusChamados",
@@ -366,6 +407,7 @@ export default {
         observacao: "",
       },
       Chamados: [],
+      Historico: [],
       selectedStatus: null,
       isEditing: false,
       isConfirmingCancel: false,
@@ -528,11 +570,12 @@ export default {
     confirmarCancelamento() {
       this.isConfirmingCancel = true;
     },
-    cancelarChamado() {
+    onCancelarChamado() {
       const {
         id_chamado,
         id_user = sessionStorage.getItem("id_user"),
         idfr_chamado,
+        observacao,
       } = this.ChamadoData;
       axios
         .post(
@@ -541,6 +584,7 @@ export default {
             id_chamado,
             id_user,
             idfr_chamado,
+            observacao,
           }
         )
         .then((res) => {
@@ -548,7 +592,7 @@ export default {
           this.isConfirmingCancel = false;
           this.showAlert(res.data.msg);
           this.onListarChamados();
-          $("#myModal").modal("hide");
+          //$("#myModal").modal("hide");
         })
         .catch((error) => {
           console.error("Erro ao cancelar chamado:", error);
@@ -650,6 +694,27 @@ export default {
       if (chamado.status_chamado == 3) {
         this.btAvaliar = true;
       }
+    },
+    //Exibir histórico do chamado
+    onVisualizarHistoricoChamado(chamado) {
+      this.ChamadoData = chamado;
+      const id_chamado = this.ChamadoData.id_chamado;
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/visualizarHistoricoChamado.php?action=selectHistorico&id_chamado=${id_chamado}`
+        )
+        .then((res) => {
+          if (res.data.error === true) {
+            console.log("Server response:", res.data.msg);
+            this.recoverMessage = res.data.msg;
+          } else {
+            console.log("Server response:", res.data.historico);
+            this.Historico = res.data.historico;
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
 };

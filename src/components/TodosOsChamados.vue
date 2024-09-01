@@ -282,7 +282,7 @@ export default {
       });
       axios
         .post(
-          `http://localhost/projeto/helptek/php/api/functions/assumirChamado.php`,
+          `http://localhost/projeto/helptek/php/api/functions/assumirChamado.php?action=AssumirChamado`,
           {
             id_chamado: id_chamado,
             idfr_chamado: idfr_chamado,

@@ -20,21 +20,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $urgencia = $mysqli_con->real_escape_string($data['urgencia']);
             $tendencia = $mysqli_con->real_escape_string($data['tendencia']);
 
-            $sql_atualiza = "UPDATE chamados SET titulo_chamado = '$titulo', descricao_chamado = '$descricao', gravidade = '$gravidade', urgencia = '$urgencia', tendencia = '$tendencia', data_atualizacao = NOW() WHERE id_chamado = '$id_chamado'";
+            $select_user = "SELECT id_user, idfr_code_user FROM users WHERE id_user = '$id_user'";
+            $res_select_user = $mysqli_con->query($select_user);
+            $obj = $res_select_user->fetch_object();
 
-            $result_atualiza = $mysqli_con->query($sql_atualiza);
+            if ($res_select_user->num_rows == 1) {
+                $id_user = $obj->id_user;
+                $idfr_code_user = $obj->idfr_code_user;
 
-            if ($result_atualiza) {
-                $acao = "USUARIO $id_user ATUALIZOU O CHAMADO $idfr_chamado";
-                $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `idfr_chamado`, `acao`) VALUES('$id_chamado', '$id_user','$idfr_chamado','$acao')";
-                $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
+                $select_chamado = "SELECT * FROM chamados WHERE id_chamado='$id_chamado'";
+                $res_select_chamado = $mysqli_con->query($select_chamado);
+                $obj = $res_select_chamado->fetch_object();
 
-                if ($result_acompanhamento){
-                    $res['msg'] = "Chamado atualizado com sucesso!";
+                if ($res_select_chamado->num_rows == 1) {
+                    $status_chamado = $obj->status_chamado;
+                    $total_acoes = $obj->total_acoes;
+                    $total_acoes_upd = $total_acoes++;
+
+                    if ($status_chamado != 4 || $status_chamado != 0) {
+                        $sql_atualiza = "UPDATE chamados SET titulo_chamado = '$titulo', descricao_chamado = '$descricao', gravidade = '$gravidade', urgencia = '$urgencia', tendencia = '$tendencia', data_atualizacao = NOW(), total_acoes = '$total_acoes' WHERE id_chamado = '$id_chamado'";
+
+                        $result_atualiza = $mysqli_con->query($sql_atualiza);
+
+                        if ($result_atualiza) {
+
+                            $acao = "USUARIO $idfr_code_user ATUALIZOU O CHAMADO $idfr_chamado";
+                            $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `idfr_code_user`, `idfr_chamado`, `acao`, `descricao_acao`, `id_usuario_acao`, `status_chamado`) VALUES('$id_chamado', '$id_user','$idfr_code_user','$idfr_chamado','$acao','$descricao','$id_user','$status_chamado')";
+                            $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
+
+                            if ($result_acompanhamento) {
+                                $res['msg'] = "Chamado atualizado com sucesso!";
+                            } else {
+                                $res['error'] = true;
+                                $res['msg'] = "Erro ao atualizar chamado: " . $mysqli_con->error;
+                            }
+                        } else {
+                            $res['error'] = true;
+                            $res['msg'] = "Erro inesperado! (Declaração não pôde ser executada na base)";
+                        }
+                    } else {
+                        $res['error'] = true;
+                        $res['msg'] = "Erro! Chamado está concluído ou cancelado, impossível editar!";
+                    }
                 } else {
                     $res['error'] = true;
-                    $res['msg'] = "Erro ao atualizar chamado: " . $mysqli_con->error;
+                    $res['msg'] = "Erro inesperado! (Chamado não encontrado)";
                 }
+            } else{
+                $res['error'] = true;
+                $res['msg'] = "Erro inesperado! (Usuário não encontrado)";
             }
         } else {
             $res['error'] = true;

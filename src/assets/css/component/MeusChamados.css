@@ -165,3 +165,21 @@
 .black {
     color: black;
 }
+
+.historico-table{
+    border: none;
+    border-radius: 15px;
+    background-color: #dcd2d2;
+    margin-bottom: 10px;
+}
+
+.historico-info-i{
+    font-size: 40px;
+    text-align: center;
+    width: 100px;
+}
+
+
+.historico-info1{
+    font-size: 12px;
+}

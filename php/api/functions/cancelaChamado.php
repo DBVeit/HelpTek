@@ -14,14 +14,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_chamado = $mysqli_con->real_escape_string($data['id_chamado']);
             $id_user = $mysqli_con->real_escape_string($data['id_user']);
             $idfr_chamado = $mysqli_con->real_escape_string($data['idfr_chamado']);
+            $observacao = $mysqli_con->real_escape_string($data['observacao']);
 
-            $sql_cancela = "UPDATE chamados SET status_chamado = 0, data_atualizacao = NOW() WHERE id_chamado = '$id_chamado'";
+            $sql_cancela = "UPDATE chamados SET status_chamado = 0, observacao = '$observacao', data_atualizacao = NOW() WHERE id_chamado = '$id_chamado'";
 
             $result_cancela = $mysqli_con->query($sql_cancela);
 
             if ($result_cancela) {
                 $acao = "USUARIO $id_user CANCELOU O CHAMADO $idfr_chamado";
-                $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `idfr_chamado`, `acao`) VALUES('$id_chamado', '$id_user','$idfr_chamado','$acao')";
+                $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `idfr_chamado`, `acao`, `descricao_acao`, `status_chamado`) VALUES('$id_chamado', '$id_user','$idfr_chamado','$acao','$observacao',0)";
                 $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
 
                 if ($result_acompanhamento){
