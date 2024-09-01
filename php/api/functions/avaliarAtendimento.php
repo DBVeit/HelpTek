@@ -17,45 +17,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $solicitacao_atendida = $mysqli_con->real_escape_string($data['solicitacao_atendida']);
             $observacao = $mysqli_con->real_escape_string($data['observacao']);
 
-            $sql_get_chamado = "SELECT idfr_chamado, id_user, id_user_tecnico FROM chamados WHERE id_chamado = '$id_chamado'";
-            $result_get_chamado = $mysqli_con->query($sql_get_chamado);
+            $select_user = "SELECT id_user, idfr_code_user FROM users WHERE id_user = '$id_user'";
+            $res_select_user = $mysqli_con->query($select_user);
+            $obj_u = $res_select_user->fetch_object();
 
-            if ($result_get_chamado && $result_get_chamado->num_rows > 0) {
-                $row = $result_get_chamado->fetch_assoc();
-                $idfr_chamado = $row['idfr_chamado'];
-                $id_user = $row['id_user'];
-                $id_user_tecnico = $row['id_user_tecnico'];
+            if ($res_select_user->num_rows == 1) {
+                $idfr_code_user = $obj_u->idfr_code_user;
 
-                if ($solicitacao_atendida == 1) {
-                    $avaliacao = "SIM (SOLICITACAO ATENDIDA)";
-                    $sql = "UPDATE chamados SET status_chamado = 4, data_atualizacao = NOW(), data_conclusao = NOW(), observacao = '$observacao' WHERE id_chamado = '$id_chamado'";
-                    $result = $mysqli_con->query($sql);
-                } else {
-                    $avaliacao = "NAO (SOLICITACAO NAO ATENDIDA)";
-                    $sql = "UPDATE chamados SET status_chamado = 2, id_usuario_atual = '$id_user_tecnico', id_usuario_anterior = '$id_user', data_atualizacao = NOW(), observacao = '$observacao' WHERE id_chamado = '$id_chamado'";
-                    $result = $mysqli_con->query($sql);
-                }
+                $sql_get_chamado = "SELECT idfr_chamado, id_user, id_user_tecnico, total_acoes FROM chamados WHERE id_chamado = '$id_chamado'";
+                $result_get_chamado = $mysqli_con->query($sql_get_chamado);
 
-                if ($result) {
-                    $acao = "USUARIO $id_user AVALIOU O CHAMADO $idfr_chamado COMO $avaliacao";
-                    $descricao_acao = $observacao;
-                    $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `id_user_tecnico`, `idfr_chamado`, `acao`, `descricao_acao`)
-                                            VALUES('$id_chamado', '$id_user','$id_user_tecnico','$idfr_chamado','$acao','$descricao_acao')";
-                    $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
+                if ($result_get_chamado && $result_get_chamado->num_rows > 0) {
+                    $row = $result_get_chamado->fetch_assoc();
+                    $idfr_chamado = $row['idfr_chamado'];
+                    $id_user = $row['id_user'];
+                    $id_user_tecnico = $row['id_user_tecnico'];
+                    $total_acoes = $row['total_acoes'];
+                    $total_acoes_upd = ++$total_acoes;
 
-                    if ($result_acompanhamento) {
-                        $res['msg'] = "Chamado avaliado com sucesso!";
+                    if ($solicitacao_atendida == 1) {
+                        $avaliacao = "SIM (SOLICITACAO ATENDIDA)";
+                        $status_chamado = 4;
+                        $sql = "UPDATE chamados SET status_chamado = '$status_chamado', data_atualizacao = NOW(), data_conclusao = NOW(), observacao = '$observacao', total_acoes = '$total_acoes_upd' WHERE id_chamado = '$id_chamado'";
+                        $result = $mysqli_con->query($sql);
+                    } else {
+                        $avaliacao = "NAO (SOLICITACAO NAO ATENDIDA)";
+                        $status_chamado = 2;
+                        $sql = "UPDATE chamados SET status_chamado = '$status_chamado', id_usuario_atual = '$id_user_tecnico', id_usuario_anterior = '$id_user', data_atualizacao = NOW(), observacao = '$observacao', total_acoes = '$total_acoes_upd' WHERE id_chamado = '$id_chamado'";
+                        $result = $mysqli_con->query($sql);
+                    }
+
+                    if ($result) {
+                        $acao = "USUARIO $idfr_code_user AVALIOU O CHAMADO $idfr_chamado COMO $avaliacao";
+                        $descricao_acao = $observacao;
+                        $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `id_user_tecnico`, `idfr_code_user`, `idfr_chamado`, `acao`, `descricao_acao`, `id_usuario_acao`, `status_chamado`)
+                                                VALUES('$id_chamado', '$id_user','$id_user_tecnico','$idfr_code_user','$idfr_chamado','$acao','$descricao_acao','$id_user','$status_chamado')";
+                        $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
+
+                        if ($result_acompanhamento) {
+                            $res['msg'] = "Chamado avaliado com sucesso!";
+                        } else {
+                            $res['error'] = true;
+                            $res['msg'] = "Erro ao registrar acompanhamento: " . $mysqli_con->error;
+                        }
                     } else {
                         $res['error'] = true;
-                        $res['msg'] = "Erro ao registrar acompanhamento: " . $mysqli_con->error;
+                        $res['msg'] = "Erro ao avaliar chamado: " . $mysqli_con->error;
                     }
                 } else {
                     $res['error'] = true;
-                    $res['msg'] = "Erro ao avaliar chamado: " . $mysqli_con->error;
+                    $res['msg'] = "Chamado não encontrado!";
                 }
             } else {
                 $res['error'] = true;
-                $res['msg'] = "Chamado não encontrado!";
+                $res['msg'] = "Erro inesperado! (Usuário não encontrado)";
             }
         } else {
             $res['error'] = true;

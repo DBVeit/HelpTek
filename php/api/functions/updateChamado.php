@@ -22,19 +22,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $select_user = "SELECT id_user, idfr_code_user FROM users WHERE id_user = '$id_user'";
             $res_select_user = $mysqli_con->query($select_user);
-            $obj = $res_select_user->fetch_object();
+            $obj_u = $res_select_user->fetch_object();
 
             if ($res_select_user->num_rows == 1) {
-                $id_user = $obj->id_user;
-                $idfr_code_user = $obj->idfr_code_user;
+                $id_user = $obj_u->id_user;
+                $idfr_code_user = $obj_u->idfr_code_user;
 
                 $select_chamado = "SELECT * FROM chamados WHERE id_chamado='$id_chamado'";
                 $res_select_chamado = $mysqli_con->query($select_chamado);
-                $obj = $res_select_chamado->fetch_object();
+                $obj_c = $res_select_chamado->fetch_object();
 
                 if ($res_select_chamado->num_rows == 1) {
-                    $status_chamado = $obj->status_chamado;
-                    $total_acoes = $obj->total_acoes;
+                    $status_chamado = $obj_c->status_chamado;
+                    $total_acoes = $obj_c->total_acoes;
                     $total_acoes_upd = $total_acoes++;
 
                     if ($status_chamado != 4 || $status_chamado != 0) {

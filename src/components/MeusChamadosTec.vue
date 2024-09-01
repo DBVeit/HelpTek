@@ -414,7 +414,6 @@ export default {
     enviarResposta() {
       const {
         id_chamado,
-        id_user,
         id_user_tecnico,
         idfr_chamado,
         categoriaServico,
@@ -423,7 +422,6 @@ export default {
       } = this.ChamadoData;
       console.log("Dados do chamado:", {
         id_chamado,
-        id_user,
         id_user_tecnico,
         idfr_chamado,
         categoriaServico,
@@ -432,10 +430,9 @@ export default {
       });
       axios
         .post(
-          "http://localhost/projeto/helptek/php/api/functions/responderChamado.php",
+          "http://localhost/projeto/helptek/php/api/functions/responderChamado.php?action=ResponderChamado",
           {
             id_chamado,
-            id_user,
             id_user_tecnico,
             idfr_chamado,
             categoriaServico,
