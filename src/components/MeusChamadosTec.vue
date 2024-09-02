@@ -228,7 +228,7 @@
                     <div class="confirmation-box">
                       <button
                         class="submit-button-modal"
-                        @click="enviarChamado"
+                        @click="onEncaminharChamado"
                       >
                         Enviar
                       </button>
@@ -458,7 +458,7 @@ export default {
       this.showEncaminharCampos = true;
       this.showBotoesAcao = false;
     },
-    enviarChamado() {
+    onEncaminharChamado() {
       const {
         id_chamado,
         idfr_chamado,
@@ -475,11 +475,11 @@ export default {
       });
       axios
         .post(
-          `http://localhost/projeto/helptek/php/api/functions/encaminharChamado.php`,
+          `http://localhost/projeto/helptek/php/api/functions/encaminharChamado.php?action=EncaminharChamado`,
           {
             id_chamado: id_chamado,
             idfr_chamado: idfr_chamado,
-            id_user_tecnico: sessionStorage.getItem("id_user"), // Supondo que o id do técnico está armazenado na sessão
+            id_user_tecnico: sessionStorage.getItem("id_user"),
             novoTecnicoResponsavel: novoTecnicoResponsavel,
             justificativaEncaminhamento: justificativaEncaminhamento,
           }

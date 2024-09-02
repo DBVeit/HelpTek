@@ -348,6 +348,11 @@
             </button>
           </div>
           <div class="modal-body">
+            <div class="message-box" v-if="showMessage">
+              <div class="message-content">
+                <span>{{ message }}</span>
+              </div>
+            </div>
             <form method="POST" @submit.prevent="">
               <div>
                 <h5 class="modal-title">
