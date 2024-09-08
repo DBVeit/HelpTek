@@ -28,7 +28,6 @@
               <th>Data de criação</th>
               <th>Status</th>
               <th></th>
-              <!--<th>Minutos de espera</th>-->
             </tr>
           </thead>
           <tbody>

@@ -32,6 +32,9 @@
         <MeusChamadosTec v-if="MeusChamadosList && isTecnico" />
         <TodosOsChamados v-if="TodosOsChamadosList" />
         <ConfiguracoesUsuarios v-if="ConfigUsuarios" />
+        <DashboardChamados v-if="Dashboard" />
+        <ConfiguracoesCorp v-if="ConfigCorp" />
+        <ConfiguracoesSetores v-if="ConfigSetores" />
       </main>
     </div>
   </div>
@@ -43,14 +46,20 @@ import MeusChamadosTec from "@/components/MeusChamadosTec.vue";
 import TodosOsChamados from "@/components/TodosOsChamados.vue";
 import ConfiguracoesUsuarios from "@/components/ConfiguracoesUsuarios.vue";
 import axios from "axios";
+import DashboardChamados from "@/components/DashboardChamados.vue";
+import ConfiguracoesCorp from "@/components/ConfiguracoesCorp.vue";
+import ConfiguracoesSetores from "@/components/ConfiguracoesSetores.vue";
 export default {
   name: "HomePage",
   components: {
+    DashboardChamados,
     CriarChamado,
     MeusChamados,
     MeusChamadosTec,
     TodosOsChamados,
     ConfiguracoesUsuarios,
+    ConfiguracoesCorp,
+    ConfiguracoesSetores,
   },
 
   data() {
@@ -64,6 +73,9 @@ export default {
       MeusChamadosList: false,
       TodosOsChamadosList: false,
       ConfigUsuarios: false,
+      Dashboard: false,
+      ConfigCorp: false,
+      ConfigSetores: false,
       isTecnico: false,
     };
   },
@@ -108,21 +120,57 @@ export default {
         this.MeusChamadosList = false;
         this.TodosOsChamadosList = false;
         this.ConfigUsuarios = false;
+        this.Dashboard = false;
+        this.ConfigCorp = false;
+        this.ConfigSetores = false;
       } else if (menuItem === "Meus chamados") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = true;
         this.TodosOsChamadosList = false;
         this.ConfigUsuarios = false;
+        this.Dashboard = false;
+        this.ConfigCorp = false;
+        this.ConfigSetores = false;
       } else if (menuItem === "Todos os chamados") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
         this.TodosOsChamadosList = true;
         this.ConfigUsuarios = false;
-      } else if (menuItem === "Configuracoes de usuarios") {
+        this.Dashboard = false;
+        this.ConfigCorp = false;
+        this.ConfigSetores = false;
+      } else if (menuItem === "Configurações de usuários") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
         this.TodosOsChamadosList = false;
         this.ConfigUsuarios = true;
+        this.Dashboard = false;
+        this.ConfigCorp = false;
+        this.ConfigSetores = false;
+      } else if (menuItem === "Dashboard") {
+        this.CriarChamadoForm = false;
+        this.MeusChamadosList = false;
+        this.TodosOsChamadosList = false;
+        this.ConfigUsuarios = false;
+        this.Dashboard = true;
+        this.ConfigCorp = false;
+        this.ConfigSetores = false;
+      } else if (menuItem === "Configurações corporação") {
+        this.CriarChamadoForm = false;
+        this.MeusChamadosList = false;
+        this.TodosOsChamadosList = false;
+        this.ConfigUsuarios = false;
+        this.Dashboard = false;
+        this.ConfigCorp = true;
+        this.ConfigSetores = false;
+      } else if (menuItem === "Configurações setores") {
+        this.CriarChamadoForm = false;
+        this.MeusChamadosList = false;
+        this.TodosOsChamadosList = false;
+        this.ConfigUsuarios = false;
+        this.Dashboard = false;
+        this.ConfigCorp = false;
+        this.ConfigSetores = true;
       }
     },
     verificarTipoUsuario() {

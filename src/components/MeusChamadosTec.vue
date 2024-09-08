@@ -27,7 +27,6 @@
               <th>Prioridade</th>
               <th>Data de criação</th>
               <th>Status</th>
-              <!--<th>Minutos de espera</th>-->
               <th>Atualizado em</th>
               <th>Concluído em</th>
               <th></th>
