@@ -6,6 +6,11 @@ include "../../config/httpaccess.php";
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use Dotenv\Dotenv;
+
+// Carregar variáveis de ambiente
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+$dotenv->load();
 
 // Permitir requisições de diferentes origens (CORS)
 header("Access-Control-Allow-Origin: *");
@@ -19,7 +24,7 @@ $request = json_decode($postData);
 if (isset($request->email)) {
     $email = $request->email;
 
-    // Verifique se o email existe no banco de dados (considerando 'email_user' como campo de email)
+    // Verifique se o email existe no banco de dados
     $sql = "SELECT * FROM users WHERE email_user = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
@@ -53,19 +58,19 @@ if (isset($request->email)) {
         try {
             // Configurações do servidor
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';  // Servidor SMTP do Gmail
+            $mail->Host = $_ENV['SMTP_HOST'];
             $mail->SMTPAuth = true;
-            $mail->Username = 'contato.helptek@gmail.com'; // Seu endereço de email SMTP
-            $mail->Password = 'xxhw porl ejrk ndfm'; // Senha gerada para apps
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Habilitar criptografia TLS
-            $mail->Port = 587; // Porta TCP para TLS
+            $mail->Username = $_ENV['SMTP_USER'];
+            $mail->Password = $_ENV['SMTP_PASS'];
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = $_ENV['SMTP_PORT'];
 
             // Recipientes
-            $mail->setFrom('contato.helptek@gmail.com', 'HelpTek');
-            $mail->addAddress($email); // Adicionar um destinatário
+            $mail->setFrom($_ENV['SMTP_FROM'], $_ENV['SMTP_NAME']);
+            $mail->addAddress($email);
 
             // Conteúdo do email
-            $mail->isHTML(true); // Definir o formato do email como HTML
+            $mail->isHTML(true);
             $mail->Subject = 'Recuperação de Senha';
             $mail->Body    = "Sua nova senha é: " . $newPassword;
 
