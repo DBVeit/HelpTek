@@ -1,9 +1,9 @@
 <template>
   <div class="ticket-form-container">
     <h1>Dashboard</h1>
-    <div>
+    <div id="form-group-dashboard">
       <form @submit.prevent="onSelectConsultaDashboard">
-        <div class="form-group">
+        <div id="form-dash-selector" class="form-group">
           <label for="chartType">Selecione o tipo de consulta:</label>
           <select v-model="selectedConsulta" class="form-select" required>
             <option value="" disabled selected>Selecionar...</option>
@@ -14,14 +14,21 @@
             <option value="setor">Chamados por setor</option>
             <option value="usuario">Chamados por usuário</option>
           </select>
+          <a
+            v-if="showDashboard"
+            @click.prevent="resetDashboard"
+            class="clear-selection-link"
+            >Limpar seleção</a
+          >
         </div>
-        <div class="form-group">
+        <div id="form-dash-submit" class="form-group-dashboard">
           <button class="submit-button-chamado">Executar</button>
         </div>
       </form>
     </div>
     <div v-if="showDashboard" class="main-dash-area">
       <!-- Dropdown para selecionar o tipo de gráfico -->
+      <!-- Botão para expandir o gráfico -->
       <div class="chart-options">
         <select
           class="form-select"
@@ -36,7 +43,50 @@
 
       <!-- Elemento para renderizar o gráfico -->
       <div class="chart-area">
+        <button class="bt-acoes-dash" @click="openModal" title="Expandir">
+          <i class="bi bi-arrows-fullscreen"></i>
+        </button>
         <canvas id="chamadoChart" ref="chamadoChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Modal Bootstrap -->
+    <div
+      class="modal fade"
+      id="chartModal"
+      tabindex="-1"
+      aria-labelledby="chartModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <!-- Dropdown para selecionar o tipo de gráfico no modal -->
+            <div class="chart-options">
+              <select
+                class="form-select"
+                v-model="selectedChart"
+                @change="renderChart(true)"
+              >
+                <option value="bar">Gráfico de Barras</option>
+                <option value="pie">Gráfico de Pizza</option>
+                <option value="line">Gráfico de Linha</option>
+              </select>
+            </div>
+            <!-- Gráfico dentro do modal -->
+            <div class="chart-area">
+              <canvas id="modalChart" ref="modalChart"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -44,6 +94,7 @@
 <script>
 import { Chart, registerables } from "chart.js";
 import axios from "axios";
+import { Modal } from "bootstrap";
 Chart.register(...registerables);
 
 export default {
@@ -56,6 +107,7 @@ export default {
       selectedConsulta: "", // Tipo de consulta selecionada
       showDashboard: false, // Controla a exibição da div main-dash-area
       chart: null, // Referência ao gráfico Chart.js
+      modalChart: null, // Referência ao gráfico Chart.js no modal
       chamadoData: {
         labels: [],
         datasets: [
@@ -95,14 +147,20 @@ export default {
           console.error("Erro na requisição ao servidor:", err);
         });
     },
-    renderChart() {
+    renderChart(isModal = false) {
+      const chartRef = isModal
+        ? this.$refs.modalChart
+        : this.$refs.chamadoChart;
+
       // Destruir gráfico anterior ao trocar o tipo
-      if (this.chart) {
+      if (isModal && this.modalChart) {
+        this.modalChart.destroy();
+      } else if (!isModal && this.chart) {
         this.chart.destroy();
       }
 
       // Criar o novo gráfico com o tipo selecionado
-      this.chart = new Chart(this.$refs.chamadoChart, {
+      const newChart = new Chart(chartRef, {
         type: this.selectedChart, // Tipo de gráfico dinâmico
         data: this.chamadoData, // Dados do gráfico
         options: {
@@ -118,11 +176,33 @@ export default {
           },
         },
       });
+      if (isModal) {
+        this.modalChart = newChart;
+      } else {
+        this.chart = newChart;
+      }
     },
     onSelectConsultaDashboard() {
       // Chamar a função de busca de dados com o tipo de consulta selecionado
       this.fetchChamadosData(this.selectedConsulta);
       this.showDashboard = true; // Exibe a div com o gráfico após o submit
+    },
+    // Função para limpar a seleção e ocultar o gráfico
+    resetDashboard() {
+      this.selectedConsulta = ""; // Limpa o select
+      this.showDashboard = false; // Oculta a div do dashboard
+      if (this.chart) {
+        this.chart.destroy(); // Destroi o gráfico se ele existir
+      }
+    },
+    // Função para abrir o modal com o gráfico expandido
+    openModal() {
+      const modalElement = document.getElementById("chartModal");
+      const modalInstance = new Modal(modalElement);
+      modalInstance.show();
+
+      // Renderizar o gráfico dentro do modal
+      this.renderChart(true);
     },
   },
   mounted() {

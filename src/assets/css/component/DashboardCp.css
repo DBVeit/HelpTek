@@ -1,6 +1,6 @@
 .main-dash-area{
     width: 95%;
-    padding: 50px;
+    padding: 10px 50px 50px 50px;
 }
 
 .chart-area {
@@ -9,8 +9,62 @@
     padding: 50px;
 }
 
+.chart-area-modal {
+    background-color: white;
+    border-radius: 10px;
+    padding: 50px;
+    text-align: center;
+    align-content: center;
+    width: 100%;
+    height: 90%;
+}
+
 .chart-area canvas{
     text-align: center;
     align-content: center;
     width: 50%;
+}
+
+.form-group-dashboard {
+    align-content: center;
+    width: 85%;
+    padding: 6px;
+}
+
+#form-dash-selector {
+    float: left;
+    width: 55%;
+}
+
+#form-dash-submit {
+    width: 25%;
+    height: 125px;
+}
+
+.clear-selection-link {
+    display: inline-block;
+    margin-top: 10px;
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}
+
+.bt-acoes-dash {
+    border: none;
+    border-radius: 4px;
+    background-color: #f3f3f3;
+}
+
+.modal-xl-custom {
+    max-width: 90%; /* Aumenta a largura do modal */
+    height: 90%; /* Define a altura do modal */
+}
+
+.modal-xl-custom .modal-content {
+    height: 100%; /* Faz o conteúdo preencher a altura do modal */
+}
+
+.modal-xl-custom .modal-body {
+    height: calc(100% - 56px - 56px); /* Ajusta o corpo do modal, subtraindo a altura do header e footer */
+    overflow-y: auto; /* Habilita o scroll se necessário */
 }

@@ -221,6 +221,7 @@ export default {
     onListarChamados() {
       const id_user = sessionStorage.getItem("id_user");
       const permission = sessionStorage.getItem("permission");
+      console.log(permission);
       axios
         .get(
           `http://localhost/projeto/helptek/php/api/functions/selectTodosChamados.php?action=selectTodosChamados&id_user=${id_user}&permission=${permission}`
