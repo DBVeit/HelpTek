@@ -19,6 +19,54 @@
         >
           {{ errorMessage }}
         </div>
+        <!--Modal p/ derrubar sessão ativa-->
+        <div
+          class="modal fade"
+          id="activeSessionModal"
+          tabindex="-1"
+          aria-labelledby="activeSessionModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="activeSessionModalLabel">
+                  Sessão Ativa
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <p>
+                  Uma sessão ativa foi detectada. Deseja derrubar a sessão
+                  anterior?
+                </p>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Não
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  @click="confirmActiveSessionOverride"
+                >
+                  Sim
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--Modal p/ derrubar sessão ativa-->
+        <!--Modal p/ alteração de senha-->
         <div id="loginform" v-if="loginform">
           <form method="POST" class="login-form" @submit.prevent="onLogin()">
             <div class="input-group">
@@ -153,6 +201,7 @@
 <script>
 import axios from "axios";
 import CryptoJS from "crypto-js";
+import { Modal } from "bootstrap"; // Importa o Modal do Bootstrap
 
 export default {
   name: "LoginForm",
@@ -174,7 +223,14 @@ export default {
       userId: null,
       showActiveSessionMessage: false,
       sessionToken: null,
+      activeSessionModal: null,
     };
+  },
+  mounted() {
+    // Inicializa o modal após o DOM ser carregado
+    this.activeSessionModal = new Modal(
+      document.getElementById("activeSessionModal")
+    );
   },
   methods: {
     onLogin() {
@@ -191,48 +247,64 @@ export default {
       data.append("username", this.User.username);
       data.append("password", encryptedPassword);
       // Cria um objeto para armazenar os dados
-      let dataEntries = {};
+      /*let dataEntries = {};
       data.forEach((value, key) => {
         dataEntries[key] = value;
       });
-      console.log(dataEntries); // Exibe o objeto com os dados
+      console.log(dataEntries);*/ // Exibe o objeto com os dados
       axios
         .post(
           "http://localhost/projeto/helptek/php/api/functions/login.php?action=login",
           data
         )
         .then((res) => {
-          if (res.data.code !== 200) {
-            this.errorMessage = res.data.msg;
-            this.fadeOutErrorMessage();
-          } else if (res.data.troca_senha === 1) {
-            this.showPasswordChangeForm = true;
-            this.userId = res.data.id_user;
-            this.sessionToken = res.data.token;
-          } else if (res.data.user_logado === 1) {
-            this.showActiveSessionMessage = true;
-            this.userId = res.data.id_user;
-            this.sessionToken = res.data.token;
-          } else {
+          if (res.data.code === 200) {
             this.$router.push("/Home");
             localStorage.setItem("token", res.data.token);
             sessionStorage.setItem("id_user", res.data.id_user);
             sessionStorage.setItem("first_name", res.data.first_name);
             sessionStorage.setItem("level_user", res.data.level_user);
             sessionStorage.setItem("permission", res.data.user_permission);
+          } else if (res.data.code === 409) {
+            this.openActiveSessionModal(); // Abre o modal ao detectar a sessão ativa
+            this.sessionToken = res.data.token;
+          } else if (res.data.code === 428) {
+            this.showPasswordChangeForm = true;
+            this.userId = res.data.id_user;
+            this.sessionToken = res.data.token;
+          } else {
+            this.errorMessage = res.data.msg;
+            this.fadeOutErrorMessage();
           }
         })
         .catch((err) => {
           console.log("Err", err);
         });
     },
+    openActiveSessionModal() {
+      if (this.activeSessionModal) {
+        this.activeSessionModal.show();
+      } else {
+        console.error("Modal não foi inicializado corretamente.");
+      }
+    },
     onRecovery() {
       if (!this.Rec.emailUser) {
         alert("Por favor, preencha o campo.");
         return;
       }
+
+      // Gerar uma senha aleatória
+      const randomPassword = this.generateRandomPassword();
+
+      // Criptografar a senha gerada
+      const encryptedPassword = CryptoJS.SHA256(randomPassword).toString();
+
       let dataRec = new FormData();
       dataRec.append("emailUser", this.Rec.emailUser);
+      dataRec.append("new_password_email", randomPassword); // Enviar senha para o email ao backend
+      dataRec.append("new_password", encryptedPassword); // Enviar senha criptografada ao backend
+      console.log(randomPassword);
       axios
         .post(
           "http://localhost/projeto/helptek/php/api/functions/loginRecover.php?action=recover",
@@ -250,6 +322,18 @@ export default {
         .catch((err) => {
           console.log("Err", err);
         });
+    },
+    // Função para gerar uma senha aleatória
+    generateRandomPassword() {
+      const length = 12; // Comprimento da senha
+      const charset =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~";
+      let password = "";
+      for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charset.length);
+        password += charset[randomIndex];
+      }
+      return password;
     },
     onPasswordChange() {
       if (!this.newPassword || !this.confirmPassword) {
@@ -294,19 +378,16 @@ export default {
       }, 250);
     },
     confirmActiveSessionOverride() {
-      let data = new FormData();
-      data.append("id_user", this.userId);
-      data.append("session_token", this.sessionToken);
+      let username = this.User.username;
       axios
-        .post(
-          "http://localhost/projeto/helptek/php/api/functions/overrideSession.php",
-          data
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/overrideSession.php?action=derrubarLogin&username=${username}`
         )
         .then((res) => {
           if (res.data.error) {
             alert(res.data.msg);
           } else {
-            this.showActiveSessionMessage = false;
+            this.activeSessionModal.hide(); // Fecha o modal
             this.$router.push("/Home");
             localStorage.setItem("token", this.sessionToken);
           }

@@ -25,6 +25,7 @@ if (isset($_GET['action'])) {
                 $passwordDB = $obj->password_user;//Obtem o atributo password_user
                 $first_nameDB = $obj->first_name;
                 $level_userDB = $obj->id_permissao;
+                $logado = $obj->user_logado; // Verificar se já está logado
                 $validUsername = true;
 
                 if ($passwordDB == $password){
@@ -42,51 +43,58 @@ if (isset($_GET['action'])) {
 
                 //Se $validPassword for verdadeiro...
                 if ($validPassword){
-
-                    $_SESSION['user_id'] = $idDB;
-                    $_SESSION['user_fname'] = $first_nameDB;
-                    $_SESSION['user_level'] = $level_userDB;
-
-                    $expire_in = time() + 60000;
-                    $token = JWT::encode([
-                        'id'         => $idDB,
-                        'name'       => $name_userDB,
-                        'expires_in' => $expire_in,
-                    ], $GLOBALS['secretJWT']);
-
-                    $level = $_SESSION['user_level'];
-
-                    switch ($level){
-                        case 1:
-                            $level = "Solicitante";
-                            break;
-                        case 2:
-                            $level = "Técnico";
-                            break;
-                        case 3:
-                            $level = "Gerente técnico";
-                            break;
-                        case 4:
-                            $level = "Administrador";
-                            break;
-                    }
-
-                    $res['msg'] = "Logado com sucesso!";
-                    $res['code'] = 200;
-                    $res['token'] = $token;
-                    $res['id_user'] = $_SESSION['user_id'];
-                    $res['first_name'] = $_SESSION['user_fname'];
-                    $res['level_user'] = $level;
-                    $res['user_permission'] = $_SESSION['user_level'];
-                    $updateQuery = "UPDATE users SET user_logado = 1, token_user = '$token' WHERE id_user = '$idDB'";
-                    $mysqli_con->query($updateQuery);
-                    if ($updateQuery){
-                        $res['msg'] = "Token de usuário atualizado com sucesso!";
-                        $res['code'] = 200;
-                    } else {
+                    if ($logado == 1) {
+                        // Retornar mensagem perguntando se deseja derrubar a sessão anterior
                         $res['error'] = true;
-                        $res['msg'] = "Erro ao atualizar token!";
-                        $res['code'] = 401;
+                        $res['msg'] = "Já existe uma sessão ativa para este usuário. Deseja encerrar a sessão anterior?";
+                        $res['code'] = 409; // Status de conflito
+                    } else {
+
+                        $_SESSION['user_id'] = $idDB;
+                        $_SESSION['user_fname'] = $first_nameDB;
+                        $_SESSION['user_level'] = $level_userDB;
+
+                        $expire_in = time() + 60000;
+                        $token = JWT::encode([
+                            'id' => $idDB,
+                            'name' => $name_userDB,
+                            'expires_in' => $expire_in,
+                        ], $GLOBALS['secretJWT']);
+
+                        $level = $_SESSION['user_level'];
+
+                        switch ($level) {
+                            case 1:
+                                $level = "Solicitante";
+                                break;
+                            case 2:
+                                $level = "Técnico";
+                                break;
+                            case 3:
+                                $level = "Gerente técnico";
+                                break;
+                            case 4:
+                                $level = "Administrador";
+                                break;
+                        }
+
+                        $res['msg'] = "Logado com sucesso!";
+                        $res['code'] = 200;
+                        $res['token'] = $token;
+                        $res['id_user'] = $_SESSION['user_id'];
+                        $res['first_name'] = $_SESSION['user_fname'];
+                        $res['level_user'] = $level;
+                        $res['user_permission'] = $_SESSION['user_level'];
+                        $updateQuery = "UPDATE users SET user_logado = 1, token_user = '$token' WHERE id_user = '$idDB'";
+                        $mysqli_con->query($updateQuery);
+                        if ($updateQuery) {
+                            $res['msg'] = "Token de usuário atualizado com sucesso!";
+                            $res['code'] = 200;
+                        } else {
+                            $res['error'] = true;
+                            $res['msg'] = "Erro ao atualizar token!";
+                            $res['code'] = 401;
+                        }
                     }
                 } else { //Do contrario...
                     $res['error'] = true;
@@ -103,7 +111,15 @@ if (isset($_GET['action'])) {
             $res['msg'] = "Parametros inválidos!";
             $res['code'] = 400;
         }
+    } else {
+        $res['error'] = true;
+        $res['msg'] = "Ação inválida!";
+        $res['code'] = 400;
     }
+} else {
+    $res['error'] = true;
+    $res['msg'] = "Requisição inválida!";
+    $res['code'] = 400;
 }
 
 $mysqli_con -> close();

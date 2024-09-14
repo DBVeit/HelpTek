@@ -37,6 +37,96 @@
         <ConfiguracoesSetores v-if="ConfigSetores" />
       </main>
     </div>
+    <!---------------------------Modal p/ redefinicao de senha----------------------------->
+    <div class="modal fade bd-example-modal-lg" id="modalRedefinirSenha">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Redefinir senha</h4>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form method="POST" @submit.prevent="">
+              <div class="form-group-modal">
+                <div class="form-group-modal">
+                  <label>Senha *</label>
+                  <input
+                    :type="showPassword ? 'text' : 'password'"
+                    class="form-control"
+                    name="senha"
+                    v-model="NovaSenha.password_user"
+                    @input="validatePassword"
+                  />
+                  <span class="form-danger-msg"
+                    >*A senha deve conter ter no mínimo 8 caracteres,
+                    considerando letras maiúsculas e minúsculas, números e
+                    caracteres especiais.
+                  </span>
+                  <i
+                    v-if="NovaSenha.password_user"
+                    :class="passwordValidationMessage"
+                  ></i>
+                  <span
+                    class="form-danger-msg"
+                    v-if="!NovaSenha.password_user && showErrors"
+                    ><br />*Preechimento obrigatório!
+                  </span>
+                </div>
+                <div class="form-group-modal">
+                  <label>Confirmar Senha *</label>
+                  <input
+                    :type="showPassword ? 'text' : 'password'"
+                    class="form-control"
+                    name="confirma_senha"
+                    v-model="NovaSenha.confirma_senha"
+                    @input="validatePasswordMatch"
+                  />
+                  <span
+                    class="form-danger-msg"
+                    v-if="!NovaSenha.confirma_senha && showErrors"
+                    >*Preechimento obrigatório!</span
+                  >
+                  <span class="form-danger-msg" v-if="passwordMatchMessage">{{
+                    passwordMatchMessage
+                  }}</span>
+                </div>
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input check-passw"
+                    id="togglePasswordVisibility_pass"
+                    v-model="showPassword"
+                  />
+                  <label
+                    class="form-check-label check-passw"
+                    for="togglePasswordVisibility_pass"
+                  >
+                    Mostrar senha
+                  </label>
+                </div>
+                <div class="form-buttons">
+                  <button type="submit" class="submit-button">
+                    Salvar Alterações
+                  </button>
+                  <button
+                    type="button"
+                    class="cancel-button"
+                    data-bs-dismiss="modal"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -49,6 +139,7 @@ import axios from "axios";
 import DashboardChamados from "@/components/DashboardChamados.vue";
 import ConfiguracoesCorp from "@/components/ConfiguracoesCorp.vue";
 import ConfiguracoesSetores from "@/components/ConfiguracoesSetores.vue";
+import { Modal } from "bootstrap";
 export default {
   name: "HomePage",
   components: {
@@ -77,6 +168,19 @@ export default {
       ConfigCorp: false,
       ConfigSetores: false,
       isTecnico: false,
+      showPasswordChangeForm: false,
+      newPassword: "",
+      confirmPassword: "",
+      modalRedefinirSenha: null,
+      passwordValidationMessage: "",
+      passwordMatchMessage: "",
+      showErrors: false,
+      showMessage: false,
+      showPassword: false,
+      NovaSenha: {
+        password_user: "",
+        confirma_senha: "",
+      },
     };
   },
 
@@ -93,11 +197,39 @@ export default {
 
     this.nameUser = nameUser || "Usuário";
     this.typeUser = typeUser || "Usuário";
+    this.checkTrocaSenha();
     this.verificarTipoUsuario();
     this.fetchUserMenus();
   },
-
+  mounted() {
+    this.modalRedefinirSenha = new Modal(
+      document.getElementById("modalRedefinirSenha")
+    );
+  },
   methods: {
+    checkTrocaSenha() {
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkTrocaSenha.php?action=checkTrocaSenha&id_user=${this.id_user}`
+        )
+        .then((res) => {
+          if (res.data.code === 200) {
+            this.$router.push("/Home");
+            localStorage.setItem("token", res.data.token);
+            sessionStorage.setItem("id_user", res.data.id_user);
+            sessionStorage.setItem("first_name", res.data.first_name);
+            sessionStorage.setItem("level_user", res.data.level_user);
+            sessionStorage.setItem("permission", res.data.user_permission);
+          } else if (res.data.code === 409) {
+            this.openActiveSessionModal(); // Abre o modal ao detectar a sessão ativa
+            this.sessionToken = res.data.token;
+          } else {
+            this.errorMessage = res.data.msg;
+            this.fadeOutErrorMessage();
+          }
+        });
+    },
+
     fetchUserMenus() {
       axios
         .get(
@@ -187,13 +319,105 @@ export default {
         });
     },
     logout() {
-      localStorage.removeItem("token");
-      sessionStorage.removeItem("id_user");
-      sessionStorage.removeItem("first_name");
-      sessionStorage.removeItem("level_user");
+      let id_user = this.id_user;
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/logout.php?action=logout&id_user=${id_user}`
+        )
+        .then((res) => {
+          if (res.data.error) {
+            alert(res.data.msg);
+          } else {
+            localStorage.removeItem("token");
+            sessionStorage.removeItem("id_user");
+            sessionStorage.removeItem("first_name");
+            sessionStorage.removeItem("level_user");
+            this.$router.push("/Login");
+          }
+        })
+        .catch((err) => {
+          console.log("Err", err);
+        });
+    },
+    openTrocaSenhaModal() {
+      if (this.modalRedefinirSenha) {
+        this.modalRedefinirSenha.show();
+      } else {
+        console.error("Modal não foi inicializado corretamente.");
+      }
+    },
+    onPasswordChange() {
+      if (!this.newPassword || !this.confirmPassword) {
+        alert("Por favor, preencha todos os campos.");
+        return;
+      }
+      if (this.newPassword !== this.confirmPassword) {
+        alert("As senhas não coincidem.");
+        return;
+      }
 
-      this.$router.push("/Login");
+      let data = new FormData();
+      data.append("id_user", this.userId);
+      data.append("new_password", this.newPassword);
+      axios
+        .post(
+          "http://localhost/projeto/helptek/php/api/functions/changePassword.php",
+          data
+        )
+        .then((res) => {
+          if (res.data.error) {
+            alert(res.data.msg);
+          } else {
+            this.showPasswordChangeForm = false;
+            this.$router.push("/Home");
+          }
+        })
+        .catch((err) => {
+          console.log("Err", err);
+        });
+    },
+    // Validação do padrão de senha
+    validatePassword() {
+      const password = this.NovaSenha.password_user;
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+      if (!password) {
+        this.passwordValidationMessage = "";
+        this.validaSenha = false;
+      } else if (!passwordRegex.test(password)) {
+        this.passwordValidationMessage = "bi bi-x text-danger";
+        this.validaSenha = false;
+      } else {
+        this.passwordValidationMessage = "bi bi-check2 text-success";
+        this.validaSenha = true;
+      }
+    },
+    // Validação de senhas inseridas / comparação
+    validatePasswordMatch() {
+      if (this.NovaSenha.password_user !== this.NovaSenha.confirma_senha) {
+        this.passwordMatchMessage = "As senhas não coincidem.";
+        this.matchSenha = false;
+      } else {
+        this.passwordMatchMessage = "";
+        this.matchSenha = true;
+      }
+    },
+    fadeOutErrorMessage() {
+      let opacity = 1;
+      const interval = setInterval(() => {
+        opacity -= 0.1;
+        this.errorMessageOpacity = opacity;
+        if (opacity <= 0) {
+          clearInterval(interval);
+          this.errorMessage = "";
+          this.errorMessageOpacity = 1;
+        }
+      }, 250);
     },
   },
 };
 </script>
+<style>
+@import "../assets/css/component/ConfiguracoesUsuarios.css";
+</style>

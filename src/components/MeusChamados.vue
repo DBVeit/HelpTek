@@ -36,7 +36,10 @@
             <td class="title">{{ chamados.titulo_chamado }}</td>
             <td>
               {{ chamados.prioridade_chamado_desc }}
-              <i class="bi bi-circle-fill"></i>
+              <i
+                :class="getPriorityClass(chamados.prioridade_chamado_desc)"
+                class="bi bi-circle-fill"
+              ></i>
             </td>
             <td>{{ chamados.data_criacao_fm }}</td>
             <td>
@@ -160,8 +163,41 @@
                   </option>
                 </select>
               </div>
-              <div>
+              <div class="form-group-modal">
                 <label>Anexos</label>
+                <input
+                  type="file"
+                  id="attachment"
+                  ref="attachment"
+                  name="anexo"
+                  @change="handleFileUpload"
+                  multiple
+                  :disabled="!isEditing"
+                />
+                <table class="anexo-grid" v-if="anexos.length > 0">
+                  <thead>
+                    <tr>
+                      <th>Arquivo</th>
+                      <th>Tamanho</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(anexo, index) in anexos" :key="index">
+                      <td>{{ anexo.name }}</td>
+                      <td>{{ anexo.size }} bytes</td>
+                      <td>
+                        <button
+                          class="bt-remove-anexo"
+                          @click="removeAnexo(index)"
+                          :disabled="!isEditing"
+                        >
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
               <div class="confirmation-overlay" v-if="!isEditing">
                 <div class="confirmation-box">
@@ -426,6 +462,7 @@ export default {
       message: "",
       showErrors: false,
       btAvaliar: false,
+      anexos: [], // Array para armazenar os arquivos anexados
     };
   },
   created() {
@@ -521,6 +558,21 @@ export default {
       this.ChamadoData.gravidade = chamado.gravidade;
       this.ChamadoData.urgencia = chamado.urgencia;
       this.ChamadoData.tendencia = chamado.tendencia;
+
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/chamados/read/getAnexosChamados.php?id_chamado=${chamado.id_chamado}`
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.anexos = response.data.anexos;
+          } else {
+            console.error("Erro ao buscar anexos:", response.data.msg);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar anexos:", error);
+        });
     },
     editarChamado() {
       this.isEditing = true;
@@ -720,6 +772,29 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+    handleFileUpload(event) {
+      const files = event.target.files;
+      for (let i = 0; i < files.length; i++) {
+        this.anexos.push(files[i]);
+      }
+    },
+    removeAnexo(index) {
+      this.anexos.splice(index, 1); // Remove o anexo da lista
+    },
+    getPriorityClass(prioridade) {
+      switch (prioridade) {
+        case "Baixa":
+          return "green";
+        case "Média":
+          return "yellow";
+        case "Alta":
+          return "red";
+        case "Crítica":
+          return "black";
+        default:
+          return ""; // Classe vazia para evitar erros
+      }
     },
   },
 };

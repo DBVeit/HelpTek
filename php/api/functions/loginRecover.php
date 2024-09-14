@@ -10,6 +10,9 @@ if (isset($_GET['action'])) {
     if ($action == "recover") {
         if (isset($_POST['emailUser'])) {
             $emailUser = $mysqli_con->real_escape_string($_POST['emailUser']);
+            $new_password_email = $mysqli_con->real_escape_string($_POST['new_password_email']);
+            $new_password = $mysqli_con->real_escape_string($_POST['new_password']);
+
             $sql = "SELECT * FROM users WHERE email_user='$emailUser' AND status_user=1";//Buscar pelo email informado
             $result = $mysqli_con->query($sql);//Executa a query e armazena em $result
             $obj = $result->fetch_object();//Retorna o registro de $result como um objeto
@@ -19,18 +22,7 @@ if (isset($_GET['action'])) {
                 $idDB = $obj->id_user;//Obtem o atributo id_user
                 $validEmail = true;
 
-                $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-                $pass = array(); //remember to declare $pass as an array
-                $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
-                for ($i = 0; $i < 8; $i++) {
-                    $n = rand(0, $alphaLength);
-                    $pass[] = $alphabet[$n];
-                }
-                $newpass = implode($pass); //turn the array into a string
-                $newpasshash = password_hash($newpass, PASSWORD_DEFAULT);
-                //echo($idDB ." + ". $newpass ." = ". $newpasshash);
-
-                $sql = "UPDATE users SET password_user='$newpasshash',troca_senha=1 WHERE id_user='$idDB'";
+                $sql = "UPDATE users SET password_user='$new_password',troca_senha=1 WHERE id_user='$idDB'";
                 $result = $mysqli_con->query($sql);//Executa a query e armazena em $result
 
                 //sendMail();
@@ -38,7 +30,7 @@ if (isset($_GET['action'])) {
                 // Envia o e-mail
                 $to = $emailUser;
                 $subject = "Recuperação de Senha";
-                $message = "Sua nova senha é: " . $newpass;
+                $message = "Sua nova senha é: " . $new_password_email;
                 $headers = "From: contato.helptek@gmail.com";
 
                 if (mail($to, $subject, $message, $headers)) {
