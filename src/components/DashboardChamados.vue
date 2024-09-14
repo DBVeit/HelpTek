@@ -27,21 +27,17 @@
       </form>
     </div>
     <div v-if="showDashboard" class="main-dash-area">
-      <!-- Dropdown para selecionar o tipo de gráfico -->
-      <!-- Botão para expandir o gráfico -->
       <div class="chart-options">
         <select
           class="form-select"
           v-model="selectedChart"
-          @change="renderChart"
+          @change="renderChart(false)"
         >
           <option value="bar">Gráfico de Barras</option>
           <option value="pie">Gráfico de Pizza</option>
           <option value="line">Gráfico de Linha</option>
         </select>
       </div>
-
-      <!-- Elemento para renderizar o gráfico -->
       <div class="chart-area">
         <button class="bt-acoes-dash" @click="openModal" title="Expandir">
           <i class="bi bi-arrows-fullscreen"></i>
@@ -50,7 +46,7 @@
       </div>
     </div>
 
-    <!-- Modal Bootstrap -->
+    <!----------Gráfico expandido---------->
     <div
       class="modal fade"
       id="chartModal"
@@ -69,7 +65,6 @@
             ></button>
           </div>
           <div class="modal-body">
-            <!-- Dropdown para selecionar o tipo de gráfico no modal -->
             <div class="chart-options">
               <select
                 class="form-select"
@@ -81,7 +76,6 @@
                 <option value="line">Gráfico de Linha</option>
               </select>
             </div>
-            <!-- Gráfico dentro do modal -->
             <div class="chart-area">
               <canvas id="modalChart" ref="modalChart"></canvas>
             </div>
@@ -89,6 +83,7 @@
         </div>
       </div>
     </div>
+    <!----------Gráfico expandido---------->
   </div>
 </template>
 <script>
@@ -130,9 +125,39 @@ export default {
         .then((res) => {
           if (!res.data.error) {
             const chamados = res.data.data;
+            console.log(res.data.data);
 
-            // Atualizar labels e dados do gráfico dinamicamente
-            this.chamadoData.labels = chamados.map((item) => item.label);
+            if (consulta === "status") {
+              // Mapear os status para suas descrições
+              const statusMap = {
+                0: "Cancelado",
+                1: "Em aberto",
+                2: "Em atendimento",
+                3: "Respondido",
+                4: "Concluído",
+              };
+
+              // Atualizar labels e dados do gráfico com as descrições
+              this.chamadoData.labels = chamados.map(
+                (item) => statusMap[item.status_chamado] || "Desconhecido"
+              );
+              console.log(statusMap);
+            } else if (consulta === "prioridade") {
+              // Atualizar labels com base na prioridade descrita no back-end
+              this.chamadoData.labels = chamados.map(
+                (item) => item.prioridade_chamado || "Desconhecido"
+              );
+            } else if (consulta === "tecnico") {
+              // Mapa de técnicos (aqui você pode mapear ids para nomes, se necessário)
+              this.chamadoData.labels = chamados.map(
+                (item) => `Técnico ${item.id_user_tecnico}`
+              );
+            } else {
+              // Para outros tipos de consulta, use o campo 'label'
+              this.chamadoData.labels = chamados.map((item) => item.label);
+            }
+
+            // Atualizar os dados do gráfico
             this.chamadoData.datasets[0].data = chamados.map(
               (item) => item.total
             );
@@ -210,9 +235,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.chart-options {
-  margin-bottom: 20px;
-}
-</style>

@@ -16,9 +16,16 @@ if (isset($_GET['action']) && $_GET['action'] == 'getChamadosData' && isset($_GE
             break;
 
         case 'prioridade':
-            $sql_select = "SELECT prioridade_chamado, COUNT(*) as total 
-                           FROM chamados 
-                           GROUP BY prioridade_chamado";
+            $sql_select = "SELECT 
+                          CASE 
+                            WHEN prioridade_chamado <= 20 THEN 'Baixa'
+                            WHEN prioridade_chamado > 20 AND prioridade_chamado <= 60 THEN 'Média'
+                            WHEN prioridade_chamado > 60 AND prioridade_chamado <= 100 THEN 'Alta'
+                            ELSE 'Crítica'
+                          END as prioridade_desc,
+                          COUNT(*) as total
+                       FROM chamados
+                       GROUP BY prioridade_desc";
             break;
 
         case 'tecnico':
@@ -39,23 +46,23 @@ if (isset($_GET['action']) && $_GET['action'] == 'getChamadosData' && isset($_GE
 
     if ($result_select) {
         while ($row = $result_select->fetch_assoc()) {
-            // Criar labels e dados dinâmicos para o gráfico
-            $label = ''; // Definir o label conforme a consulta
-            switch ($consulta) {
-                case 'status':
-                    $label = "Status " . $row['status_chamado'];
-                    break;
-                case 'prioridade':
-                    $label = "Prioridade " . $row['prioridade_chamado'];
-                    break;
-                case 'tecnico':
-                    $label = "Técnico " . $row['id_user_tecnico'];
-                    break;
-            }
-            $res['data'][] = [
-                'label' => $label,
+
+            $data = [
                 'total' => $row['total']
             ];
+
+            switch ($consulta) {
+                case 'status':
+                    $data['status_chamado'] = $row['status_chamado'];
+                    break;
+                case 'prioridade':
+                    $data['prioridade_chamado'] = $row['prioridade_desc'];
+                    break;
+                case 'tecnico':
+                    $data['id_user_tecnico'] = $row['id_user_tecnico'];
+                    break;
+            }
+            $res['data'][] = $data;
         }
     } else {
         $res['error'] = true;
