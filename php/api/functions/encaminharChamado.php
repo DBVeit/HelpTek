@@ -93,25 +93,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $res['error'] = true;
                             $res['msg'] = "Erro ao encaminhar chamado: ".$e->getMessage();
                         }
-                        /*$sql = "UPDATE chamados SET id_user_tecnico = '$novoTecnicoResponsavel', id_usuario_atual = '$novoTecnicoResponsavel', data_atualizacao = NOW() WHERE id_chamado = '$id_chamado'";
-                        $result = $mysqli_con->query($sql);
-
-                        if ($result) {
-                            $acao = "USUARIO $id_user_tecnico ENCAMINHOU O CHAMADO $idfr_chamado AO USUARIO $novoTecnicoResponsavel";
-                            $sql_acompanhamento = "INSERT INTO acompanhamento (`id_chamado`, `id_user`, `id_user_tecnico`, `idfr_chamado`, `acao`)
-                                                    VALUES('$id_chamado', '$id_user','$id_user_tecnico','$idfr_chamado','$acao')";
-                            $result_acompanhamento = $mysqli_con->query($sql_acompanhamento);
-
-                            if ($result_acompanhamento) {
-                                $res['msg'] = "Chamado encaminhado com sucesso!";
-                            }else {
-                                $res['error'] = true;
-                                $res['msg'] = "Erro ao registrar acompanhamento: " . $mysqli_con->error;
-                            }
-                        }else{
-                            $res['error'] = true;
-                            $res['msg'] = "Erro ao encaminhar chamado: " . $mysqli_con->error;
-                        }*/
                     } else {
                         $res['error'] = true;
                         $res['msg'] = "Chamado não encontrado!";

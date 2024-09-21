@@ -20,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $urgencia = $mysqli_con->real_escape_string($data['urgencia']);
             $tendencia = $mysqli_con->real_escape_string($data['tendencia']);
 
+            $prioridade = (intval($gravidade)*intval($urgencia)*intval($tendencia));
+
             $select_user = "SELECT id_user, idfr_code_user FROM users WHERE id_user = '$id_user'";
             $res_select_user = $mysqli_con->query($select_user);
             $obj_u = $res_select_user->fetch_object();
@@ -38,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $total_acoes_upd = $total_acoes++;
 
                     if ($status_chamado != 4 || $status_chamado != 0) {
-                        $sql_atualiza = "UPDATE chamados SET titulo_chamado = '$titulo', descricao_chamado = '$descricao', gravidade = '$gravidade', urgencia = '$urgencia', tendencia = '$tendencia', data_atualizacao = NOW(), total_acoes = '$total_acoes' WHERE id_chamado = '$id_chamado'";
+                        $sql_atualiza = "UPDATE chamados SET titulo_chamado = '$titulo', descricao_chamado = '$descricao', gravidade = '$gravidade', urgencia = '$urgencia', tendencia = '$tendencia', prioridade_chamado = '$prioridade', data_atualizacao = NOW(), total_acoes = '$total_acoes' WHERE id_chamado = '$id_chamado'";
 
                         $result_atualiza = $mysqli_con->query($sql_atualiza);
 

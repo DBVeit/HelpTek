@@ -4,11 +4,7 @@
       <p>Inovação em serviços HelpDesk</p>
     </header>
     <div class="content-wrapper">
-      <!--Login-->
-      <div
-        class="container login-box"
-        v-if="!showPasswordChangeForm && !showActiveSessionMessage"
-      >
+      <div class="container login-box" v-if="!showActiveSessionMessage">
         <div class="login_logo">
           <img src="../assets/img/LogoHelpTek.png" alt="Logo HelpTek" />
         </div>
@@ -19,7 +15,7 @@
         >
           {{ errorMessage }}
         </div>
-        <!--Modal p/ derrubar sessão ativa-->
+        <!----------------------------------Modal p/ derrubar sessão ativa---------------------------------->
         <div
           class="modal fade"
           id="activeSessionModal"
@@ -65,8 +61,8 @@
             </div>
           </div>
         </div>
-        <!--Modal p/ derrubar sessão ativa-->
-        <!--Modal p/ alteração de senha-->
+        <!----------------------------------Modal p/ derrubar sessão ativa---------------------------------->
+        <!----------------------------------Formulário de login---------------------------------->
         <div id="loginform" v-if="loginform">
           <form method="POST" class="login-form" @submit.prevent="onLogin()">
             <div class="input-group">
@@ -104,51 +100,8 @@
             <button type="submit" class="button-submit-login">Entrar</button>
           </form>
         </div>
-        <!--Alterar senha-->
-        <div class="container login-box" v-if="showPasswordChangeForm">
-          <h2>Trocar Senha</h2>
-          <form
-            method="POST"
-            class="login-form"
-            @submit.prevent="onPasswordChange"
-          >
-            <div class="input-group">
-              <input
-                type="password"
-                v-model="newPassword"
-                placeholder="Nova Senha"
-                autocomplete="off"
-                required
-              />
-            </div>
-            <div class="input-group">
-              <input
-                type="password"
-                v-model="confirmPassword"
-                placeholder="Confirme a Nova Senha"
-                autocomplete="off"
-                required
-              />
-            </div>
-            <button type="submit">Alterar Senha</button>
-          </form>
-        </div>
-        <!--Desconectar logon ativo-->
-        <div class="container login-box" v-if="showActiveSessionMessage">
-          <h2>Login Ativo</h2>
-          <p>Usuário possui sessão ativa. Desconectar sessão?</p>
-          <button @click="confirmActiveSessionOverride">Sim</button>
-          <button @click="showActiveSessionMessage = false">Não</button>
-        </div>
-        <!--Mensagem de retorno recuperação senha-->
-        <div
-          class="recover-message"
-          v-if="recoverMessage"
-          :style="{ opacity: recoverMessageOpacity }"
-        >
-          {{ recoverMessage }}
-        </div>
-        <!--Form recuperação de senha-->
+        <!----------------------------------Formulário de login---------------------------------->
+        <!----------------------------------Formulário recuperação de senha---------------------------------->
         <div id="recoverform" v-if="recoverform">
           <form method="POST" class="login-form" @submit.prevent="onRecovery()">
             <div class="input-group">
@@ -179,8 +132,10 @@
             <button type="submit" class="button-submit-login">Enviar</button>
           </form>
         </div>
+        <!----------------------------------Formulário recuperação de senha---------------------------------->
       </div>
     </div>
+    <!----------------------------------Rodapé---------------------------------->
     <footer class="login-footer">
       <div class="footer-basic">
         <footer>
@@ -196,6 +151,7 @@
         </footer>
       </div>
     </footer>
+    <!----------------------------------Rodapé---------------------------------->
   </div>
 </template>
 <script>
@@ -217,9 +173,6 @@ export default {
       recoverMessageOpacity: 1,
       showMessage: false,
       message: "",
-      showPasswordChangeForm: false,
-      newPassword: "",
-      confirmPassword: "",
       userId: null,
       showActiveSessionMessage: false,
       sessionToken: null,
@@ -233,6 +186,7 @@ export default {
     );
   },
   methods: {
+    //*********Função p/ realizar login*********//
     onLogin() {
       if (!this.User.username || !this.User.password) {
         this.showAlert = "Por favor, preencha todos os campos.";
@@ -259,18 +213,14 @@ export default {
         )
         .then((res) => {
           if (res.data.code === 200) {
-            this.$router.push("/Home");
             localStorage.setItem("token", res.data.token);
             sessionStorage.setItem("id_user", res.data.id_user);
             sessionStorage.setItem("first_name", res.data.first_name);
             sessionStorage.setItem("level_user", res.data.level_user);
             sessionStorage.setItem("permission", res.data.user_permission);
+            this.$router.push("/Home");
           } else if (res.data.code === 409) {
             this.openActiveSessionModal(); // Abre o modal ao detectar a sessão ativa
-            this.sessionToken = res.data.token;
-          } else if (res.data.code === 428) {
-            this.showPasswordChangeForm = true;
-            this.userId = res.data.id_user;
             this.sessionToken = res.data.token;
           } else {
             this.errorMessage = res.data.msg;
@@ -281,6 +231,7 @@ export default {
           console.log("Err", err);
         });
     },
+    //*********Abrir modal de sessão ativa*********//
     openActiveSessionModal() {
       if (this.activeSessionModal) {
         this.activeSessionModal.show();
@@ -288,6 +239,7 @@ export default {
         console.error("Modal não foi inicializado corretamente.");
       }
     },
+    //*********Função p/ recuperar login*********//
     onRecovery() {
       if (!this.Rec.emailUser) {
         alert("Por favor, preencha o campo.");
@@ -304,7 +256,6 @@ export default {
       dataRec.append("emailUser", this.Rec.emailUser);
       dataRec.append("new_password_email", randomPassword); // Enviar senha para o email ao backend
       dataRec.append("new_password", encryptedPassword); // Enviar senha criptografada ao backend
-      console.log(randomPassword);
       axios
         .post(
           "http://localhost/projeto/helptek/php/api/functions/loginRecover.php?action=recover",
@@ -323,7 +274,7 @@ export default {
           console.log("Err", err);
         });
     },
-    // Função para gerar uma senha aleatória
+    //*********Função p/ gerar senha aleatória*********//
     generateRandomPassword() {
       const length = 12; // Comprimento da senha
       const charset =
@@ -335,36 +286,7 @@ export default {
       }
       return password;
     },
-    onPasswordChange() {
-      if (!this.newPassword || !this.confirmPassword) {
-        alert("Por favor, preencha todos os campos.");
-        return;
-      }
-      if (this.newPassword !== this.confirmPassword) {
-        alert("As senhas não coincidem.");
-        return;
-      }
-
-      let data = new FormData();
-      data.append("id_user", this.userId);
-      data.append("new_password", this.newPassword);
-      axios
-        .post(
-          "http://localhost/projeto/helptek/php/api/functions/changePassword.php",
-          data
-        )
-        .then((res) => {
-          if (res.data.error) {
-            alert(res.data.msg);
-          } else {
-            this.showPasswordChangeForm = false;
-            this.$router.push("/Home");
-          }
-        })
-        .catch((err) => {
-          console.log("Err", err);
-        });
-    },
+    //*********Função p/ msg de erro no login*********//
     fadeOutErrorMessage() {
       let opacity = 1;
       const interval = setInterval(() => {
@@ -377,6 +299,7 @@ export default {
         }
       }, 250);
     },
+    //*********Derrubar sessão ativa*********//
     confirmActiveSessionOverride() {
       let username = this.User.username;
       axios
@@ -396,6 +319,7 @@ export default {
           console.log("Err", err);
         });
     },
+    //*********Função p/ msg de erro ao recuperar login*********//
     fadeOutErrorRecMsg() {
       let opacity = 1;
       const interval = setInterval(() => {
@@ -408,6 +332,7 @@ export default {
         }
       }, 800);
     },
+    //*********Função p/ msg de sucesso ao recuperar login*********//
     fadeOutSuccessRecMsg() {
       let opacity = 1;
       const interval = setInterval(() => {

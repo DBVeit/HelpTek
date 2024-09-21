@@ -37,96 +37,6 @@
         <ConfiguracoesSetores v-if="ConfigSetores" />
       </main>
     </div>
-    <!---------------------------Modal p/ redefinicao de senha----------------------------->
-    <div class="modal fade bd-example-modal-lg" id="modalRedefinirSenha">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title">Redefinir senha</h4>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form method="POST" @submit.prevent="">
-              <div class="form-group-modal">
-                <div class="form-group-modal">
-                  <label>Senha *</label>
-                  <input
-                    :type="showPassword ? 'text' : 'password'"
-                    class="form-control"
-                    name="senha"
-                    v-model="NovaSenha.password_user"
-                    @input="validatePassword"
-                  />
-                  <span class="form-danger-msg"
-                    >*A senha deve conter ter no mínimo 8 caracteres,
-                    considerando letras maiúsculas e minúsculas, números e
-                    caracteres especiais.
-                  </span>
-                  <i
-                    v-if="NovaSenha.password_user"
-                    :class="passwordValidationMessage"
-                  ></i>
-                  <span
-                    class="form-danger-msg"
-                    v-if="!NovaSenha.password_user && showErrors"
-                    ><br />*Preechimento obrigatório!
-                  </span>
-                </div>
-                <div class="form-group-modal">
-                  <label>Confirmar Senha *</label>
-                  <input
-                    :type="showPassword ? 'text' : 'password'"
-                    class="form-control"
-                    name="confirma_senha"
-                    v-model="NovaSenha.confirma_senha"
-                    @input="validatePasswordMatch"
-                  />
-                  <span
-                    class="form-danger-msg"
-                    v-if="!NovaSenha.confirma_senha && showErrors"
-                    >*Preechimento obrigatório!</span
-                  >
-                  <span class="form-danger-msg" v-if="passwordMatchMessage">{{
-                    passwordMatchMessage
-                  }}</span>
-                </div>
-                <div class="form-check">
-                  <input
-                    type="checkbox"
-                    class="form-check-input check-passw"
-                    id="togglePasswordVisibility_pass"
-                    v-model="showPassword"
-                  />
-                  <label
-                    class="form-check-label check-passw"
-                    for="togglePasswordVisibility_pass"
-                  >
-                    Mostrar senha
-                  </label>
-                </div>
-                <div class="form-buttons">
-                  <button type="submit" class="submit-button">
-                    Salvar Alterações
-                  </button>
-                  <button
-                    type="button"
-                    class="cancel-button"
-                    data-bs-dismiss="modal"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 <script>
@@ -139,7 +49,7 @@ import axios from "axios";
 import DashboardChamados from "@/components/DashboardChamados.vue";
 import ConfiguracoesCorp from "@/components/ConfiguracoesCorp.vue";
 import ConfiguracoesSetores from "@/components/ConfiguracoesSetores.vue";
-import { Modal } from "bootstrap";
+//import { Modal } from "bootstrap";
 export default {
   name: "HomePage",
   components: {
@@ -168,19 +78,8 @@ export default {
       ConfigCorp: false,
       ConfigSetores: false,
       isTecnico: false,
-      showPasswordChangeForm: false,
-      newPassword: "",
-      confirmPassword: "",
-      modalRedefinirSenha: null,
-      passwordValidationMessage: "",
-      passwordMatchMessage: "",
       showErrors: false,
       showMessage: false,
-      showPassword: false,
-      NovaSenha: {
-        password_user: "",
-        confirma_senha: "",
-      },
     };
   },
 
@@ -197,17 +96,17 @@ export default {
 
     this.nameUser = nameUser || "Usuário";
     this.typeUser = typeUser || "Usuário";
-    this.checkTrocaSenha();
+    //this.checkTrocaSenha();
     this.verificarTipoUsuario();
     this.fetchUserMenus();
   },
-  mounted() {
+  /*mounted() {
     this.modalRedefinirSenha = new Modal(
       document.getElementById("modalRedefinirSenha")
     );
-  },
+  },*/
   methods: {
-    checkTrocaSenha() {
+    /*checkTrocaSenha() {
       axios
         .get(
           `http://localhost/projeto/helptek/php/api/functions/session/checkTrocaSenha.php?action=checkTrocaSenha&id_user=${this.id_user}`
@@ -228,7 +127,7 @@ export default {
             this.fadeOutErrorMessage();
           }
         });
-    },
+    },*/
 
     fetchUserMenus() {
       axios
@@ -328,7 +227,7 @@ export default {
           if (res.data.error) {
             alert(res.data.msg);
           } else {
-            localStorage.removeItem("token");
+            sessionStorage.removeItem("token_session");
             sessionStorage.removeItem("id_user");
             sessionStorage.removeItem("first_name");
             sessionStorage.removeItem("level_user");
@@ -339,7 +238,7 @@ export default {
           console.log("Err", err);
         });
     },
-    openTrocaSenhaModal() {
+    /*openTrocaSenhaModal() {
       if (this.modalRedefinirSenha) {
         this.modalRedefinirSenha.show();
       } else {
@@ -375,9 +274,9 @@ export default {
         .catch((err) => {
           console.log("Err", err);
         });
-    },
+    },*/
     // Validação do padrão de senha
-    validatePassword() {
+    /*validatePassword() {
       const password = this.NovaSenha.password_user;
       const passwordRegex =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -392,9 +291,9 @@ export default {
         this.passwordValidationMessage = "bi bi-check2 text-success";
         this.validaSenha = true;
       }
-    },
+    },*/
     // Validação de senhas inseridas / comparação
-    validatePasswordMatch() {
+    /*validatePasswordMatch() {
       if (this.NovaSenha.password_user !== this.NovaSenha.confirma_senha) {
         this.passwordMatchMessage = "As senhas não coincidem.";
         this.matchSenha = false;
@@ -402,8 +301,8 @@ export default {
         this.passwordMatchMessage = "";
         this.matchSenha = true;
       }
-    },
-    fadeOutErrorMessage() {
+    },*/
+    /*fadeOutErrorMessage() {
       let opacity = 1;
       const interval = setInterval(() => {
         opacity -= 0.1;
@@ -414,7 +313,7 @@ export default {
           this.errorMessageOpacity = 1;
         }
       }, 250);
-    },
+    },*/
   },
 };
 </script>

@@ -97,15 +97,23 @@
           >
         </div>
         <div class="form-group">
-          <label>Anexo</label>
+          <!--<label>Dias com Problema *</label>
           <input
-            type="file"
-            id="attachment"
-            ref="attachment"
-            name="anexo"
-            @change="handleFileUpload"
-            multiple
-          />
+            type="number"
+            name="diasCProb"
+            v-model="ChamadoData.diasCProb"
+          />-->
+          <div class="form-group">
+            <label>Anexo</label>
+            <input
+              type="file"
+              id="attachment"
+              ref="attachment"
+              name="anexo"
+              @change="handleFileUpload"
+              multiple
+            />
+          </div>
           <table class="anexo-grid" v-if="anexos.length > 0">
             <thead>
               <tr>
@@ -141,14 +149,17 @@ export default {
   name: "CriarChamado",
   data() {
     const id_user = sessionStorage.getItem("id_user");
+    const session_token = localStorage.getItem("token");
     return {
       ChamadoData: {
         titulo: "",
         descricao: "",
+        //diasCProb: "",
         gravidade: "",
         urgencia: "",
         tendencia: "",
         id_user: id_user,
+        session_token: session_token,
       },
       prioridadesGravidade: [],
       prioridadesUrgencia: [],
@@ -161,6 +172,8 @@ export default {
   },
   created() {
     this.fetchPrioridades();
+    /*console.log(sessionStorage.getItem("id_user"));
+    console.log(localStorage.getItem("token"));*/
   },
   methods: {
     fetchPrioridades() {
@@ -202,10 +215,13 @@ export default {
 
       this.showErrors = false;
 
+      let id_user = sessionStorage.getItem("id_user");
+      let session_token = localStorage.getItem("token");
       data.append("titulo", this.ChamadoData.titulo);
       data.append("descricao", this.ChamadoData.descricao);
       data.append("gravidade", this.ChamadoData.gravidade);
       data.append("urgencia", this.ChamadoData.urgencia);
+      //data.append("diasCProb", this.ChamadoData.diasCProb);
       data.append("tendencia", this.ChamadoData.tendencia);
       data.append("id_user", this.ChamadoData.id_user);
       // Adiciona os arquivos ao FormData
@@ -214,23 +230,42 @@ export default {
       });
 
       // Cria um objeto para armazenar os dados
-      /*let dataEntries = {};
+      let dataEntries = {};
       data.forEach((value, key) => {
         dataEntries[key] = value;
       });
-      console.log(dataEntries);*/ // Exibe o objeto com os dados
+      console.log(dataEntries); // Exibe o objeto com os dados
+      //console.log(session_token);
+
       axios
-        .post(
-          "http://localhost/projeto/helptek/php/api/functions/insertChamado.php?action=InsertChamado",
-          data
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkUser.php?id_user=${id_user}&session_token=${session_token}`
         )
         .then((res) => {
-          console.log("Server response:", res.data);
-          if (res.data.error === true) {
-            this.showAlert(res.data.msg);
+          if (res.data.error === false) {
+            console.log("Server response:", res.data.msg);
+            const idfr_code_user = res.data.user;
+            data.append("idfr_code_user", idfr_code_user);
+            axios
+              .post(
+                "http://localhost/projeto/helptek/php/api/functions/chamados/create/insertChamado.php",
+                data
+              )
+              .then((res_insert) => {
+                console.log("Server response:", res_insert.data);
+                if (res_insert.data.error === true) {
+                  this.showAlert(res_insert.data.msg);
+                } else {
+                  this.showAlert(res_insert.data.msg);
+                  this.clearFormFields();
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            //this.showAlert(res.data.msg);
           } else {
             this.showAlert(res.data.msg);
-            this.clearFormFields();
           }
         })
         .catch((err) => {

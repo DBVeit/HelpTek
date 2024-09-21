@@ -26,6 +26,7 @@ if (isset($_GET['action'])) {
                 $first_nameDB = $obj->first_name;
                 $level_userDB = $obj->id_permissao;
                 $logado = $obj->user_logado; // Verificar se já está logado
+                $troca_senha = $obj->troca_senha; // Verificar se precisa alterar a senha
                 $validUsername = true;
 
                 if ($passwordDB == $password){
@@ -33,7 +34,6 @@ if (isset($_GET['action'])) {
                 }else{
                     $validPassword = false;
                 }
-
 
                 session_start();
 
@@ -81,10 +81,12 @@ if (isset($_GET['action'])) {
                         $res['msg'] = "Logado com sucesso!";
                         $res['code'] = 200;
                         $res['token'] = $token;
+                        $res['token_session'] = $token;
                         $res['id_user'] = $_SESSION['user_id'];
                         $res['first_name'] = $_SESSION['user_fname'];
                         $res['level_user'] = $level;
                         $res['user_permission'] = $_SESSION['user_level'];
+                        //$res['idfr_code_user'] = $_SESSION['idfr_code_user'];
                         $updateQuery = "UPDATE users SET user_logado = 1, token_user = '$token' WHERE id_user = '$idDB'";
                         $mysqli_con->query($updateQuery);
                         if ($updateQuery) {

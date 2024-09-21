@@ -24,9 +24,11 @@
             <th>Prioridade</th>
             <th>Data de criação</th>
             <th>Status</th>
+            <th>Prazo</th>
             <!--<th>Atualizado em</th>
             <th>Concluído em</th>-->
             <th>Última atualização</th>
+            <!--<th>Dias com Problema</th>-->
             <th></th>
           </tr>
         </thead>
@@ -45,7 +47,11 @@
             <td>
               {{ chamados.status_chamado_desc }}
             </td>
+            <td>
+              {{ chamados.prazo }}
+            </td>
             <td>{{ chamados.data_atualizacao_fm }}</td>
+            <!--<td>{{ chamados.diasCProb }}</td>-->
             <td>
               <button
                 class="bt-acoes-chamado"
@@ -436,6 +442,7 @@ export default {
         status_chamado: "",
         data_atualizacao: "",
         data_conclusao: "",
+        //diasCProb: "",
         gravidade: "",
         urgencia: "",
         tendencia: "",

@@ -26,4 +26,8 @@
     </form>
   </div>
 </template>
-<script setup></script>
+<script>
+export default {
+  name: "TrocaSenhaView",
+}
+</script>

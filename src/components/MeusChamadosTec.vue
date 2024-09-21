@@ -1,248 +1,253 @@
 <template>
-  <div>
-    <div class="page_title">
-      <h1>Meus chamados</h1>
+  <div class="ticket-form-container">
+    <h1>Meus chamados</h1>
+    <div class="filter">
+      Filtros:
+      <select v-model="selectedStatus" @change="filterChamados">
+        <option selected disabled>Selecionar...</option>
+        <option value="1">Em aberto</option>
+        <option value="2">Em atendimento</option>
+        <option value="3">Respondido</option>
+        <option value="4">Concluido</option>
+        <option value="0">Cancelado</option>
+      </select>
+      <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== null"
+        >Limpar filtros</a
+      >
     </div>
-    <div class="">
-      <div class="filter">
-        Filtros:
-        <select v-model="selectedStatus" @change="filterChamados">
-          <option selected disabled>Selecionar...</option>
-          <option value="1">Em aberto</option>
-          <option value="2">Em atendimento</option>
-          <option value="3">Atendido</option>
-          <option value="4">Concluido</option>
-          <option value="0">Cancelado</option>
-        </select>
-        <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== null"
-          >Limpar filtros</a
-        >
-      </div>
-      <div>
-        <table class="chamados-list-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Titulo</th>
-              <th>Prioridade</th>
-              <th>Data de criação</th>
-              <th>Status</th>
-              <th>Atualizado em</th>
-              <th>Concluído em</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="chamados in Chamados" :key="chamados.id_chamado">
-              <td>{{ chamados.idfr_chamado }}</td>
-              <td class="title">{{ chamados.titulo_chamado }}</td>
-              <td>{{ chamados.prioridade_chamado }}</td>
-              <td>{{ chamados.data_criacao_fm }}</td>
-              <td>{{ chamados.status_chamado_desc }}</td>
-              <!--<td>{{ chamados.minutos_espera }}</td>-->
-              <td>{{ chamados.data_atualizacao_fm }}</td>
-              <td>{{ chamados.data_conclusao_fm }}</td>
-              <td>
-                <button
-                  class="bt-chamado"
-                  data-bs-toggle="modal"
-                  data-bs-target="#myModal"
-                  @click="verChamado(chamados)"
-                >
-                  Ver
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- The Modal -->
-      <div class="modal fade bd-example-modal-lg" id="myModal">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <!-- Modal Header -->
-            <div class="modal-header" style="width: 70%">
-              <h4 class="modal-title">Dados do chamado</h4>
+    <div>
+      <table class="chamados-list-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Titulo</th>
+            <th>Prioridade</th>
+            <th>Data de criação</th>
+            <th>Status</th>
+            <th>Prazo</th>
+            <!--<th>Atualizado em</th>
+              <th>Concluído em</th>-->
+            <th>Última atualização</th>
+            <!--<th>Dias com Problema</th>-->
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="chamados in Chamados" :key="chamados.id_chamado">
+            <td>{{ chamados.idfr_chamado }}</td>
+            <td class="title">{{ chamados.titulo_chamado }}</td>
+            <td>
+              {{ chamados.prioridade_chamado_desc }}
+              <i
+                :class="getPriorityClass(chamados.prioridade_chamado_desc)"
+                class="bi bi-circle-fill"
+              ></i>
+            </td>
+            <td>{{ chamados.data_criacao_fm }}</td>
+            <td>
+              {{ chamados.status_chamado_desc }}
+            </td>
+            <td>
+              {{ chamados.prazo }}
+            </td>
+            <td>{{ chamados.data_atualizacao_fm }}</td>
+            <!--<td>{{ chamados.diasCProb }}</td>-->
+            <td>
               <button
-                type="button"
-                class="btn-close"
-                style="padding: 5px"
-                data-bs-dismiss="modal"
-                @click="fecharModal"
+                class="bt-acoes-chamado"
+                data-bs-toggle="modal"
+                data-bs-target="#modalVisualizarChamado"
+                @click="verChamado(chamados)"
+                title="Ver"
               >
-                <span aria-hidden="true">&times;</span>
+                <i class="bi bi-eye"></i>
               </button>
+              <button
+                class="bt-acoes-chamado"
+                data-bs-toggle="modal"
+                data-bs-target="#modalResponderChamado"
+                @click="verChamado(chamados)"
+                title="Responder chamado"
+                v-if="chamados.status_chamado == 2"
+              >
+                <i class="bi bi-chat-right-dots green"></i>
+              </button>
+              <button
+                class="bt-acoes-chamado"
+                data-bs-toggle="modal"
+                data-bs-target="#modalHistoricoChamado"
+                @click="onVisualizarHistoricoChamado(chamados)"
+                title="Histórico do atendimento"
+              >
+                <i class="bi bi-card-list"></i>
+              </button>
+              <button
+                class="bt-acoes-chamado"
+                data-bs-toggle="modal"
+                data-bs-target="#modalEncaminharChamado"
+                @click="verChamado(chamados)"
+                title="Encaminhar"
+                v-if="chamados.status_chamado == 2"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="recover-message" v-if="recoverMessage">
+        {{ recoverMessage }}
+      </div>
+    </div>
+    <!----------------------Modal p/ visualizar informações do chamado---------------------->
+    <div class="modal fade bd-example-modal-lg" id="modalVisualizarChamado">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Dados do chamado</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="message-box" v-if="showMessage">
+              <div class="message-content">
+                <span>{{ message }}</span>
+              </div>
             </div>
-            <!-- Modal body -->
-            <div class="modal-body">
-              <div class="message-box" v-if="showMessage">
-                <div class="message-content">
-                  <span>{{ message }}</span>
-                  <button @click="closeMessage">X</button>
+            <form method="POST" @submit.prevent="">
+              <div class="form-group-modal">
+                <label>Título</label>
+                <input
+                  type="text"
+                  id="subject"
+                  v-model="ChamadoData.titulo_chamado"
+                  :disabled="!isEditing"
+                />
+              </div>
+              <div class="form-group-modal">
+                <label>Descrição</label>
+                <textarea
+                  id="description"
+                  rows="4"
+                  v-model="ChamadoData.descricao_chamado"
+                  :disabled="!isEditing"
+                ></textarea>
+              </div>
+              <div class="form-group-modal">
+                <label>Prioridade</label>
+                <select v-model="ChamadoData.gravidade" :disabled="!isEditing">
+                  <option
+                    v-for="gravidade in prioridadesGravidade"
+                    :key="gravidade.id_prioridade"
+                    :value="gravidade.valor_prioridade"
+                  >
+                    {{ gravidade.descricao_categoria }}
+                  </option>
+                </select>
+                <select v-model="ChamadoData.urgencia" :disabled="!isEditing">
+                  <option
+                    v-for="urgencia in prioridadesUrgencia"
+                    :key="urgencia.id_prioridade"
+                    :value="urgencia.valor_prioridade"
+                  >
+                    {{ urgencia.descricao_categoria }}
+                  </option>
+                </select>
+                <select v-model="ChamadoData.tendencia" :disabled="!isEditing">
+                  <option
+                    v-for="tendencia in prioridadesTendencia"
+                    :key="tendencia.id_prioridade"
+                    :value="tendencia.valor_prioridade"
+                  >
+                    {{ tendencia.descricao_categoria }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group-modal">
+                <label>Anexos</label>
+                <input
+                  type="file"
+                  id="attachment"
+                  ref="attachment"
+                  name="anexo"
+                  @change="handleFileUpload"
+                  multiple
+                  :disabled="!isEditing"
+                />
+                <table class="anexo-grid" v-if="anexos.length > 0">
+                  <thead>
+                    <tr>
+                      <th>Arquivo</th>
+                      <th>Tamanho</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(anexo, index) in anexos" :key="index">
+                      <td>{{ anexo.name }}</td>
+                      <td>{{ anexo.size }} bytes</td>
+                      <td>
+                        <button
+                          class="bt-remove-anexo"
+                          @click="removeAnexo(index)"
+                          :disabled="!isEditing"
+                        >
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="confirmation-overlay" v-if="!isEditing">
+                <div class="confirmation-box">
+                  <button
+                    type="submit"
+                    class="btEditar"
+                    @click="editarChamado"
+                    v-if="
+                      ChamadoData.status_chamado != 4 &&
+                      ChamadoData.status_chamado != 0
+                    "
+                  >
+                    Editar
+                  </button>
                 </div>
               </div>
-              <form method="POST" @submit.prevent="">
-                <div class="form-group-modal">
-                  <label>Título</label>
-                  <input
-                    type="text"
-                    id="subject"
-                    v-model="ChamadoData.titulo_chamado"
-                    disabled
-                  />
-                </div>
-                <div class="form-group-modal">
-                  <label>Descrição</label>
-                  <textarea
-                    id="description"
-                    rows="4"
-                    v-model="ChamadoData.descricao_chamado"
-                    disabled
-                  ></textarea>
-                </div>
-                <div class="form-group-modal">
-                  <label>Prioridade</label>
-                  <select v-model="ChamadoData.gravidade" disabled>
-                    <option
-                      v-for="gravidade in prioridadesGravidade"
-                      :key="gravidade.id_prioridade"
-                      :value="gravidade.valor_prioridade"
-                    >
-                      {{ gravidade.descricao_categoria }}
-                    </option>
-                  </select>
-                  <select v-model="ChamadoData.urgencia" disabled>
-                    <option
-                      v-for="urgencia in prioridadesUrgencia"
-                      :key="urgencia.id_prioridade"
-                      :value="urgencia.valor_prioridade"
-                    >
-                      {{ urgencia.descricao_categoria }}
-                    </option>
-                  </select>
-                  <select v-model="ChamadoData.tendencia" disabled>
-                    <option
-                      v-for="tendencia in prioridadesTendencia"
-                      :key="tendencia.id_prioridade"
-                      :value="tendencia.valor_prioridade"
-                    >
-                      {{ tendencia.descricao_categoria }}
-                    </option>
-                  </select>
-                </div>
-                <div>
-                  <label>Anexos</label>
-                </div>
-                <!--Botoes de ação-->
-                <div
-                  v-if="!showResponderCampos && !showEncaminharCampos"
-                  class="confirmation-overlay"
+              <div v-else>
+                <button
+                  type="button"
+                  class="submit-button-modal"
+                  @click="salvarChamado"
                 >
-                  <div class="confirmation-box">
-                    <button
-                      class="submit-button-modal"
-                      @click="responderChamado"
-                    >
-                      Responder Chamado
-                    </button>
-                    <button
-                      class="submit-button-modal"
-                      @click="encaminharChamado"
-                    >
-                      Encaminhar Chamado
-                    </button>
-                  </div>
-                </div>
-                <!--Campos responder chamado-->
-                <div v-if="showResponderCampos">
-                  <h4 class="modal-title">Responder Chamado</h4>
-                  <div class="form-group-modal">
-                    <label>Categoria do Serviço</label>
-                    <select v-model="ChamadoData.categoriaServico">
-                      <option
-                        v-for="categoriaServ in categoriasServico"
-                        :key="categoriaServ.id_categoria_servico"
-                        :value="categoriaServ.id_categoria_servico"
-                      >
-                        {{ categoriaServ.descricao_categoria_servico }}
-                      </option>
-                    </select>
-                  </div>
-                  <div class="form-group-modal">
-                    <label>Categoria da Ocorrência</label>
-                    <select v-model="ChamadoData.categoriaOcorrencia">
-                      <option
-                        v-for="categoriaOcor in categoriasOcorrencia"
-                        :key="categoriaOcor.id_categoria_ocorrencia"
-                        :value="categoriaOcor.id_categoria_ocorrencia"
-                      >
-                        {{ categoriaOcor.descricao_categoria_ocorrencia }}
-                      </option>
-                    </select>
-                  </div>
-                  <div class="form-group-modal">
-                    <label>Descrição da Solução</label>
-                    <textarea v-model="ChamadoData.descricaoSolucao"></textarea>
-                  </div>
-                  <div class="confirmation-overlay">
-                    <div class="confirmation-box">
-                      <button
-                        class="submit-button-modal"
-                        @click="enviarResposta"
-                      >
-                        Enviar Resposta
-                      </button>
-                      <button class="submit-button-modal" @click="cancelar">
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <!--Campos encaminhar chamado-->
-                <div
-                  v-if="showEncaminharCampos && ChamadoData.status_chamado != 4"
-                >
-                  <h4 class="modal-title">Encaminhar Chamado</h4>
-                  <div class="form-group-modal">
-                    <label>Selecionar novo responsável</label>
-                    <select v-model="ChamadoData.novoTecnicoResponsavel">
-                      <option value="" disabled>Selecionar...</option>
-                      <option
-                        v-for="tecnico in tecnicos"
-                        :key="tecnico.id_user"
-                        :value="tecnico.id_user"
-                      >
-                        {{ tecnico.idfr_code_user }} -
-                        {{ tecnico.name_user }} ({{ tecnico.id_user }})
-                      </option>
-                    </select>
-                  </div>
-                  <div class="form-group-modal">
-                    <label>Justificativa do encaminhamento*</label>
-                    <textarea
-                      v-model="ChamadoData.justificativaEncaminhamento"
-                    ></textarea>
-                  </div>
-                  <div class="confirmation-overlay">
-                    <div class="confirmation-box">
-                      <button
-                        class="submit-button-modal"
-                        @click="onEncaminharChamado"
-                      >
-                        Enviar
-                      </button>
-                      <button class="submit-button-modal" @click="cancelar">
-                        Cancelar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </form>
-            </div>
+                  Salvar
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
     </div>
+    <!----------------------Modal p/ visualizar informações do chamado---------------------->
+    <!----------------------Modal p/ responder chamado---------------------->
+    <div
+      class="modal fade bd-example-modal-lg"
+      id="modalResponderChamado"
+    ></div>
+    <!----------------------Modal p/ responder chamado---------------------->
+    <!----------------------Modal p/ visualizar histórico do chamado---------------------->
+    <div
+      class="modal fade bd-example-modal-lg"
+      id="modalHistoricoChamado"
+    ></div>
+    <!----------------------Modal p/ visualizar histórico do chamado---------------------->
+    <!----------------------Modal p/ encaminhar chamado---------------------->
+    <div
+      class="modal fade bd-example-modal-lg"
+      id="modalEncaminharChamado"
+    ></div>
+    <!----------------------Modal p/ encaminhar chamado---------------------->
   </div>
 </template>
 <script>
@@ -264,16 +269,21 @@ export default {
         id_user_tecnico: "",
         data_atualizacao: "",
         data_conclusao: "",
+        //diasCProb: "",
         gravidade: "",
         urgencia: "",
         tendencia: "",
+        id_categoria_servico: "",
+        id_categoria_ocorrencia: "",
         categoriaServico: "",
         categoriaOcorrencia: "",
         descricaoSolucao: "",
+        observacao: "",
         novoTecnicoResponsavel: "",
         justificativaEncaminhamento: "",
       },
       Chamados: [],
+      Historico: [],
       selectedStatus: null,
       tecnicos: [],
       isEditing: false,
@@ -288,6 +298,7 @@ export default {
       categoriasOcorrencia: [],
       showMessage: false,
       message: "",
+      anexos: [], // Array para armazenar os arquivos anexados
     };
   },
   created() {
@@ -299,17 +310,6 @@ export default {
     this.fetchUserTecnico();
   },
   methods: {
-    showAlert(message) {
-      this.fecharModal();
-      this.message = message;
-      this.showMessage = true;
-      setTimeout(() => {
-        this.showMessage = false;
-      }, 3000); // Ajuste o tempo conforme necessário
-    },
-    closeMessage() {
-      this.showMessage = false;
-    },
     onListarChamados() {
       const id_user = sessionStorage.getItem("id_user");
       const permission = sessionStorage.getItem("permission");
@@ -409,6 +409,17 @@ export default {
       this.showResponderCampos = true;
       this.showEncaminharCampos = false;
       this.showBotoesAcao = false;
+    },
+    showAlert(message) {
+      this.fecharModal();
+      this.message = message;
+      this.showMessage = true;
+      setTimeout(() => {
+        this.showMessage = false;
+      }, 3000); // Ajuste o tempo conforme necessário
+    },
+    closeMessage() {
+      this.showMessage = false;
     },
     enviarResposta() {
       const {
