@@ -20,9 +20,11 @@ if (isset($_GET['action'])) {
                                 DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,
                                 DATE_FORMAT(data_atualizacao, '%d/%m/%Y') AS data_atualizacao_fm,
                                 DATE_FORMAT(data_conclusao, '%d/%m/%Y') AS data_conclusao_fm,
-                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera 
-                            FROM chamados
-                            WHERE id_user='$id_user' AND status_chamado = '$status_chamado' 
+                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera, 
+                                users.name_user AS usuario_chamado
+                            FROM chamados 
+                            INNER JOIN users ON users.id_user = chamados.id_user
+                            WHERE chamados.id_user='$id_user' AND status_chamado = '$status_chamado' 
                             ORDER BY 
                                 CASE 
                                     WHEN status_chamado NOT IN (0, 4) THEN 1
@@ -40,9 +42,11 @@ if (isset($_GET['action'])) {
                                 DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,
                                 DATE_FORMAT(data_atualizacao, '%d/%m/%Y') AS data_atualizacao_fm,
                                 DATE_FORMAT(data_conclusao, '%d/%m/%Y') AS data_conclusao_fm,
-                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera 
-                            FROM chamados
-                            WHERE id_user='$id_user' 
+                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera,
+                                users.name_user AS usuario_chamado
+                            FROM chamados 
+                            INNER JOIN users ON users.id_user = chamados.id_user
+                            WHERE chamados.id_user='$id_user' 
                             ORDER BY 
                                 CASE 
                                     WHEN status_chamado NOT IN (0, 4) THEN 1
@@ -63,8 +67,10 @@ if (isset($_GET['action'])) {
                                 DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,
                                 DATE_FORMAT(data_atualizacao, '%d/%m/%Y') AS data_atualizacao_fm,
                                 DATE_FORMAT(data_conclusao, '%d/%m/%Y') AS data_conclusao_fm,
-                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera 
+                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera, 
+                                users.name_user AS usuario_chamado
                             FROM chamados 
+                            INNER JOIN users ON users.id_user = chamados.id_user
                             WHERE id_user_tecnico='$id_user' AND status_chamado = '$status_chamado' 
                             ORDER BY 
                                 CASE 
@@ -83,8 +89,10 @@ if (isset($_GET['action'])) {
                                 DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,
                                 DATE_FORMAT(data_atualizacao, '%d/%m/%Y') AS data_atualizacao_fm,
                                 DATE_FORMAT(data_conclusao, '%d/%m/%Y') AS data_conclusao_fm,
-                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera 
+                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera,
+                                users.name_user AS usuario_chamado
                             FROM chamados 
+                            INNER JOIN users ON users.id_user = chamados.id_user
                             WHERE id_user_tecnico='$id_user' 
                             ORDER BY
                                 CASE 

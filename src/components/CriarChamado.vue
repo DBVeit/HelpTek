@@ -35,11 +35,17 @@
           >
         </div>
         <div class="form-group">
+          <label>Setor</label>
+          <select name="setor" id="setor" v-model="ChamadoData.setor">
+            <option default value="" disabled>Setor</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label
             >Prioridade *
             <a class="form-tip"
               >(Será calculada sistemicamente com base em
-              GravidadeXUrgênciaXTendência)</a
+              IPS*Gravidade*Urgência*Tendência)</a
             ></label
           >
         </div>
@@ -155,6 +161,7 @@ export default {
         titulo: "",
         descricao: "",
         //diasCProb: "",
+        setor: "",
         gravidade: "",
         urgencia: "",
         tendencia: "",

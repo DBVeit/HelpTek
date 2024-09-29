@@ -110,11 +110,42 @@
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title">Dados do chamado</h4>
-            <button type="button" class="btn-close" data-bs-dismiss="modal">
-              <span aria-hidden="true">&times;</span>
+            <button
+              type="button"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+              class="btn-close"
+            >
+              &times;
             </button>
           </div>
           <div class="modal-body">
+            <span>
+              ID:
+              <h6 style="display: inline">{{ ChamadoData.idfr_chamado }}</h6>
+            </span>
+            <span>
+              Solicitante:
+              <h6 style="display: inline">
+                {{ ChamadoData.usuario_chamado }}
+              </h6>
+            </span>
+            <span>
+              Status:
+              <h6 style="display: inline">
+                {{ ChamadoData.status_chamado_desc }}
+              </h6>
+            </span>
+            <span>
+              Técnico:
+              <h6 style="display: inline">-</h6>
+            </span>
+            <span>
+              Última atualização:
+              <h6 style="display: inline">
+                {{ ChamadoData.data_atualizacao_fm }}
+              </h6>
+            </span>
             <div class="message-box" v-if="showMessage">
               <div class="message-content">
                 <span>{{ message }}</span>
@@ -398,7 +429,8 @@
             <form method="POST" @submit.prevent="">
               <div>
                 <h5 class="modal-title">
-                  Deseja realmente cancelar o chamado?
+                  Deseja realmente cancelar o chamado
+                  {{ ChamadoData.idfr_chamado }}?
                 </h5>
                 <div class="form-group-modal">
                   <label>Observação *</label>
@@ -480,6 +512,7 @@ export default {
     this.fetchCategoriasOcorrencia();
   },
   methods: {
+    //Listagem de chamados
     onListarChamados() {
       const id_user = sessionStorage.getItem("id_user");
       const permission = sessionStorage.getItem("permission");
@@ -500,6 +533,7 @@ export default {
           console.log(err);
         });
     },
+    //Função para obter as prioridades
     fetchPrioridades() {
       axios
         .get(
@@ -521,6 +555,7 @@ export default {
           console.error("Erro ao buscar prioridades: ", error);
         });
     },
+    //Função para obter as categorias de serviço
     fetchCategoriasServico() {
       axios
         .get(
@@ -540,6 +575,7 @@ export default {
           console.error("Erro ao buscar categorias do serviço:", error);
         });
     },
+    //Função para obter as categorias de ocorrencia
     fetchCategoriasOcorrencia() {
       axios
         .get(
@@ -559,6 +595,7 @@ export default {
           console.error("Erro ao buscar categorias de ocorrencia:", error);
         });
     },
+    //Função para ver dados de um chamado da lista
     verChamado(chamado) {
       this.ChamadoData = chamado;
       this.isEditing = false;
@@ -581,9 +618,11 @@ export default {
           console.error("Erro ao buscar anexos:", error);
         });
     },
+    //Função para liberar edição do chamado
     editarChamado() {
       this.isEditing = true;
     },
+    //Função para salvar dados editados do chamado
     salvarChamado() {
       const {
         id_chamado,
@@ -631,18 +670,58 @@ export default {
           console.log(err);
         });
     },
+    //Botão para liberar cancelamento do chamado
     confirmarCancelamento() {
       this.isConfirmingCancel = true;
     },
+    //Função para cancelar um chamado
     onCancelarChamado() {
-      const {
-        id_chamado,
-        id_user = sessionStorage.getItem("id_user"),
-        idfr_chamado,
-        observacao,
-      } = this.ChamadoData;
+      let data = new FormData();
+
+      let id_user = sessionStorage.getItem("id_user");
+      let session_token = localStorage.getItem("token");
+
+      data.append("id_chamado", this.ChamadoData.id_chamado);
+      data.append("id_user", this.ChamadoData.id_user);
+      data.append("idfr_chamado", this.ChamadoData.idfr_chamado);
+      data.append("observacao", this.ChamadoData.observacao);
+
       axios
-        .post(
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkUser.php?id_user=${id_user}&session_token=${session_token}`
+        )
+        .then((res) => {
+          if (res.data.error === false) {
+            console.log("Server response:", res.data.msg);
+            const idfr_code_user = res.data.user;
+            data.append("idfr_code_user", idfr_code_user);
+            axios
+              .post(
+                "http://localhost/projeto/helptek/php/api/functions/chamados/update/s_cancelarChamado.php",
+                data
+              )
+              .then((res_cancela) => {
+                console.log("Server response:", res_cancela.data);
+                if (res_cancela.data.error === true) {
+                  this.showAlert(res_cancela.data.msg);
+                } else {
+                  this.isConfirmingCancel = false;
+                  this.showAlert(res_cancela.data.msg);
+                  this.onListarChamados();
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            //this.showAlert(res.data.msg);
+          } else {
+            this.showAlert(res.data.msg);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      /*.post(
           `http://localhost/projeto/helptek/php/api/functions/cancelaChamado.php?action=CancelaChamado`,
           {
             id_chamado,
@@ -660,7 +739,7 @@ export default {
         })
         .catch((error) => {
           console.error("Erro ao cancelar chamado:", error);
-        });
+        });*/
     },
     onAvaliarChamado() {
       this.showErrors = true;
@@ -789,6 +868,7 @@ export default {
     removeAnexo(index) {
       this.anexos.splice(index, 1); // Remove o anexo da lista
     },
+    //Exibir cores diferentes de acordo com a prioridade
     getPriorityClass(prioridade) {
       switch (prioridade) {
         case "Baixa":

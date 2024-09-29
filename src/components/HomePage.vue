@@ -7,6 +7,7 @@
         class="logo"
       />
       <input type="search" placeholder="Pesquisar aqui" class="search-bar" />
+      <span> <i class="bi bi-building"></i> CORP </span>
     </div>
     <div class="main-container">
       <aside class="sidebar">

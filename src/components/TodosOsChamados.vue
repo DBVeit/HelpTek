@@ -1,9 +1,7 @@
 <template>
   <div>
-    <div class="page_title">
-      <h1>Todos os chamados</h1>
-    </div>
     <div class="ticket-form-container">
+      <h1>Todos os chamados</h1>
       <div class="filter" v-if="isGerente">
         Filtros:
         <select v-model="selectedStatus" @change="filterChamados">
@@ -23,10 +21,15 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Titulo</th>
+              <th style="width: 50px">Titulo</th>
               <th>Prioridade</th>
               <th>Data de criação</th>
               <th>Status</th>
+              <th>Prazo</th>
+              <!--<th>Atualizado em</th>
+            <th>Concluído em</th>-->
+              <th>Última atualização</th>
+              <!--<th>Dias com Problema</th>-->
               <th></th>
             </tr>
           </thead>
@@ -34,28 +37,50 @@
             <tr v-for="chamados in Chamados" :key="chamados.id_chamado">
               <td>{{ chamados.idfr_chamado }}</td>
               <td class="title">{{ chamados.titulo_chamado }}</td>
-              <td>{{ chamados.prioridade_chamado }}</td>
+              <td>
+                {{ chamados.prioridade_chamado_desc }}
+                <i
+                  :class="getPriorityClass(chamados.prioridade_chamado_desc)"
+                  class="bi bi-circle-fill"
+                ></i>
+              </td>
               <td>{{ chamados.data_criacao_fm }}</td>
-              <td>{{ chamados.status_chamado_desc }}</td>
-              <!--<td>{{ chamados.minutos_espera }}</td>-->
+              <td>
+                {{ chamados.status_chamado_desc }}
+              </td>
+              <td>
+                {{ chamados.prazo }}
+              </td>
+              <td>{{ chamados.data_atualizacao_fm }}</td>
+              <!--<td>{{ chamados.diasCProb }}</td>-->
               <td>
                 <button
-                  class="bt-chamado"
+                  class="bt-acoes-chamado"
                   data-bs-toggle="modal"
-                  data-bs-target="#myModal"
+                  data-bs-target="#modalVisualizarChamado"
                   @click="verChamado(chamados)"
+                  title="Ver"
                 >
-                  Ver
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button
+                  class="bt-acoes-chamado"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalHistoricoChamado"
+                  @click="onVisualizarHistoricoChamado(chamados)"
+                  title="Histórico do atendimento"
+                >
+                  <i class="bi bi-card-list"></i>
                 </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <!-- The Modal -->
+      <!----------------------Modal p/ visualizar informações do chamado---------------------->
       <div
         class="modal fade"
-        id="myModal"
+        id="modalVisualizarChamado"
         tabindex="-1"
         role="dialog"
         aria-labelledby="exampleModalLabel"
@@ -63,8 +88,7 @@
       >
         <div class="modal-dialog" role="document">
           <div class="modal-content">
-            <!-- Modal Header -->
-            <div class="modal-header" style="width: 70%">
+            <div class="modal-header">
               <h5 class="modal-title">Dados do chamado</h5>
               <button
                 type="button"
@@ -75,8 +99,33 @@
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <!-- Modal body -->
             <div class="modal-body">
+              <span>
+                ID:
+                <h6 style="display: inline">{{ ChamadoData.idfr_chamado }}</h6>
+              </span>
+              <span>
+                Solicitante:
+                <h6 style="display: inline">
+                  {{ ChamadoData.usuario_chamado }}
+                </h6>
+              </span>
+              <span>
+                Status:
+                <h6 style="display: inline">
+                  {{ ChamadoData.status_chamado_desc }}
+                </h6>
+              </span>
+              <span>
+                Técnico:
+                <h6 style="display: inline">-</h6>
+              </span>
+              <span>
+                Última atualização:
+                <h6 style="display: inline">
+                  {{ ChamadoData.data_atualizacao_fm }}
+                </h6>
+              </span>
               <div class="message-box" v-if="showMessage">
                 <div class="message-content">
                   <span>{{ message }}</span>
@@ -85,21 +134,11 @@
               <form method="" @submit.prevent="">
                 <div class="form-group-modal">
                   <label>Título</label>
-                  <input
-                    type="text"
-                    id="subject"
-                    v-model="ChamadoData.titulo_chamado"
-                    disabled
-                  />
+                  <div>{{ ChamadoData.titulo_chamado }}</div>
                 </div>
                 <div class="form-group-modal">
                   <label>Descrição</label>
-                  <textarea
-                    id="description"
-                    rows="4"
-                    v-model="ChamadoData.descricao_chamado"
-                    disabled
-                  ></textarea>
+                  <div>{{ ChamadoData.descricao_chamado }}</div>
                 </div>
                 <div class="form-group-modal">
                   <label>Prioridade</label>
@@ -131,9 +170,34 @@
                     </option>
                   </select>
                 </div>
-                <div>
+                <div class="form-group-modal">
                   <label>Anexos</label>
+                  <table class="anexo-grid" v-if="anexos.length > 0">
+                    <thead>
+                      <tr>
+                        <th>Arquivo</th>
+                        <th>Tamanho</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(anexo, index) in anexos" :key="index">
+                        <td>{{ anexo.name }}</td>
+                        <td>{{ anexo.size }} bytes</td>
+                        <td>
+                          <button
+                            class="bt-remove-anexo"
+                            @click="removeAnexo(index)"
+                            :disabled="!isEditing"
+                          >
+                            <i class="bi bi-x"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
+                <!----------------------Assumir chamado (tecnico)---------------------->
                 <div v-if="isTecnico && !confirmacaoAssumirChamado">
                   <button
                     class="submit-button-modal"
@@ -141,38 +205,101 @@
                   >
                     Assumir Chamado
                   </button>
-                </div>
-                <div
-                  v-if="confirmacaoAssumirChamado"
-                  class="confirmation-overlay"
-                  style="width: 74%"
-                >
-                  <div class="confirmation-box">
-                    <p>Deseja assumir este chamado?</p>
-                    <button class="btAssumirSim" @click="assumirChamado">
-                      Sim
-                    </button>
-                    <button
-                      class="btAssumirNao"
-                      @click="cancelarAssumirChamado"
-                    >
-                      Não
-                    </button>
+                  <div
+                    v-if="confirmacaoAssumirChamado"
+                    class="confirmation-overlay"
+                  >
+                    <div class="confirmation-box">
+                      <p>Deseja assumir este chamado?</p>
+                      <button class="btAssumirSim" @click="assumirChamado">
+                        Sim
+                      </button>
+                      <button
+                        class="btAssumirNao"
+                        @click="cancelarAssumirChamado"
+                      >
+                        Não
+                      </button>
+                    </div>
                   </div>
                 </div>
+                <!----------------------Encaminhar chamado (gerente)---------------------->
                 <div v-if="isGerente">
-                  <button
-                    class="submit-button-modal"
-                    @click="encaminharChamado"
-                  >
+                  <button class="submit-button-modal">
                     Encaminhar Chamado
                   </button>
+                  <div class="form-group-modal">
+                    <label>Selecionar novo responsável</label>
+                    <select v-model="ChamadoData.novoTecnicoResponsavel">
+                      <option value="" disabled>Selecionar...</option>
+                      <option
+                        v-for="tecnico in tecnicos"
+                        :key="tecnico.id_user"
+                        :value="tecnico.id_user"
+                      >
+                        {{ tecnico.idfr_code_user }} -
+                        {{ tecnico.name_user }} ({{ tecnico.id_user }})
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group-modal">
+                    <label>Justificativa do encaminhamento*</label>
+                    <textarea
+                      v-model="ChamadoData.justificativaEncaminhamento"
+                    ></textarea>
+                  </div>
+                  <div class="confirmation-overlay">
+                    <div class="confirmation-box">
+                      <button class="submit-button-modal">Enviar</button>
+                      <button class="submit-button-modal">Cancelar</button>
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>
           </div>
         </div>
       </div>
+      <!----------------------Modal p/ visualizar informações do chamado---------------------->
+      <!-----------------------Modal p/ visualizar histórico do chamado----------------------->
+      <div class="modal fade bd-example-modal-lg" id="modalHistoricoChamado">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Histórico do atendimento</h4>
+              <button type="button" class="btn-close" data-bs-dismiss="modal">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <table
+                class="historico-table"
+                v-for="historico in Historico"
+                :key="historico.id_acompanhamento"
+              >
+                <tr>
+                  <td rowspan="2" class="historico-info-i">
+                    <i class="bi bi-person-circle"></i>
+                  </td>
+                  <td class="historico-info1">
+                    {{ historico.data_acao_fm }} <br />
+                    {{ historico.name_user }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <label>Ação:</label> <label>{{ historico.acao }}</label>
+                    <br />
+                    <label> Descrição:</label>
+                    <label> {{ historico.descricao_acao }}</label>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-----------------------Modal p/ visualizar histórico do chamado----------------------->
     </div>
   </div>
 </template>
@@ -192,23 +319,33 @@ export default {
         prioridade_chamado: "",
         data_criacao: "",
         status_chamado: "",
+        id_user_tecnico: "",
         data_atualizacao: "",
         data_conclusao: "",
+        //diasCProb: "",
         gravidade: "",
         urgencia: "",
         tendencia: "",
+        observacao: "",
+        novoTecnicoResponsavel: "",
+        justificativaEncaminhamento: "",
+        usuario_chamado: "",
       },
       Chamados: [],
+      Historico: [],
       selectedStatus: null,
+      tecnicos: [],
       isTecnico: false,
       isGerente: false,
       prioridadesGravidade: [],
       prioridadesUrgencia: [],
       prioridadesTendencia: [],
       confirmacaoAssumirChamado: false,
+      showEncaminharCampos: false,
       recoverMessage: "",
       showMessage: false,
       message: "",
+      anexos: [], // Array para armazenar os arquivos anexados
     };
   },
   created() {
@@ -216,6 +353,7 @@ export default {
     this.onListarChamados();
     this.checkPermissions();
     this.fetchPrioridades();
+    this.fetchUserTecnico();
   },
   methods: {
     onListarChamados() {
@@ -253,6 +391,18 @@ export default {
         })
         .catch((error) => {
           console.error("Erro ao buscar prioridades: ", error);
+        });
+    },
+    fetchUserTecnico() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/getUserTecnico.php"
+        )
+        .then((response) => {
+          this.tecnicos = response.data.tecnicos;
+        })
+        .catch((error) => {
+          console.error(error);
         });
     },
     verChamado(chamado) {
@@ -341,6 +491,42 @@ export default {
       setTimeout(() => {
         this.showMessage = false;
       }, 8000);
+    },
+    //Exibir cores diferentes de acordo com a prioridade
+    getPriorityClass(prioridade) {
+      switch (prioridade) {
+        case "Baixa":
+          return "green";
+        case "Média":
+          return "yellow";
+        case "Alta":
+          return "red";
+        case "Crítica":
+          return "black";
+        default:
+          return ""; // Classe vazia para evitar erros
+      }
+    },
+    //Exibir histórico do chamado
+    onVisualizarHistoricoChamado(chamado) {
+      this.ChamadoData = chamado;
+      const id_chamado = this.ChamadoData.id_chamado;
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/visualizarHistoricoChamado.php?action=selectHistorico&id_chamado=${id_chamado}`
+        )
+        .then((res) => {
+          if (res.data.error === true) {
+            console.log("Server response:", res.data.msg);
+            this.recoverMessage = res.data.msg;
+          } else {
+            console.log("Server response:", res.data.historico);
+            this.Historico = res.data.historico;
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
 };

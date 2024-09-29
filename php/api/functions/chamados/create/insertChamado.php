@@ -23,13 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $prioridade = (intval($gravidade) * intval($urgencia) * intval($tendencia));
         $id_user = $_POST['id_user'];
         $idfr_code_user = $_POST['idfr_code_user'];
-        $total_acoes = 1;
-        $status_chamado = 1;
-
         $mysqli_con->begin_transaction();
 
         try {
-            $sql = "INSERT INTO chamados(`id_user`,`titulo_chamado`,`descricao_chamado`,`gravidade`,`urgencia`,`tendencia`,`prioridade_chamado`,`data_atualizacao`,`id_usuario_atual`,`total_acoes`) VALUES('$id_user','$titulo','$descricao','$gravidade','$urgencia','$tendencia','$prioridade',NOW(),$id_user,1)";
+            /*$sql = "INSERT INTO chamados(`id_user`,`titulo_chamado`,`descricao_chamado`,`gravidade`,`urgencia`,`tendencia`,`prioridade_chamado`,`data_atualizacao`,`id_usuario_atual`,`total_acoes`) VALUES('$id_user','$titulo','$descricao','$gravidade','$urgencia','$tendencia','$prioridade',NOW(),$id_user,1)";
             $result = $mysqli_con->query($sql);
 
             if ($result) {
@@ -79,7 +76,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } else {
                 throw new Exception("Erro ao registrar chamado!");
+            }*/
+            // Preparar JSON de anexos
+            $anexos = [];
+            $upload_dir = "../../../public/uploads/"; // Diretório onde os arquivos serão armazenados
+            if (!file_exists($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
             }
+
+            // Verificar e mover os arquivos
+            foreach ($_FILES as $key => $file) {
+                $file_name = $file['name'];
+                $file_tmp = $file['tmp_name'];
+                $file_size = $file['size'];
+                $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+                $new_file_name = uniqid() . '.' . $file_ext;
+                $file_dest = $upload_dir . $new_file_name;
+
+                if (move_uploaded_file($file_tmp, $file_dest)) {
+                    $anexos[] = [
+                        'nome' => $file_name,
+                        'caminho' => $file_dest,
+                        'tamanho' => $file_size
+                    ];
+                }
+            }
+
+            // Converter os anexos para JSON
+            $json_anexos = json_encode($anexos);
+
+            // Chamada da stored procedure
+            $stmt = $mysqli_con->prepare("CALL InserirChamado(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param(
+                'issiiiiss',
+                $id_user,           // ID do usuário
+                $titulo,            // Título do chamado
+                $descricao,         // Descrição do chamado
+                $gravidade,         // Gravidade
+                $urgencia,          // Urgência
+                $tendencia,         // Tendência
+                $prioridade,        // Prioridade calculada
+                $idfr_code_user,    // Código do usuário
+                $json_anexos        // JSON com os anexos
+            );
+
+            // Executar a query
+            if ($stmt->execute()) {
+                $mysqli_con->commit();
+                $res_insert['msg'] = "Chamado registrado com sucesso!";
+            } else {
+                throw new Exception("Erro ao registrar o chamado!");
+            }
+
+            $stmt->close();
+
         } catch (Exception $e) {
             $mysqli_con->rollback();
             $res_insert['error'] = true;
