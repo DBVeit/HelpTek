@@ -170,3 +170,22 @@
     background-color: #f3f3f3;
 }
 
+.no-data-found{
+    width: 50%;
+    text-align: center;
+    margin: auto;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.no-data-found span{
+    font-size: 25px;
+    color: #333333;
+    text-align: center;
+    margin: auto;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+

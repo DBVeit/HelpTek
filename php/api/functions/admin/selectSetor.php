@@ -2,7 +2,7 @@
 include "../../../config/dbconnect.php";
 include "../../../config/httpaccess.php";
 
-$res = array('error' => false, 'msg' => '', 'setores' => '');
+$res = array('error' => false, 'msg' => '', 'code' => '', 'setores' => '');
 
 if (isset($_GET['action'])) {
     $action = $_GET['action'];
@@ -36,8 +36,9 @@ if (isset($_GET['action'])) {
                     $res['msg'] = "Listagem";
                     $res['setores'] = $setores;
                 } else {
-                    $res['error'] = false;
+                    $res['error'] = true;
                     $res['msg'] = "Não há dados para exibição";
+                    $res['code'] = 204;
                 }
             }else {
                 $res['error'] = true;

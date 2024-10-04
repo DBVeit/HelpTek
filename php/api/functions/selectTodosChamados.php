@@ -19,10 +19,17 @@ if (isset($_GET['action'])) {
                                 DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,
                                 DATE_FORMAT(data_atualizacao, '%d/%m/%Y') AS data_atualizacao_fm,
                                 DATE_FORMAT(data_conclusao, '%d/%m/%Y') AS data_conclusao_fm,
-                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera,
-                                users.name_user AS usuario_chamado
+                                -- Cálculo de dias, horas e minutos de espera
+                                CONCAT(
+                                    FLOOR(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())) / 1440), ' dia(s), ',  -- 1440 minutos em um dia
+                                    MOD(FLOOR(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())) / 60), 24), ' hora(s), ',  -- 60 minutos em uma hora, mod 24 para horas no intervalo de um dia
+                                    MOD(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())), 60), ' minuto(s)'  -- minutos restantes após calcular horas e dias
+                                ) AS tempo_espera,
+                                users.name_user AS usuario_chamado,
+                                tecnico.name_user AS tecnico_responsavel
                             FROM chamados 
                             INNER JOIN users ON users.id_user = chamados.id_user
+                            LEFT JOIN users AS tecnico ON tecnico.id_user = chamados.id_user_tecnico AND tecnico.id_permissao = 2
                             WHERE status_chamado = '$status_chamado' 
                             ORDER BY 
                                 CASE 
@@ -41,10 +48,17 @@ if (isset($_GET['action'])) {
                                 DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,
                                 DATE_FORMAT(data_atualizacao, '%d/%m/%Y') AS data_atualizacao_fm,
                                 DATE_FORMAT(data_conclusao, '%d/%m/%Y') AS data_conclusao_fm,
-                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera,
-                                users.name_user AS usuario_chamado
+                                -- Cálculo de dias, horas e minutos de espera
+                                CONCAT(
+                                    FLOOR(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())) / 1440), ' dia(s), ',  -- 1440 minutos em um dia
+                                    MOD(FLOOR(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())) / 60), 24), ' hora(s), ',  -- 60 minutos em uma hora, mod 24 para horas no intervalo de um dia
+                                    MOD(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())), 60), ' minuto(s)'  -- minutos restantes após calcular horas e dias
+                                ) AS tempo_espera,
+                                users.name_user AS usuario_chamado,
+                                tecnico.name_user AS tecnico_responsavel
                             FROM chamados 
                             INNER JOIN users ON users.id_user = chamados.id_user
+                            LEFT JOIN users AS tecnico ON tecnico.id_user = chamados.id_user_tecnico AND tecnico.id_permissao = 2
                             ORDER BY 
                                 CASE 
                                     WHEN status_chamado NOT IN (0, 4) THEN 1
@@ -65,10 +79,17 @@ if (isset($_GET['action'])) {
                                 DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,
                                 DATE_FORMAT(data_atualizacao, '%d/%m/%Y') AS data_atualizacao_fm,
                                 DATE_FORMAT(data_conclusao, '%d/%m/%Y') AS data_conclusao_fm,
-                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera, 
-                                users.name_user AS usuario_chamado
+                                -- Cálculo de dias, horas e minutos de espera
+                                CONCAT(
+                                    FLOOR(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())) / 1440), ' dia(s), ',  -- 1440 minutos em um dia
+                                    MOD(FLOOR(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())) / 60), 24), ' hora(s), ',  -- 60 minutos em uma hora, mod 24 para horas no intervalo de um dia
+                                    MOD(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())), 60), ' minuto(s)'  -- minutos restantes após calcular horas e dias
+                                ) AS tempo_espera, 
+                                users.name_user AS usuario_chamado,
+                                tecnico.name_user AS tecnico_responsavel
                             FROM chamados 
                             INNER JOIN users ON users.id_user = chamados.id_user 
+                            LEFT JOIN users AS tecnico ON tecnico.id_user = chamados.id_user_tecnico AND tecnico.id_permissao = 2
                             WHERE id_user_tecnico='' AND status_chamado = 1 
                             ORDER BY 
                                 CASE 
@@ -87,10 +108,17 @@ if (isset($_GET['action'])) {
                                 DATE_FORMAT(data_criacao, '%d/%m/%Y') AS data_criacao_fm,
                                 DATE_FORMAT(data_atualizacao, '%d/%m/%Y') AS data_atualizacao_fm,
                                 DATE_FORMAT(data_conclusao, '%d/%m/%Y') AS data_conclusao_fm,
-                                TIMESTAMPDIFF(MINUTE, data_criacao, NOW()) AS minutos_espera, 
-                                users.name_user AS usuario_chamado
+                                -- Cálculo de dias, horas e minutos de espera
+                                CONCAT(
+                                    FLOOR(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())) / 1440), ' dia(s), ',  -- 1440 minutos em um dia
+                                    MOD(FLOOR(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())) / 60), 24), ' hora(s), ',  -- 60 minutos em uma hora, mod 24 para horas no intervalo de um dia
+                                    MOD(TIMESTAMPDIFF(MINUTE, data_criacao, IF(data_conclusao IS NOT NULL, data_conclusao, NOW())), 60), ' minuto(s)'  -- minutos restantes após calcular horas e dias
+                                ) AS tempo_espera, 
+                                users.name_user AS usuario_chamado,
+                                tecnico.name_user AS tecnico_responsavel
                             FROM chamados 
                             INNER JOIN users ON users.id_user = chamados.id_user
+                            LEFT JOIN users AS tecnico ON tecnico.id_user = chamados.id_user_tecnico AND tecnico.id_permissao = 2
                             WHERE status_chamado = 1 
                             ORDER BY 
                                 CASE 

@@ -81,6 +81,9 @@
           </tbody>
         </table>
       </div>
+      <div v-if="noDataFound === true" class="no-data-found">
+        <span>{{ noDataFoundMsg }}</span>
+      </div>
     </div>
     <!---------------------------------Modal Cadastrar Setor--------------------------------->
     <div class="modal fade bd-example-modal-lg" id="modalCadastroSetor">
@@ -196,6 +199,8 @@ export default {
       usuarioAtual: {},
       validaSenha: false,
       matchSenha: false,
+      noDataFound: false,
+      noDataFoundMsg: "",
     };
   },
   created() {
@@ -204,7 +209,7 @@ export default {
     this.onListarSetores();
   },
   methods: {
-    // Listagem de usuarios cadastrados na base
+    // Listagem de setores cadastrados na base
     onListarSetores() {
       axios
         .get(
@@ -213,6 +218,10 @@ export default {
         .then((res) => {
           console.log("Server response:", res.data);
           this.Corporacao = res.data.corporacao;
+          if (res.data.code == 204) {
+            this.noDataFound = true;
+            this.noDataFoundMsg = res.data.msg;
+          }
         })
         .catch((err) => {
           console.log(err);

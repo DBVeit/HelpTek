@@ -78,14 +78,12 @@
       <div class="modal fade bd-example-modal-lg" id="myModal">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
-            <!-- Modal Header -->
             <div class="modal-header">
               <h4 class="modal-title">Dados do usuário</h4>
               <button type="button" class="btn-close" data-bs-dismiss="modal">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <!-- Modal body -->
             <div class="modal-body">
               <form method="POST" @submit.prevent="salvarEditarUsuario()">
                 <div class="form-group-modal">
@@ -196,7 +194,19 @@
             </button>
           </div>
           <div class="modal-body">
-            <form method="POST" @submit.prevent="">
+            <span>
+              ID usuário:
+              <h6 style="display: inline">
+                {{ UsuarioData.idfr_code_user }}
+              </h6>
+            </span>
+            <span>
+              Nome usuário:
+              <h6 style="display: inline">
+                {{ UsuarioData.name_user }}
+              </h6>
+            </span>
+            <form method="POST" @submit.prevent="onRedefinirSenha()">
               <div class="form-group-modal">
                 <div class="form-group-modal">
                   <label>Senha *</label>
@@ -284,7 +294,45 @@
             </button>
           </div>
           <div class="modal-body">
-            <form method="POST" @submit.prevent=""></form>
+            <span>
+              ID usuário:
+              <h6 style="display: inline">
+                {{ UsuarioData.idfr_code_user }}
+              </h6>
+            </span>
+            <span>
+              Nome usuário:
+              <h6 style="display: inline">
+                {{ UsuarioData.name_user }}
+              </h6>
+            </span>
+            <form method="POST" @submit.prevent="onAtivaInativaUsuario()">
+              <div class="form-group-modal">
+                <div class="form-group-modal">
+                  <label>Status do usuário</label>
+                  <select
+                    class="form-select"
+                    name="status_user"
+                    v-model="UpdateStatus.status_user"
+                  >
+                    <option value="1">Ativo</option>
+                    <option value="0">Inativo</option>
+                  </select>
+                </div>
+                <div class="form-buttons">
+                  <button type="submit" class="submit-button">
+                    Salvar Alterações
+                  </button>
+                  <button
+                    type="button"
+                    class="cancel-button"
+                    data-bs-dismiss="modal"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -498,6 +546,9 @@ export default {
         password_user: "",
         confirma_senha: "",
       },
+      UpdateStatus: {
+        status_user: "",
+      },
       Usuarios: [],
       showMessage: false,
       message: "",
@@ -604,12 +655,7 @@ export default {
       data.append("user", this.NovoUsuario.username_user);
       data.append("senha", encryptedPassword);
       data.append("confirma_senha", encryptedPasswordConf);
-      // Cria um objeto para armazenar os dados
-      let dataEntries = {};
-      data.forEach((value, key) => {
-        dataEntries[key] = value;
-      });
-      //console.log(dataEntries); // Exibe o objeto com os dados
+
       axios
         .post(
           "http://localhost/projeto/helptek/php/api/functions/insertUsuario.php?action=InsertUsuario",
@@ -756,6 +802,141 @@ export default {
       // Atualize o originalUsuario com os novos dados
       //this.originalUsuario = { ...this.usuarioAtual };
       //this.closeModal();
+    },
+    //Redefinir senha de usuario
+    onRedefinirSenha() {
+      let data = new FormData();
+
+      this.showErrors = true;
+
+      if (!this.NovoUsuario.password_user || !this.NovoUsuario.confirma_senha) {
+        // Não prosseguir se houver erros
+        return;
+      } else if (this.validaSenha == false || this.matchSenha == false) {
+        // Validação de senha
+        return;
+      }
+
+      // Encriptação de senha no front
+      // eslint-disable-next-line no-undef
+      const encryptedPassword = CryptoJS.SHA256(
+        this.NovoUsuario.password_user
+      ).toString();
+
+      // eslint-disable-next-line no-undef
+      const encryptedPasswordConf = CryptoJS.SHA256(
+        this.NovoUsuario.confirma_senha
+      ).toString();
+
+      let id_user_session = sessionStorage.getItem("id_user");
+      let session_token = localStorage.getItem("token");
+
+      data.append("id_user", this.UsuarioData.id_user);
+      data.append("encryptedPassword", encryptedPassword);
+      data.append("encryptedPasswordConf", encryptedPasswordConf);
+
+      // Cria um objeto para armazenar os dados
+      let dataEntries = {};
+      data.forEach((value, key) => {
+        dataEntries[key] = value;
+      });
+      console.log(dataEntries); // Exibe o objeto com os dados
+
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkUser.php?id_user=${id_user_session}&session_token=${session_token}`
+        )
+        .then((res) => {
+          if (res.data.error === false) {
+            console.log("Server response:", res.data.msg);
+            this.showAlertError(res.data.msg);
+            //this.clearFormFields();
+            //const idfr_code_user = res.data.user;
+            //data.append("idfr_code_user", idfr_code_user);
+            axios
+              .post(
+                "http://localhost/projeto/helptek/php/api/functions/admin/redefineSenha.php",
+                data
+              )
+              .then((res_redef) => {
+                console.log("Server response:", res_redef.data);
+                if (res_redef.data.error === true) {
+                  this.showAlertError(res_redef.data.msg);
+                  //this.clearFormFields();
+                } else {
+                  this.showAlert(res_redef.data.msg);
+                  this.clearFormFields();
+                  this.closeModal(); // Fecha o modal
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            //this.showAlert(res.data.msg);
+          } else {
+            this.showAlert(res.data.msg);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    onAtivaInativaUsuario() {
+      let data = new FormData();
+
+      this.showErrors = true;
+
+      let id_user_session = sessionStorage.getItem("id_user");
+      let session_token = localStorage.getItem("token");
+
+      data.append("id_user", this.UsuarioData.id_user);
+      data.append("status_user", this.UpdateStatus.status_user);
+
+      // Cria um objeto para armazenar os dados
+      let dataEntries = {};
+      data.forEach((value, key) => {
+        dataEntries[key] = value;
+      });
+      console.log(dataEntries); // Exibe o objeto com os dados
+
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkUser.php?id_user=${id_user_session}&session_token=${session_token}`
+        )
+        .then((res) => {
+          if (res.data.error === false) {
+            console.log("Server response:", res.data.msg);
+            this.showAlertError(res.data.msg);
+            //this.clearFormFields();
+            //const idfr_code_user = res.data.user;
+            //data.append("idfr_code_user", idfr_code_user);
+            axios
+              .post(
+                "http://localhost/projeto/helptek/php/api/functions/admin/updateStatusUser.php",
+                data
+              )
+              .then((res_statuser) => {
+                console.log("Server response:", res_statuser.data);
+                if (res_statuser.data.error === true) {
+                  this.showAlertError(res_statuser.data.msg);
+                  //this.clearFormFields();
+                } else {
+                  this.showAlert(res_statuser.data.msg);
+                  this.clearFormFields();
+                  this.closeModal(); // Fecha o modal
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            //this.showAlert(res.data.msg);
+          } else {
+            this.showAlert(res.data.msg);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
 };

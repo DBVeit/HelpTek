@@ -121,32 +121,54 @@
             </button>
           </div>
           <div class="modal-body">
-            <span>
-              ID:
-              <h6 style="display: inline">{{ ChamadoData.idfr_chamado }}</h6>
-            </span>
-            <span>
-              Solicitante:
-              <h6 style="display: inline">
-                {{ ChamadoData.usuario_chamado }}
-              </h6>
-            </span>
-            <span>
-              Status:
-              <h6 style="display: inline">
-                {{ ChamadoData.status_chamado_desc }}
-              </h6>
-            </span>
-            <span>
-              Técnico:
-              <h6 style="display: inline">-</h6>
-            </span>
-            <span>
-              Última atualização:
-              <h6 style="display: inline">
-                {{ ChamadoData.data_atualizacao_fm }}
-              </h6>
-            </span>
+            <div style="width: 50%; float: left">
+              <div>
+                <span>
+                  ID:
+                  <h6 style="display: inline">
+                    {{ ChamadoData.idfr_chamado }}
+                  </h6>
+                </span>
+              </div>
+              <div>
+                <span>
+                  Solicitante:
+                  <h6 style="display: inline">
+                    {{ ChamadoData.usuario_chamado }}
+                  </h6>
+                </span>
+              </div>
+              <div>
+                <span>
+                  Status:
+                  <h6 style="display: inline">
+                    {{ ChamadoData.status_chamado_desc }}
+                  </h6>
+                </span>
+              </div>
+              <div>
+                <span>
+                  Técnico:
+                  <h6 style="display: inline">
+                    {{ ChamadoData.tecnico_responsavel }}
+                  </h6>
+                </span>
+              </div>
+              <div>
+                <span>
+                  Última atualização:
+                  <h6 style="display: inline">
+                    {{ ChamadoData.data_atualizacao_fm }}
+                  </h6>
+                </span>
+              </div>
+            </div>
+            <div style="float: right">
+              <span>
+                Tempo de espera:
+                <h6>{{ ChamadoData.tempo_espera }}</h6>
+              </span>
+            </div>
             <div class="message-box" v-if="showMessage">
               <div class="message-content">
                 <span>{{ message }}</span>
@@ -412,6 +434,9 @@ export default {
         observacao: "",
         novoTecnicoResponsavel: "",
         justificativaEncaminhamento: "",
+        usuario_chamado: "",
+        tempo_espera: "",
+        tecnico_responsavel: "",
       },
       Chamados: [],
       Historico: [],

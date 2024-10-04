@@ -36,6 +36,7 @@
         <DashboardChamados v-if="Dashboard" />
         <ConfiguracoesCorp v-if="ConfigCorp" />
         <ConfiguracoesSetores v-if="ConfigSetores" />
+        <RelatorioChamados v-if="Relatorios" />
       </main>
     </div>
   </div>
@@ -50,6 +51,7 @@ import axios from "axios";
 import DashboardChamados from "@/components/DashboardChamados.vue";
 import ConfiguracoesCorp from "@/components/ConfiguracoesCorp.vue";
 import ConfiguracoesSetores from "@/components/ConfiguracoesSetores.vue";
+import RelatorioChamados from "@/components/RelatorioChamados.vue";
 //import { Modal } from "bootstrap";
 export default {
   name: "HomePage",
@@ -62,6 +64,7 @@ export default {
     ConfiguracoesUsuarios,
     ConfiguracoesCorp,
     ConfiguracoesSetores,
+    RelatorioChamados,
   },
 
   data() {
@@ -78,6 +81,7 @@ export default {
       Dashboard: false,
       ConfigCorp: false,
       ConfigSetores: false,
+      Relatorios: false,
       isTecnico: false,
       showErrors: false,
       showMessage: false,
@@ -155,6 +159,7 @@ export default {
         this.Dashboard = false;
         this.ConfigCorp = false;
         this.ConfigSetores = false;
+        this.Relatorios = false;
       } else if (menuItem === "Meus chamados") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = true;
@@ -163,6 +168,7 @@ export default {
         this.Dashboard = false;
         this.ConfigCorp = false;
         this.ConfigSetores = false;
+        this.Relatorios = false;
       } else if (menuItem === "Todos os chamados") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -171,6 +177,7 @@ export default {
         this.Dashboard = false;
         this.ConfigCorp = false;
         this.ConfigSetores = false;
+        this.Relatorios = false;
       } else if (menuItem === "Configurações de usuários") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -179,6 +186,7 @@ export default {
         this.Dashboard = false;
         this.ConfigCorp = false;
         this.ConfigSetores = false;
+        this.Relatorios = false;
       } else if (menuItem === "Dashboard") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -187,6 +195,7 @@ export default {
         this.Dashboard = true;
         this.ConfigCorp = false;
         this.ConfigSetores = false;
+        this.Relatorios = false;
       } else if (menuItem === "Configurações corporação") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -195,6 +204,7 @@ export default {
         this.Dashboard = false;
         this.ConfigCorp = true;
         this.ConfigSetores = false;
+        this.Relatorios = false;
       } else if (menuItem === "Configurações setores") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -203,6 +213,16 @@ export default {
         this.Dashboard = false;
         this.ConfigCorp = false;
         this.ConfigSetores = true;
+        this.Relatorios = false;
+      } else if (menuItem === "Relatórios") {
+        this.CriarChamadoForm = false;
+        this.MeusChamadosList = false;
+        this.TodosOsChamadosList = false;
+        this.ConfigUsuarios = false;
+        this.Dashboard = false;
+        this.ConfigCorp = false;
+        this.ConfigSetores = false;
+        this.Relatorios = true;
       }
     },
     verificarTipoUsuario() {
