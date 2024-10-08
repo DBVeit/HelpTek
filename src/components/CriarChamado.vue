@@ -35,17 +35,33 @@
           >
         </div>
         <div class="form-group">
-          <label>Setor</label>
-          <select name="setor" id="setor" v-model="ChamadoData.setor">
+          <label>Setor *</label>
+          <select
+            name="setor"
+            id="setor"
+            v-model="ChamadoData.setor"
+            @change="updatePesoSetor"
+          >
             <option default value="" disabled>Setor</option>
+            <!--<option value="1">Não especificado (IPS: 1)</option>-->
+            <option
+              v-for="subs in subsetores"
+              :key="subs.id_setor"
+              :value="subs.id_setor"
+            >
+              {{ subs.nome_setor + " (IPS: " + subs.peso + ")" }}
+            </option>
           </select>
+          <span class="form-tip" v-if="!ChamadoData.setor && showErrors"
+            >*Preechimento obrigatório!</span
+          >
         </div>
         <div class="form-group">
           <label
             >Prioridade *
             <a class="form-tip"
-              >(Será calculada sistemicamente com base em
-              IPS*Gravidade*Urgência*Tendência)</a
+              >(Será calculada sistemicamente com base em IPS * Gravidade *
+              Urgência * Tendência)</a
             ></label
           >
         </div>
@@ -165,12 +181,14 @@ export default {
         gravidade: "",
         urgencia: "",
         tendencia: "",
+        peso: "",
         id_user: id_user,
         session_token: session_token,
       },
       prioridadesGravidade: [],
       prioridadesUrgencia: [],
       prioridadesTendencia: [],
+      subsetores: [],
       showMessage: false,
       message: "",
       showErrors: false,
@@ -179,6 +197,7 @@ export default {
   },
   created() {
     this.fetchPrioridades();
+    this.fetchSetoresList();
     /*console.log(sessionStorage.getItem("id_user"));
     console.log(localStorage.getItem("token"));*/
   },
@@ -204,6 +223,36 @@ export default {
           console.error("Erro ao buscar prioridades: ", error);
         });
     },
+    fetchSetoresList() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/admin/selectSetoresList.php"
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.subsetores = response.data.sub_setores;
+          } else {
+            console.error("Erro ao buscar setores: ", response.data.msg);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar setores:", error);
+        });
+    },
+    updatePesoSetor() {
+      // Busca o setor selecionado na lista de subsetores
+      const setorSelecionado = this.subsetores.find(
+        (subs) => subs.id_setor === this.ChamadoData.setor
+      );
+
+      // Se o setor for encontrado, atualiza o peso no ChamadoData
+      if (setorSelecionado) {
+        this.ChamadoData.peso = setorSelecionado.peso;
+      } else {
+        // Caso contrário, define o peso como 1 ou vazio
+        this.ChamadoData.peso = 1;
+      }
+    },
     onCriarChamado() {
       let data = new FormData();
 
@@ -211,6 +260,7 @@ export default {
       if (
         !this.ChamadoData.titulo ||
         !this.ChamadoData.descricao ||
+        !this.ChamadoData.setor ||
         !this.ChamadoData.gravidade ||
         !this.ChamadoData.urgencia ||
         !this.ChamadoData.tendencia
@@ -226,6 +276,8 @@ export default {
       let session_token = localStorage.getItem("token");
       data.append("titulo", this.ChamadoData.titulo);
       data.append("descricao", this.ChamadoData.descricao);
+      data.append("setor", this.ChamadoData.setor);
+      data.append("peso", this.ChamadoData.peso);
       data.append("gravidade", this.ChamadoData.gravidade);
       data.append("urgencia", this.ChamadoData.urgencia);
       //data.append("diasCProb", this.ChamadoData.diasCProb);
@@ -289,6 +341,7 @@ export default {
     clearFormFields() {
       this.ChamadoData.titulo = "";
       this.ChamadoData.descricao = "";
+      this.ChamadoData.setor = "";
       this.ChamadoData.gravidade = "";
       this.ChamadoData.urgencia = "";
       this.ChamadoData.tendencia = "";

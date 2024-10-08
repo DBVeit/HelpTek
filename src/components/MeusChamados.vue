@@ -183,6 +183,26 @@
                 />
               </div>
               <div class="form-group-modal">
+                <label>Setor *</label>
+                <select
+                  name="setor"
+                  id="setor"
+                  v-model="ChamadoData.id_setor"
+                  @change="updatePesoSetor"
+                  :disabled="!isEditing"
+                >
+                  <option default value="" disabled>Setor</option>
+                  <!--<option value="1">Não especificado (IPS: 1)</option>-->
+                  <option
+                    v-for="subs in subsetores"
+                    :key="subs.id_setor"
+                    :value="subs.id_setor"
+                  >
+                    {{ subs.nome_setor + " (IPS: " + subs.peso + ")" }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group-modal">
                 <label>Descrição</label>
                 <textarea
                   id="description"
@@ -486,7 +506,6 @@ export default {
     return {
       ChamadoData: {
         id_chamado: "",
-        id_user: "",
         idfr_chamado: "",
         titulo_chamado: "",
         descricao_chamado: "",
@@ -496,9 +515,11 @@ export default {
         data_atualizacao: "",
         data_conclusao: "",
         //diasCProb: "",
+        id_setor: "",
         gravidade: "",
         urgencia: "",
         tendencia: "",
+        peso: "",
         id_categoria_servico: "",
         id_categoria_ocorrencia: "",
         categoriaServico: "",
@@ -517,6 +538,7 @@ export default {
       prioridadesGravidade: [],
       prioridadesUrgencia: [],
       prioridadesTendencia: [],
+      subsetores: [],
       categoriasServico: [],
       categoriasOcorrencia: [],
       recoverMessage: "",
@@ -533,6 +555,7 @@ export default {
     this.fetchPrioridades();
     this.fetchCategoriasServico();
     this.fetchCategoriasOcorrencia();
+    this.fetchSetoresList();
   },
   methods: {
     //Listagem de chamados
@@ -577,6 +600,46 @@ export default {
         .catch((error) => {
           console.error("Erro ao buscar prioridades: ", error);
         });
+    },
+    //Listagem de setores
+    fetchSetoresList() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/admin/selectSetoresList.php"
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.subsetores = response.data.sub_setores;
+          } else {
+            console.error("Erro ao buscar setores: ", response.data.msg);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar setores:", error);
+        });
+    },
+    // Função para carregar o setor e o peso ao abrir o modal
+    /*loadChamadoData() {
+      const setorSelecionado = this.subsetores.find(
+        (subs) => subs.id_setor === this.ChamadoData.id_setor
+      );
+      if (setorSelecionado) {
+        this.ChamadoData.peso = setorSelecionado.peso;
+      }
+    },*/
+    updatePesoSetor() {
+      // Busca o setor selecionado na lista de subsetores
+      const setorSelecionado = this.subsetores.find(
+        (subs) => subs.id_setor === this.ChamadoData.id_setor
+      );
+
+      // Se o setor for encontrado, atualiza o peso no ChamadoData
+      if (setorSelecionado) {
+        this.ChamadoData.peso = setorSelecionado.peso;
+      } else {
+        // Caso contrário, define o peso como 1 ou vazio
+        this.ChamadoData.peso = 1;
+      }
     },
     //Função para obter as categorias de serviço
     fetchCategoriasServico() {
@@ -625,6 +688,8 @@ export default {
       this.ChamadoData.gravidade = chamado.gravidade;
       this.ChamadoData.urgencia = chamado.urgencia;
       this.ChamadoData.tendencia = chamado.tendencia;
+      //this.loadChamadoData();
+      //console.log(chamado);
 
       axios
         .get(
@@ -647,12 +712,14 @@ export default {
     },
     //Função para salvar dados editados do chamado
     salvarChamado() {
+      let id_user = sessionStorage.getItem("id_user");
       const {
         id_chamado,
-        id_user = sessionStorage.getItem("id_user"),
         idfr_chamado,
         titulo_chamado,
         descricao_chamado,
+        id_setor,
+        peso,
         gravidade,
         urgencia,
         tendencia,
@@ -663,6 +730,8 @@ export default {
         idfr_chamado,
         titulo_chamado,
         descricao_chamado,
+        id_setor,
+        peso,
         gravidade,
         urgencia,
         tendencia,
@@ -676,6 +745,8 @@ export default {
             idfr_chamado,
             titulo_chamado,
             descricao_chamado,
+            id_setor,
+            peso,
             gravidade,
             urgencia,
             tendencia,

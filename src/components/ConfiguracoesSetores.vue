@@ -119,12 +119,13 @@
               <div class="form-group-modal">
                 <label>Peso *</label>
                 <input
-                  type="text"
+                  type="number"
                   class="form-control"
+                  max="5"
+                  min="0"
                   name="peso"
                   v-model="NovoSetor.peso"
                 />
-                <input type="number" />
                 <span
                   class="form-danger-msg"
                   v-if="!NovoSetor.peso && showErrors"
@@ -133,17 +134,38 @@
               </div>
               <div class="form-group-modal">
                 <label>Corporação *</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  name="id_corporacao"
-                  v-model="NovoSetor.nome_setor"
-                />
+                <select v-model="NovoSetor.corporacao">
+                  <option default value="" disabled>Corporacao</option>
+                  <option
+                    v-for="corps in corporacoes"
+                    :key="corps.id_corporacao"
+                    :value="corps.id_corporacao"
+                  >
+                    {{ corps.nome_corporacao }}
+                  </option>
+                </select>
                 <span
                   class="form-danger-msg"
-                  v-if="!NovoSetor.nome_setor && showErrors"
+                  v-if="!NovoSetor.corporacao && showErrors"
                   >*Preechimento obrigatório!</span
                 >
+              </div>
+              <div class="form-group-modal">
+                <label>Subsetor</label>
+                <select
+                  name="subsetor"
+                  id="subsetor"
+                  v-model="NovoSetor.subsetor"
+                >
+                  <option default value="" disabled>Subsetor</option>
+                  <option
+                    v-for="subs in subsetores"
+                    :key="subs.id_setor"
+                    :value="subs.id_setor"
+                  >
+                    {{ subs.nome_setor }}
+                  </option>
+                </select>
               </div>
               <div class="form-group-modal">
                 <div class="form-buttons">
@@ -181,7 +203,7 @@ export default {
         id_corporacao: "",
         idfr_setor: "",
         nome_setor: "",
-        nome_corporacao: "",
+        corporacao: "",
         peso: "",
         data_criacao: "",
       },
@@ -189,8 +211,11 @@ export default {
         nome_setor: "",
         peso: "",
         id_corporacao: "",
+        subsetor: "",
       },
       Setor: [],
+      subsetores: [],
+      corporacoes: [],
       showMessage: false,
       message: "",
       showErrors: false,
@@ -207,6 +232,8 @@ export default {
     import("../assets/css/component/MeusChamados.css");
     import("../assets/css/component/ConfiguracoesUsuarios.css");
     this.onListarSetores();
+    this.fetchSetoresList();
+    this.fetchCorporacoes();
   },
   methods: {
     // Listagem de setores cadastrados na base
@@ -217,7 +244,7 @@ export default {
         )
         .then((res) => {
           console.log("Server response:", res.data);
-          this.Corporacao = res.data.corporacao;
+          this.Setor = res.data.setores;
           if (res.data.code == 204) {
             this.noDataFound = true;
             this.noDataFoundMsg = res.data.msg;
@@ -227,39 +254,83 @@ export default {
           console.log(err);
         });
     },
-    verCorporacao(corporacao) {
-      this.CorporacaoData = corporacao;
+    verSetor(setor) {
+      this.SetorData = setor;
       this.isEditing = false;
-      this.originalCorporacao = { corporacao };
-      this.corporacaoAtual = { corporacao };
+      this.originalSetor = { setor };
+      this.corporacaoSetor = { setor };
     },
     // Visualizar ou esconder listagem
     toggleView() {
       this.showList = !this.showList;
     },
+    //Listar corporacoes
+    fetchCorporacoes() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/admin/selectCorporacoes.php"
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.corporacoes = response.data.corps;
+          } else {
+            console.error("Erro ao buscar corporacoes: ", response.data.msg);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar corporacoes:", error);
+        });
+    },
+    //Listar subsetores
+    fetchSetoresList() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/admin/selectSetoresList.php"
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.subsetores = response.data.sub_setores;
+          } else {
+            console.error("Erro ao buscar setores: ", response.data.msg);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar setores:", error);
+        });
+    },
     // Formulario de cadastro
-    onCriarCorporacao() {
+    onCriarSetor() {
       let data = new FormData();
 
       this.showErrors = true;
 
       // Verifique se há algum campo obrigatório vazio
-      if (!this.NovaCorp.nome_corporacao) {
+      if (
+        !this.NovoSetor.nome_setor ||
+        !this.NovoSetor.peso ||
+        !this.NovoSetor.corporacao
+      ) {
         // Não prosseguir se houver erros
+        this.showErrors = true;
         return;
       }
 
-      data.append("nome_corporacao", this.NovaCorp.nome_corporacao);
+      this.showErrors = false;
+
+      data.append("nome_setor", this.NovoSetor.nome_setor);
+      data.append("peso", this.NovoSetor.peso);
+      data.append("corporacao", this.NovoSetor.corporacao);
+      data.append("subsetor", this.NovoSetor.subsetor);
 
       // Cria um objeto para armazenar os dados
       let dataEntries = {};
       data.forEach((value, key) => {
         dataEntries[key] = value;
       });
-      //console.log(dataEntries); // Exibe o objeto com os dados
+      console.log(dataEntries); // Exibe o objeto com os dados
       axios
         .post(
-          "http://localhost/projeto/helptek/php/api/functions/admin/insertCorp.php?action=InsertCorp",
+          "http://localhost/projeto/helptek/php/api/functions/admin/insertSetor.php?action=InsertSetor",
           data
         )
         .then((res) => {

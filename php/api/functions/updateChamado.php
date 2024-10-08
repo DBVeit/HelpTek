@@ -15,12 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_user = $mysqli_con->real_escape_string($data['id_user']);
             $idfr_chamado = $mysqli_con->real_escape_string($data['idfr_chamado']);
             $titulo = $mysqli_con->real_escape_string($data['titulo_chamado']);
+            $id_setor = $mysqli_con->real_escape_string($data['id_setor']);
+            $peso = $mysqli_con->real_escape_string($data['peso']);
             $descricao = $mysqli_con->real_escape_string($data['descricao_chamado']);
             $gravidade = $mysqli_con->real_escape_string($data['gravidade']);
             $urgencia = $mysqli_con->real_escape_string($data['urgencia']);
             $tendencia = $mysqli_con->real_escape_string($data['tendencia']);
 
-            $prioridade = (intval($gravidade)*intval($urgencia)*intval($tendencia));
+            $prioridade = intval($peso) * intval($gravidade) * intval($urgencia) * intval($tendencia);
 
             $select_user = "SELECT id_user, idfr_code_user FROM users WHERE id_user = '$id_user'";
             $res_select_user = $mysqli_con->query($select_user);
@@ -40,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $total_acoes_upd = $total_acoes++;
 
                     if ($status_chamado != 4 || $status_chamado != 0) {
-                        $sql_atualiza = "UPDATE chamados SET titulo_chamado = '$titulo', descricao_chamado = '$descricao', gravidade = '$gravidade', urgencia = '$urgencia', tendencia = '$tendencia', prioridade_chamado = '$prioridade', data_atualizacao = NOW(), total_acoes = '$total_acoes' WHERE id_chamado = '$id_chamado'";
+                        $sql_atualiza = "UPDATE chamados SET titulo_chamado = '$titulo', descricao_chamado = '$descricao', gravidade = '$gravidade', urgencia = '$urgencia', tendencia = '$tendencia', id_setor = '$id_setor', prioridade_chamado = '$prioridade', data_atualizacao = NOW(), total_acoes = '$total_acoes' WHERE id_chamado = '$id_chamado'";
 
                         $result_atualiza = $mysqli_con->query($sql_atualiza);
 

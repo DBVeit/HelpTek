@@ -1,0 +1,12 @@
+#form-group-rel{
+    margin-bottom: 20px;
+}
+
+#form-rel-selector{
+    float: left;
+}
+
+.components-container{
+    clear: both;
+    padding: 15px;
+}

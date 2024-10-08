@@ -31,6 +31,7 @@ if (isset($_GET['action'])) {
                             FROM chamados 
                             INNER JOIN users ON users.id_user = chamados.id_user
                             LEFT JOIN users AS tecnico ON tecnico.id_user = chamados.id_user_tecnico AND tecnico.id_permissao = 2
+                            LEFT JOIN setor ON setor.id_setor = chamados.id_setor
                             WHERE chamados.id_user='$id_user' AND status_chamado = '$status_chamado' 
                             ORDER BY 
                                 CASE 
@@ -59,6 +60,7 @@ if (isset($_GET['action'])) {
                             FROM chamados 
                             INNER JOIN users ON users.id_user = chamados.id_user
                             LEFT JOIN users AS tecnico ON tecnico.id_user = chamados.id_user_tecnico AND tecnico.id_permissao = 2
+                            LEFT JOIN setor ON setor.id_setor = chamados.id_setor
                             WHERE chamados.id_user='$id_user' 
                             ORDER BY 
                                 CASE 
@@ -90,6 +92,7 @@ if (isset($_GET['action'])) {
                             FROM chamados 
                             INNER JOIN users ON users.id_user = chamados.id_user
                             LEFT JOIN users AS tecnico ON tecnico.id_user = chamados.id_user_tecnico AND tecnico.id_permissao = 2
+                            LEFT JOIN setor ON setor.id_setor = chamados.id_setor
                             WHERE id_user_tecnico='$id_user' AND status_chamado = '$status_chamado' 
                             ORDER BY 
                                 CASE 
@@ -118,6 +121,7 @@ if (isset($_GET['action'])) {
                             FROM chamados 
                             INNER JOIN users ON users.id_user = chamados.id_user
                             LEFT JOIN users AS tecnico ON tecnico.id_user = chamados.id_user_tecnico AND tecnico.id_permissao = 2
+                            LEFT JOIN setor ON setor.id_setor = chamados.id_setor
                             WHERE id_user_tecnico='$id_user' 
                             ORDER BY
                                 CASE 

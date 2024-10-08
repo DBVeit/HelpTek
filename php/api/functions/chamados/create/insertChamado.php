@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['titulo'])
         && isset($_POST['descricao'])
+        && isset($_POST['setor'])
+        && isset($_POST['peso'])
         && isset($_POST['gravidade'])
         && isset($_POST['urgencia'])
         && isset($_POST['tendencia'])
@@ -17,10 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $titulo = $mysqli_con->real_escape_string($_POST['titulo']);
         $descricao = $mysqli_con->real_escape_string($_POST['descricao']);
+        $id_setor = $mysqli_con->real_escape_string($_POST['setor']);
         $gravidade = $mysqli_con->real_escape_string($_POST['gravidade']);
         $urgencia = $mysqli_con->real_escape_string($_POST['urgencia']);
         $tendencia = $mysqli_con->real_escape_string($_POST['tendencia']);
-        $prioridade = (intval($gravidade) * intval($urgencia) * intval($tendencia));
+        $peso = $mysqli_con->real_escape_string($_POST['peso']);
+        $prioridade = intval($peso) * intval($gravidade) * intval($urgencia) * intval($tendencia);
         $id_user = $_POST['id_user'];
         $idfr_code_user = $_POST['idfr_code_user'];
         $mysqli_con->begin_transaction();
@@ -106,12 +110,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $json_anexos = json_encode($anexos);
 
             // Chamada da stored procedure
-            $stmt = $mysqli_con->prepare("CALL InserirChamado(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $mysqli_con->prepare("CALL InserirChamado(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->bind_param(
-                'issiiiiss',
+                'issiiiiiss',
                 $id_user,           // ID do usuário
                 $titulo,            // Título do chamado
                 $descricao,         // Descrição do chamado
+                $id_setor,          // ID do setor
                 $gravidade,         // Gravidade
                 $urgencia,          // Urgência
                 $tendencia,         // Tendência
