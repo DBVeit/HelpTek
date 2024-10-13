@@ -30,6 +30,7 @@ if (isset($_GET['action'])) {
                     chamados.id_usuario_anterior,
                     chamados.observacao,
                     acompanhamento.id_acompanhamento,
+                    acompanhamento.id_usuario_acao,
                     acompanhamento.acao,
                     DATE_FORMAT(acompanhamento.data_acao, '%d/%m/%Y %H:%i:%s') AS data_acao_fm,
                     acompanhamento.descricao_acao,

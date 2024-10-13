@@ -228,6 +228,9 @@ export default {
           }
         })
         .catch((err) => {
+          alert(
+            "Internal Error (Status code: 500) - Servidor encontra-se inativo ou desabilitado!"
+          );
           console.log("Err", err);
         });
     },

@@ -169,8 +169,7 @@
 .historico-table{
     border: none;
     border-radius: 15px;
-    background-color: #dcd2d2;
-    margin-bottom: 10px;
+    /*background-color: #dcd2d2;*/
 }
 
 .historico-info-i{
@@ -181,5 +180,102 @@
 
 
 .historico-info1{
+    font-size: 12px;
+}
+
+.paginacao{
+    padding-bottom: 45px;
+    width: 96%;
+}
+
+.pager{
+    float: left;
+    width: 15%;
+}
+
+.totalizer{
+    float: right;
+    text-align: right;
+    width: 30%;
+}
+
+.top_info{
+    width: 100%;
+}
+
+.left_info{
+    width: 45%;
+    float: left;
+}
+
+.right-info{
+    float: right;
+    width: 49%;
+    text-align: right;
+}
+
+.inline{
+    display: inline;
+}
+
+.filter{
+    max-width: 98%;
+}
+
+.filter input[type=text], input[type=date], select{
+    padding: 4px;
+    border-radius: 4px;
+    background-color: white;
+    border: 1px solid #ddd;
+}
+
+.msg_receive {
+    position: relative;
+    left: 0;
+    width: 90%;
+    height: auto;
+    text-align: justify;
+    padding: 16px;
+    background-color: #dcd2d2;
+    border-radius: 20px 20px 20px;
+    margin-bottom: 10px;
+}
+
+.msg_send {
+    position: relative;
+    width: 90%;
+    right: 0;
+    height: auto;
+    text-align: justify;
+    padding: 16px;
+    background-color: #f0f0f0;
+    border-radius: 20px 20px 20px;
+    margin-bottom: 10px;
+    margin-left: auto;
+}
+
+.msg_receive::before {
+    content: " ";
+    position: absolute;
+    transform: rotate(90deg);
+    left: -20px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: #dcd2d2 transparent transparent transparent;
+}
+
+.msg_send::before {
+    content: " ";
+    position: absolute;
+    transform: rotate(270deg);
+    right: -20px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: #f0f0f0 transparent transparent transparent;
+}
+
+.time{
+    float: right;
+    margin-right:10px;
     font-size: 12px;
 }

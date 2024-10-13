@@ -18,8 +18,10 @@
             <option value="cat_ocor">
               Chamados por caregoria de ocorrência
             </option>
-            <option value="dta_abertura">Data de abertura</option>
-            <option value="dta_conclusao">Data de conclusão</option>
+            <option value="dta_abertura">Chamados por data de abertura</option>
+            <option value="dta_conclusao">
+              Chamados por data de conclusão
+            </option>
           </select>
           <!--<a
             v-if="showTypeRelatorio"
@@ -96,9 +98,6 @@ export default {
       this.selectedConsulta = ""; // Limpa o select
       this.showTypeRelatorio = false;
     },
-  },
-  mounted() {
-    this.fetchChamadosData(); // Renderizar gráfico ao carregar a página
   },
 };
 </script>

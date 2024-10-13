@@ -14,7 +14,7 @@ if (isset($_GET['action'])) {
                             setor.idfr_setor, 
                             setor.nome_setor, 
                             setor.peso, 
-                            DATE_FORMAT(setor.data_criacao, '%d/%m/%Y') AS data_criacao_fm, 
+                            DATE_FORMAT(setor.data_criacao_setor, '%d/%m/%Y') AS data_criacao_fm, 
                             corporacao.id_corporacao, 
                             corporacao.nome_corporacao 
                         FROM setor

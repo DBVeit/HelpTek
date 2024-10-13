@@ -2,18 +2,38 @@
   <div class="ticket-form-container">
     <h1>Meus chamados</h1>
     <div class="filter">
-      Filtros:
-      <select v-model="selectedStatus" @change="filterChamados">
-        <option selected disabled>Selecionar...</option>
-        <option value="1">Em aberto</option>
-        <option value="2">Em atendimento</option>
-        <option value="3">Respondido</option>
-        <option value="4">Concluido</option>
-        <option value="0">Cancelado</option>
-      </select>
-      <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== null"
-        >Limpar filtros</a
-      >
+      <h6>Filtros</h6>
+      <div>
+        <label for="filtro_status">Status: </label>
+        <select v-model="selectedStatus" @change="filterChamados">
+          <option default disabled="disabled" value>Status</option>
+          <option value="1">Em aberto</option>
+          <option value="2">Em atendimento</option>
+          <option value="3">Respondido</option>
+          <option value="4">Concluido</option>
+          <option value="0">Cancelado</option>
+        </select>
+        <label for="filtro_prioridade">Prioridade: </label>
+        <select>
+          <option>Prioridade</option>
+          <option value="0">Crítica</option>
+          <option value="1">Alta</option>
+          <option value="2">Média</option>
+          <option value="3">Baixa</option>
+        </select>
+        <label for="filtro_dta_cri">Data de criação: </label>
+        <input type="date" />
+      </div>
+      <div>
+        ou
+        <input type="text" placeholder="Pesquisar ID ou título..." />
+        <button class="bt-acoes-chamado">
+          <i class="bi bi-search"></i>
+        </button>
+        <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== ''"
+          >Limpar filtros</a
+        >
+      </div>
     </div>
     <div>
       <table class="chamados-list-table">
@@ -25,8 +45,6 @@
             <th>Data de criação</th>
             <th>Status</th>
             <th>Prazo</th>
-            <!--<th>Atualizado em</th>
-            <th>Concluído em</th>-->
             <th>Última atualização</th>
             <th></th>
           </tr>
@@ -96,6 +114,35 @@
           </tr>
         </tbody>
       </table>
+      <div class="paginacao">
+        <div class="pager">
+          <!-- Tabela ou grid de Chamados -->
+          <div v-for="Chamado in ChamadosPaginados" :key="Chamado.id">
+            {{ Chamado.nome }}
+          </div>
+          <!-- Botões de paginação -->
+          <div>
+            <button
+              class="bt-acoes-chamado"
+              @click="paginaAtual--"
+              :disabled="paginaAtual === 1"
+            >
+              <i class="bi bi-caret-left-fill"></i>
+            </button>
+            <button
+              class="bt-acoes-chamado"
+              @click="paginaAtual++"
+              :disabled="paginaAtual === totalPaginas"
+            >
+              <i class="bi bi-caret-right-fill"></i>
+            </button>
+            <!--<span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>-->
+          </div>
+        </div>
+        <div class="totalizer">
+          <span>Total de registros: {{ totalRegistros }}</span>
+        </div>
+      </div>
       <div class="recover-message" v-if="recoverMessage">
         {{ recoverMessage }}
       </div>
@@ -119,53 +166,57 @@
             </button>
           </div>
           <div class="modal-body">
-            <div style="width: 50%; float: left">
-              <div>
-                <span>
-                  ID:
-                  <h6 style="display: inline">
-                    {{ ChamadoData.idfr_chamado }}
-                  </h6>
-                </span>
+            <div class="top_info">
+              <div class="left_info">
+                <div>
+                  <span>
+                    ID:
+                    <h6 class="inline">
+                      {{ ChamadoData.idfr_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Solicitante:
+                    <h6 class="inline">
+                      {{ ChamadoData.usuario_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Status:
+                    <h6 class="inline">
+                      {{ ChamadoData.status_chamado_desc }}
+                    </h6>
+                  </span>
+                </div>
+                <div v-if="ChamadoData.tecnico_responsavel">
+                  <span>
+                    Técnico:
+                    <h6 class="inline">
+                      {{ ChamadoData.tecnico_responsavel }}
+                    </h6>
+                  </span>
+                </div>
               </div>
-              <div>
-                <span>
-                  Solicitante:
-                  <h6 style="display: inline">
-                    {{ ChamadoData.usuario_chamado }}
-                  </h6>
-                </span>
+              <div class="right-info">
+                <div>
+                  <span>
+                    Tempo de espera:
+                    <h6>{{ ChamadoData.tempo_espera }}</h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Última atualização:
+                    <h6 class="inline">
+                      {{ ChamadoData.data_atualizacao_fm }}
+                    </h6>
+                  </span>
+                </div>
               </div>
-              <div>
-                <span>
-                  Status:
-                  <h6 style="display: inline">
-                    {{ ChamadoData.status_chamado_desc }}
-                  </h6>
-                </span>
-              </div>
-              <div v-if="ChamadoData.tecnico_responsavel">
-                <span>
-                  Técnico:
-                  <h6 style="display: inline">
-                    {{ ChamadoData.tecnico_responsavel }}
-                  </h6>
-                </span>
-              </div>
-              <div>
-                <span>
-                  Última atualização:
-                  <h6 style="display: inline">
-                    {{ ChamadoData.data_atualizacao_fm }}
-                  </h6>
-                </span>
-              </div>
-            </div>
-            <div style="float: right">
-              <span>
-                Tempo de espera:
-                <h6>{{ ChamadoData.tempo_espera }}</h6>
-              </span>
             </div>
             <div class="message-box" v-if="showMessage">
               <div class="message-content">
@@ -183,7 +234,7 @@
                 />
               </div>
               <div class="form-group-modal">
-                <label>Setor *</label>
+                <label>Setor</label>
                 <select
                   name="setor"
                   id="setor"
@@ -423,29 +474,38 @@
             </button>
           </div>
           <div class="modal-body">
-            <table
-              class="historico-table"
+            <div
               v-for="historico in Historico"
               :key="historico.id_acompanhamento"
             >
-              <tr>
-                <td rowspan="2" class="historico-info-i">
-                  <i class="bi bi-person-circle"></i>
-                </td>
-                <td class="historico-info1">
-                  {{ historico.data_acao_fm }} <br />
-                  {{ historico.name_user }}
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label>Ação:</label> <label>{{ historico.acao }}</label>
-                  <br />
-                  <label> Descrição:</label>
-                  <label> {{ historico.descricao_acao }}</label>
-                </td>
-              </tr>
-            </table>
+              <div
+                :class="
+                  historico.id_usuario_acao === sessionUser
+                    ? 'msg_send'
+                    : 'msg_receive'
+                "
+              >
+                <table class="historico-table">
+                  <tr>
+                    <td rowspan="2" class="historico-info-i">
+                      <i class="bi bi-person-circle"></i>
+                    </td>
+                    <td class="historico-info1">
+                      {{ historico.data_acao_fm }} <br />
+                      {{ historico.name_user }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <label>Ação:</label> <label>{{ historico.acao }}</label>
+                      <br />
+                      <label> Descrição:</label>
+                      <label> {{ historico.descricao_acao }}</label>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -532,7 +592,7 @@ export default {
       },
       Chamados: [],
       Historico: [],
-      selectedStatus: null,
+      selectedStatus: "",
       isEditing: false,
       isConfirmingCancel: false,
       prioridadesGravidade: [],
@@ -547,6 +607,10 @@ export default {
       showErrors: false,
       btAvaliar: false,
       anexos: [], // Array para armazenar os arquivos anexados
+      totalRegistros: 0,
+      paginaAtual: 1,
+      registrosPorPagina: 50,
+      sessionUser: sessionStorage.getItem("id_user"),
     };
   },
   created() {
@@ -573,6 +637,7 @@ export default {
           } else {
             console.log("Server response:", res.data);
             this.Chamados = res.data.chamados;
+            this.totalRegistros = res.data.total;
           }
         })
         .catch((err) => {
@@ -619,14 +684,6 @@ export default {
         });
     },
     // Função para carregar o setor e o peso ao abrir o modal
-    /*loadChamadoData() {
-      const setorSelecionado = this.subsetores.find(
-        (subs) => subs.id_setor === this.ChamadoData.id_setor
-      );
-      if (setorSelecionado) {
-        this.ChamadoData.peso = setorSelecionado.peso;
-      }
-    },*/
     updatePesoSetor() {
       // Busca o setor selecionado na lista de subsetores
       const setorSelecionado = this.subsetores.find(
@@ -901,7 +958,7 @@ export default {
     },
     //Função para limpar o filtro
     limparFiltros() {
-      this.selectedStatus = null;
+      this.selectedStatus = "";
       this.onListarChamados();
       // Limpar a lista de chamados filtrados
     },
@@ -976,6 +1033,16 @@ export default {
         default:
           return ""; // Classe vazia para evitar erros
       }
+    },
+  },
+  computed: {
+    registrosPaginados() {
+      const inicio = (this.paginaAtual - 1) * this.ChamadosPorPagina;
+      const fim = this.paginaAtual * this.ChamadosPorPagina;
+      return this.Chamados.slice(inicio, fim);
+    },
+    totalPaginas() {
+      return Math.ceil(this.Chamados.length / this.ChamadosPorPagina);
     },
   },
 };

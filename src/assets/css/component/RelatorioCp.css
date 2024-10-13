@@ -10,3 +10,14 @@
     clear: both;
     padding: 15px;
 }
+
+.form-group-relatorio {
+    align-content: center;
+    padding: 6px;
+    margin: 5px auto;
+}
+
+.form-group-relatorio-acao {
+    align-content: center;
+    width: 50%;
+}

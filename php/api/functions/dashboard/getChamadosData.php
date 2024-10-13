@@ -34,6 +34,12 @@ if (isset($_GET['action']) && $_GET['action'] == 'getChamadosData' && isset($_GE
                            GROUP BY id_user_tecnico";
             break;
 
+        case 'setor':
+            $sql_select = "SELECT id_setor, COUNT(*) as total 
+                           FROM chamados 
+                           GROUP BY id_setor";
+            break;
+
         // Adicione as demais opções aqui (periodo, setor, usuario)
         default:
             $res['error'] = true;

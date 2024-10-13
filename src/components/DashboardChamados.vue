@@ -9,10 +9,17 @@
             <option value="" disabled selected>Selecionar...</option>
             <option value="status">Chamados por status</option>
             <option value="prioridade">Chamados por prioridade</option>
-            <option value="tecnico">Chamados por técnico</option>
-            <option value="periodo">Chamados por período</option>
+            <option value="tecnico">Chamados por usuário técnico</option>
             <option value="setor">Chamados por setor</option>
-            <option value="usuario">Chamados por usuário</option>
+            <option value="solicitante">
+              Chamados por usuário solicitante
+            </option>
+            <option value="cat_serv">Chamados por categoria de serviço</option>
+            <option value="cat_ocor">
+              Chamados por categoria de ocorrência
+            </option>
+            <option value="dta_abr">Chamados por data de abertura</option>
+            <option value="dta_conc">Chamados por data de conclusão</option>
           </select>
           <a
             v-if="showDashboard"

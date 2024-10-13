@@ -143,6 +143,7 @@ if (isset($_GET['action'])) {
 
                 if ($result){
                     $num = mysqli_num_rows($result);
+                    $res['total'] = $num;
                     $chamados = array();
 
                     if ($num > 0) {

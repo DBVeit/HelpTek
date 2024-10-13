@@ -75,6 +75,7 @@ if (isset($request->email)) {
             $mail->Body    = "Sua nova senha é: " . $newPassword;
 
             $mail->send();
+            $mail->SMTPDebug = 2;
             echo json_encode(['message' => 'Um email com a nova senha foi enviado para o seu email.', 'status' => 'success']);
         } catch (Exception $e) {
             echo json_encode(['message' => "Erro ao enviar o email. Mailer Error: {$mail->ErrorInfo}", 'status' => 'error']);
