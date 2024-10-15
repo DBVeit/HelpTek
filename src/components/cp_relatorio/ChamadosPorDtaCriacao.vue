@@ -2,16 +2,6 @@
   <div class="component-main-container">
     <form @submit.prevent="onSelectParamRel">
       <div class="form-group">
-        <label>Prioridade: </label>
-        <select v-model="RelatorioParam.prioridade_chamado">
-          <option value="" disabled selected>Selecionar...</option>
-          <option value="0">Crítica</option>
-          <option value="1">Alta</option>
-          <option value="2">Média</option>
-          <option value="3">Baixa</option>
-        </select>
-      </div>
-      <div class="form-group">
         <label>Data de criação: </label>
         Início
         <input type="date" v-model="RelatorioParam.dta_criacao_inicio" />
@@ -49,11 +39,10 @@
 import axios from "axios";
 
 export default {
-  name: "ChamadosPorPrioridade",
+  name: "ChamadosPorDtaCriacao",
   data() {
     return {
       RelatorioParam: {
-        prioridade_chamado: "",
         dta_criacao_inicio: "",
         dta_criacao_fim: "",
       },
@@ -66,10 +55,6 @@ export default {
       let relatorio = new FormData();
 
       relatorio.append(
-        "prioridade_chamado",
-        this.RelatorioParam.prioridade_chamado
-      );
-      relatorio.append(
         "dta_criacao_inicio",
         this.RelatorioParam.dta_criacao_inicio
       );
@@ -77,7 +62,7 @@ export default {
 
       axios
         .post(
-          `http://localhost/projeto/helptek/php/api/functions/relatorios/getChamadosPrioridade.php`,
+          `http://localhost/projeto/helptek/php/api/functions/relatorios/getChamadosDtaCriacao.php`,
           relatorio
         )
         .then((res) => {
@@ -98,10 +83,6 @@ export default {
     generateExcelReport() {
       let relatorio = new FormData();
 
-      relatorio.append(
-        "prioridade_chamado",
-        this.RelatorioParam.prioridade_chamado
-      );
       relatorio.append(
         "dta_criacao_inicio",
         this.RelatorioParam.dta_criacao_inicio

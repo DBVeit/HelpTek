@@ -1,6 +1,6 @@
 <template>
   <div class="component-main-container">
-    <form @submit.prevent="onSelectStatusRel">
+    <form @submit.prevent="onSelectParamRel">
       <div class="form-group">
         <label>Status: </label>
         <select v-model="RelatorioParam.status_chamado">
@@ -63,7 +63,7 @@ export default {
     };
   },
   methods: {
-    onSelectStatusRel() {
+    onSelectParamRel() {
       let relatorio = new FormData();
 
       relatorio.append("status_chamado", this.RelatorioParam.status_chamado);

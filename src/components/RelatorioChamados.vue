@@ -18,30 +18,15 @@
             <option value="cat_ocor">
               Chamados por caregoria de ocorrência
             </option>
-            <option value="dta_abertura">Chamados por data de abertura</option>
+            <option value="dta_criacao">Chamados por data de criação</option>
             <option value="dta_conclusao">
               Chamados por data de conclusão
             </option>
           </select>
-          <!--<a
-            v-if="showTypeRelatorio"
-            @click.prevent="resetTypeRelatorio"
-            class="clear-selection-link"
-            >Limpar seleção</a
-          >-->
         </div>
       </form>
     </div>
     <div class="components-container">
-      <!--<div id="chamados_por_status"></div>
-      <div id="chamados_por_prioridade"></div>
-      <div id="chamados_por_tecnico"></div>
-      <div id="chamados_por_setor"></div>
-      <div id="chamados_por_solicitante"></div>
-      <div id="chamados_por_servico"></div>
-      <div id="chamados_por_ocorrencia"></div>
-      <div id="chamados_por_abertura"></div>
-      <div id="chamados_por_conclusao"></div>-->
       <component :is="getComponent"></component>
     </div>
   </div>
@@ -54,7 +39,7 @@ import ChamadosPorSetor from "@/components/cp_relatorio/ChamadosPorSetor.vue";
 import ChamadosPorSolicitante from "@/components/cp_relatorio/ChamadosPorSolicitante.vue";
 import ChamadosPorCatServico from "@/components/cp_relatorio/ChamadosPorCatServico.vue";
 import ChamadosPorCatOcorrencia from "@/components/cp_relatorio/ChamadosPorCatOcorrencia.vue";
-import ChamadosPorDtaAbertura from "@/components/cp_relatorio/ChamadosPorDtaAbertura.vue";
+import ChamadosPorDtaCriacao from "@/components/cp_relatorio/ChamadosPorDtaCriacao.vue";
 import ChamadosPorDtaConclusao from "@/components/cp_relatorio/ChamadosPorDtaConclusao.vue";
 
 export default {
@@ -84,8 +69,8 @@ export default {
           return ChamadosPorCatServico;
         case "cat_ocor":
           return ChamadosPorCatOcorrencia;
-        case "dta_abertura":
-          return ChamadosPorDtaAbertura;
+        case "dta_criacao":
+          return ChamadosPorDtaCriacao;
         case "dta_conclusao":
           return ChamadosPorDtaConclusao;
         default:
