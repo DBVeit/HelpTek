@@ -19,5 +19,32 @@
 
 .form-group-relatorio-acao {
     align-content: center;
+    width: 70%;
+}
+
+.bt-relatorio-submit {
     width: 50%;
+}
+
+.bt-relatorio-submit button {
+    margin-left: 65%;
+    margin-top: 10px;
+}
+
+.result-relatorio {
+    margin-left: 50%;
+}
+
+.link-gerar-relatorio {
+    font-size: 18px;
+    margin-left: 17%;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-decoration: none;
+}
+
+.link-gerar-relatorio:hover{
+    cursor: pointer;
+    text-decoration: underline;
 }

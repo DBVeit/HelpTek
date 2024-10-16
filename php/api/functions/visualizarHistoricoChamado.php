@@ -1,4 +1,5 @@
 <?php
+global $mysqli_con;
 include "../../config/dbconnect.php";
 include "../../config/httpaccess.php";
 
@@ -40,7 +41,7 @@ if (isset($_GET['action'])) {
                 INNER JOIN acompanhamento ON chamados.id_chamado = acompanhamento.id_chamado
                 INNER JOIN users ON users.id_user = acompanhamento.id_usuario_acao
                 WHERE chamados.id_chamado = '$id_chamado'
-                ORDER BY acompanhamento.data_acao DESC";
+                ORDER BY acompanhamento.data_acao ASC";
 
         $result_select = $mysqli_con->query($sql_select);
 

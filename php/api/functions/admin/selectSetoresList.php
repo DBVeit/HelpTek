@@ -14,7 +14,7 @@ if ($result->num_rows > 0) {
     }
 } else {
     $res['error'] = true;
-    $res['msg'] = "Nenhuma setor encontrado!";
+    $res['msg'] = "Nenhum setor encontrado!";
 }
 
 $mysqli_con->close();

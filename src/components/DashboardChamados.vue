@@ -3,33 +3,41 @@
     <h1>Dashboard</h1>
     <div id="form-group-dashboard">
       <form @submit.prevent="onSelectConsultaDashboard">
-        <div id="form-dash-selector" class="form-group">
-          <label for="chartType">Selecione o tipo de consulta:</label>
-          <select v-model="selectedConsulta" class="form-select" required>
-            <option value="" disabled selected>Selecionar...</option>
-            <option value="status">Chamados por status</option>
-            <option value="prioridade">Chamados por prioridade</option>
-            <option value="tecnico">Chamados por usuário técnico</option>
-            <option value="setor">Chamados por setor</option>
-            <option value="solicitante">
-              Chamados por usuário solicitante
-            </option>
-            <option value="cat_serv">Chamados por categoria de serviço</option>
-            <option value="cat_ocor">
-              Chamados por categoria de ocorrência
-            </option>
-            <option value="dta_abr">Chamados por data de abertura</option>
-            <option value="dta_conc">Chamados por data de conclusão</option>
-          </select>
-          <a
-            v-if="showDashboard"
-            @click.prevent="resetDashboard"
-            class="clear-selection-link"
-            >Limpar seleção</a
-          >
-        </div>
-        <div id="form-dash-submit" class="form-group-dashboard">
-          <button class="submit-button-chamado">Executar</button>
+        <div class="form-group">
+          <div class="form-group-dashboard">
+            <div class="select-dashboard-type">
+              <label for="chartType">Selecione o tipo de consulta:</label>
+              <select v-model="selectedConsulta" class="form-select" required>
+                <option value="" disabled selected>Selecionar...</option>
+                <option value="status">Chamados por status</option>
+                <option value="prioridade">Chamados por prioridade</option>
+                <option value="tecnico">Chamados por usuário técnico</option>
+                <option value="setor">Chamados por setor</option>
+                <option value="solicitante">
+                  Chamados por usuário solicitante
+                </option>
+                <option value="cat_serv">
+                  Chamados por categoria de serviço
+                </option>
+                <option value="cat_ocor">
+                  Chamados por categoria de ocorrência
+                </option>
+                <option value="dta_abr">Chamados por data de abertura</option>
+                <option value="dta_conc">Chamados por data de conclusão</option>
+              </select>
+            </div>
+            <div id="" class="bt-dashboard-submit">
+              <button class="submit-button-chamado">Executar</button>
+            </div>
+          </div>
+          <div class="bt-clear-selection">
+            <a
+              v-if="showDashboard"
+              @click.prevent="resetDashboard"
+              class="clear-selection-link"
+              >Limpar seleção</a
+            >
+          </div>
         </div>
       </form>
     </div>
