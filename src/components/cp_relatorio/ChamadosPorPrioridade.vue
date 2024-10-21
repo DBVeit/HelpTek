@@ -4,7 +4,7 @@
       <form @submit.prevent="onSelectParamRel">
         <div class="form-group">
           <label>Prioridade: </label>
-          <select v-model="RelatorioParam.prioridade_chamado">
+          <select v-model="RelatorioParam.prioridade_chamado" required>
             <option value="" disabled selected>Selecionar...</option>
             <option value="0">Crítica</option>
             <option value="1">Alta</option>

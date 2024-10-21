@@ -4,7 +4,7 @@
       <form @submit.prevent="onSelectParamRel">
         <div class="form-group">
           <label>Setor: </label>
-          <select v-model="RelatorioParam.setor_chamado">
+          <select v-model="RelatorioParam.setor_chamado" required>
             <option value="" disabled selected>Selecionar...</option>
             <option
               v-for="subs in subsetores"

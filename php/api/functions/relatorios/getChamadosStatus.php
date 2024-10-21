@@ -20,8 +20,6 @@ if (isset($_POST['status_chamado'])) {
 
     $sql_count = "SELECT COUNT(*) AS total FROM chamados " . $sql_where;
 
-    //$sql_select = "SELECT * FROM chamados";
-
     $stmt_count = $mysqli_con->prepare($sql_count);
     if ($stmt_count === false) {
         $res['error'] = true;
@@ -37,9 +35,6 @@ if (isset($_POST['status_chamado'])) {
 
         $stmt_count->close();
     }
-
-
-    //$stmt = $mysqli_con->prepare($sql_select);
 
     $queryHelper = new QueryHelper($mysqli_con);
     try {
@@ -61,34 +56,6 @@ if (isset($_POST['status_chamado'])) {
         $res['error'] = true;
         $res['msg'] = $e->getMessage();
     }
-
-    /*if ($stmt === false) {
-        $res['error'] = true;
-        $res['msg'] = "Erro ao preparar a consulta SQL";
-    } else {
-        if (!empty($params)) {
-            $stmt->bind_param($types, ...$params);
-        }
-
-        $stmt->execute();
-
-        $result_select = $stmt->get_result();
-
-        while ($row = $result_select->fetch_assoc()) {
-            $chamados[] = $row;
-        }
-
-        if (!empty($chamados)) {
-            // Usando a PlanilhaHelper para gerar e salvar a planilha
-            $spreadsheet = PlanilhaHelper::gerarPlanilha($chamados, "Chamados Status");
-            PlanilhaHelper::salvarPlanilha($spreadsheet, "chamados_status.xlsx");
-        } else {
-            $res['error'] = true;
-            $res['msg'] = "Nenhum dado encontrado para os parâmetros fornecidos.";
-        }
-
-        $stmt->close();
-    }*/
 } else {
     $res['error'] = true;
     $res['msg'] = "Parâmetros inválidos";

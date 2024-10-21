@@ -4,7 +4,7 @@
       <form @submit.prevent="onSelectParamRel">
         <div class="form-group">
           <label>Técnico: </label>
-          <select v-model="RelatorioParam.tecnico_chamado">
+          <select v-model="RelatorioParam.tecnico_chamado" required>
             <option value="" disabled selected>Selecionar...</option>
             <option
               v-for="tecnico in tecnicos"
@@ -15,16 +15,6 @@
                 tecnico.id_user
               }})
             </option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Status: </label>
-          <select v-model="RelatorioParam.status_chamado">
-            <option value="" disabled selected>Selecionar...</option>
-            <option value="2">Em atendimento</option>
-            <option value="3">Respondido</option>
-            <option value="4">Concluido</option>
-            <option value="0">Cancelado</option>
           </select>
         </div>
         <div class="form-group">
@@ -73,7 +63,6 @@ export default {
     return {
       RelatorioParam: {
         tecnico_chamado: "",
-        status_chamado: "",
         dta_criacao_inicio: "",
         dta_criacao_fim: "",
       },
@@ -102,7 +91,6 @@ export default {
       let relatorio = new FormData();
 
       relatorio.append("tecnico_chamado", this.RelatorioParam.tecnico_chamado);
-      relatorio.append("status_chamado", this.RelatorioParam.status_chamado);
       relatorio.append(
         "dta_criacao_inicio",
         this.RelatorioParam.dta_criacao_inicio
@@ -133,7 +121,6 @@ export default {
       let relatorio = new FormData();
 
       relatorio.append("tecnico_chamado", this.RelatorioParam.tecnico_chamado);
-      relatorio.append("status_chamado", this.RelatorioParam.status_chamado);
       relatorio.append(
         "dta_criacao_inicio",
         this.RelatorioParam.dta_criacao_inicio

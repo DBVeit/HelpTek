@@ -94,11 +94,11 @@ function montarWhere($prioridade, $data_criacao_inicio, $data_criacao_fim) {
         $params[] = $data_criacao_inicio;
         $params[] = $data_criacao_fim;
         $types .= 'ss';
-    } else if ($data_criacao_inicio != "") {
+    } else if ($data_criacao_inicio != "" && $data_criacao_fim == "") {
         $sql_where .= " AND chamados.data_criacao >= ?";
         $params[] = $data_criacao_inicio;
         $types .= 's';
-    } else if ($data_criacao_fim != "") {
+    } else if ($data_criacao_inicio == "" && $data_criacao_fim != "") {
         $sql_where .= " AND chamados.data_criacao <= ?";
         $params[] = $data_criacao_fim;
         $types .= 's';

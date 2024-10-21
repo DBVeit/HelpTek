@@ -12,6 +12,8 @@ class QueryHelper {
                         chamados.idfr_chamado AS IDFR_CHAMADO,
                         chamados.titulo_chamado AS TITULO_CHAMADO,
                         chamados.descricao_chamado AS DESCRICAO_CHAMADO,
+                        setor.nome_setor AS SETOR,
+                        setor.peso AS PESO_SETOR,
                         chamados.gravidade AS GRAVIDADE,
                         chamados.urgencia AS URGENCIA,
                         chamados.tendencia AS TENDENCIA,
@@ -43,7 +45,8 @@ class QueryHelper {
                     LEFT JOIN users ON users.id_user = chamados.id_user
                     LEFT JOIN users AS tecnico ON tecnico.id_user = chamados.id_user_tecnico
                     LEFT JOIN categoria_servico ON categoria_servico.id_categoria_servico = chamados.id_categoria_servico
-                    LEFT JOIN categoria_ocorrencia ON categoria_ocorrencia.id_categoria_ocorrencia = chamados.id_categoria_ocorrencia " . $sql_where;
+                    LEFT JOIN categoria_ocorrencia ON categoria_ocorrencia.id_categoria_ocorrencia = chamados.id_categoria_ocorrencia
+                    LEFT JOIN setor ON setor.id_setor = chamados.id_setor " . $sql_where;
 
         $stmt = $this->mysqli->prepare($sql_select);
 

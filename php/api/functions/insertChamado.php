@@ -1,4 +1,5 @@
 <?php
+global $mysqli_con;
 include "../../config/dbconnect.php";
 include "../../config/httpaccess.php";
 

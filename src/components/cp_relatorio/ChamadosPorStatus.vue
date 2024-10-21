@@ -4,7 +4,7 @@
       <form @submit.prevent="onSelectParamRel">
         <div class="form-group">
           <label>Status: </label>
-          <select v-model="RelatorioParam.status_chamado">
+          <select v-model="RelatorioParam.status_chamado" required>
             <option value="" disabled selected>Selecionar...</option>
             <option value="1">Em aberto</option>
             <option value="2">Em atendimento</option>

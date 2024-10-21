@@ -4,7 +4,7 @@
       <form @submit.prevent="onSelectParamRel">
         <div class="form-group">
           <label>Categoria de ocorrência: </label>
-          <select v-model="RelatorioParam.cat_ocorrencia">
+          <select v-model="RelatorioParam.cat_ocorrencia" required>
             <option value="" disabled selected>Selecionar...</option>
             <option
               v-for="categoriaOcor in categoriasOcorrencia"
@@ -13,16 +13,6 @@
             >
               {{ categoriaOcor.descricao_categoria_ocorrencia }}
             </option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Status: </label>
-          <select v-model="RelatorioParam.status_chamado">
-            <option value="" disabled selected>Selecionar...</option>
-            <option value="2">Em atendimento</option>
-            <option value="3">Respondido</option>
-            <option value="4">Concluido</option>
-            <option value="0">Cancelado</option>
           </select>
         </div>
         <div class="form-group">
@@ -71,7 +61,6 @@ export default {
     return {
       RelatorioParam: {
         cat_ocorrencia: "",
-        status_chamado: "",
         dta_criacao_inicio: "",
         dta_criacao_fim: "",
       },
@@ -107,7 +96,6 @@ export default {
       let relatorio = new FormData();
 
       relatorio.append("cat_ocorrencia", this.RelatorioParam.cat_ocorrencia);
-      relatorio.append("status_chamado", this.RelatorioParam.status_chamado);
       relatorio.append(
         "dta_criacao_inicio",
         this.RelatorioParam.dta_criacao_inicio
@@ -138,7 +126,6 @@ export default {
       let relatorio = new FormData();
 
       relatorio.append("cat_ocorrencia", this.RelatorioParam.cat_ocorrencia);
-      relatorio.append("status_chamado", this.RelatorioParam.status_chamado);
       relatorio.append(
         "dta_criacao_inicio",
         this.RelatorioParam.dta_criacao_inicio

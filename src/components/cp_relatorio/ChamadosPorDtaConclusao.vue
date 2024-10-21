@@ -3,11 +3,38 @@
     <div class="form-relatorio">
       <form @submit.prevent="onSelectParamRel">
         <div class="form-group">
-          <label>Data de criação: </label>
+          <label>Data de conclusão: </label>
           Início
+          <span
+            class="form-tip"
+            v-if="
+              !RelatorioParam.dta_conclusao_inicio &&
+              !RelatorioParam.dta_conclusao_fim &&
+              showErrors
+            "
+            >*Selecionar!</span
+          >
           <input type="date" v-model="RelatorioParam.dta_conclusao_inicio" />
           Fim
+          <span
+            class="form-tip"
+            v-if="
+              !RelatorioParam.dta_conclusao_inicio &&
+              !RelatorioParam.dta_conclusao_fim &&
+              showErrors
+            "
+            >*Selecionar!</span
+          >
           <input type="date" v-model="RelatorioParam.dta_conclusao_fim" />
+          <span
+            class="form-tip"
+            v-if="
+              !RelatorioParam.dta_conclusao_inicio &&
+              !RelatorioParam.dta_conclusao_fim &&
+              showErrors
+            "
+            >*Ao menos um campo deve ser selecionado!</span
+          >
         </div>
         <div class="form-group bt-relatorio-submit">
           <button class="submit-button-chamado">Executar</button>
@@ -52,11 +79,24 @@ export default {
       },
       totalResults: 0,
       showResults: false,
+      showErrors: false,
     };
   },
   methods: {
     onSelectParamRel() {
       let relatorio = new FormData();
+
+      // Verifique se há algum campo obrigatório vazio
+      if (
+        !this.RelatorioParam.dta_conclusao_inicio &&
+        !this.RelatorioParam.dta_conclusao_fim
+      ) {
+        // Não prosseguir se houver erros
+        this.showErrors = true;
+        return;
+      }
+
+      this.showErrors = false;
 
       relatorio.append(
         "dta_conclusao_inicio",
