@@ -136,7 +136,7 @@
               multiple
             />
           </div>
-          <table class="anexo-grid" v-if="anexos.length > 0">
+          <table class="anexo-grid" v-if="anexosUrls.length > 0">
             <thead>
               <tr>
                 <th>Arquivo</th>
@@ -145,7 +145,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(anexo, index) in anexos" :key="index">
+              <tr v-for="(anexo, index) in anexosUrls" :key="index">
                 <td>{{ anexo.name }}</td>
                 <td>{{ anexo.size }} bytes</td>
                 <td>
@@ -167,6 +167,7 @@
 <script>
 import axios from "axios";
 import { storage } from "@/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default {
   name: "CriarChamado",
@@ -194,7 +195,7 @@ export default {
       message: "",
       showErrors: false,
       anexos: [], // Array para armazenar os arquivos anexados
-      //anexosUrls: [], // Array para armazenar as URLs dos arquivos no Firebase
+      anexosUrls: [], // Array para armazenar as URLs dos arquivos no Firebase
     };
   },
   created() {
@@ -256,8 +257,6 @@ export default {
       }
     },
     async onCriarChamado() {
-      let data = new FormData();
-
       // Verifique se há algum campo obrigatório vazio
       if (
         !this.ChamadoData.titulo ||
@@ -277,9 +276,12 @@ export default {
       // Primeiro faz o upload dos arquivos para o Firebase
       try {
         const uploadPromises = this.anexos.map((anexo) => {
-          const storageRef = storage.ref(`anexos/${anexo.name}`);
-          return storageRef.put(anexo).then((snapshot) => {
-            return snapshot.ref.getDownloadURL(); // Retorna a URL pública do arquivo
+          // Cria uma referência no Firebase Storage para o arquivo
+          const storageRef = ref(storage, `anexos/${anexo.name}`);
+
+          // Realiza o upload do arquivo e retorna a URL pública
+          return uploadBytes(storageRef, anexo).then(async (snapshot) => {
+            return await getDownloadURL(snapshot.ref); // Retorna a URL pública do arquivo
           });
         });
 
@@ -292,6 +294,7 @@ export default {
 
       let id_user = sessionStorage.getItem("id_user");
       let session_token = localStorage.getItem("token");
+      let data = new FormData();
       data.append("titulo", this.ChamadoData.titulo);
       data.append("descricao", this.ChamadoData.descricao);
       data.append("setor", this.ChamadoData.setor);
@@ -300,15 +303,18 @@ export default {
       data.append("urgencia", this.ChamadoData.urgencia);
       data.append("tendencia", this.ChamadoData.tendencia);
       data.append("id_user", this.ChamadoData.id_user);
+
       // Adiciona os arquivos ao FormData
-      this.anexos.forEach((anexo, index) => {
+      /*this.anexos.forEach((anexo, index) => {
         data.append(`anexo${index}`, anexo);
+      });*/
+
+      this.anexosUrls.forEach((url) => {
+        data.append("anexosUrls[]", url);
       });
 
       // Adiciona as URLs dos anexos
-      /*this.anexosUrls.forEach((url, index) => {
-        data.append(`anexoUrl${index}`, url);
-      });*/
+      //data.append("anexosUrls", JSON.stringify(this.anexosUrls));
 
       // Cria um objeto para armazenar os dados
       let dataEntries = {};
@@ -316,7 +322,6 @@ export default {
         dataEntries[key] = value;
       });
       console.log(dataEntries); // Exibe o objeto com os dados
-      //console.log(session_token);
 
       axios
         .get(

@@ -305,6 +305,11 @@
                       <td>{{ anexo.name }}</td>
                       <td>{{ anexo.size }} bytes</td>
                       <td>
+                        <a :href="anexo.caminho_arquivo" target="_blank">{{
+                          anexo.caminho_arquivo
+                        }}</a>
+                      </td>
+                      <td>
                         <button
                           class="bt-remove-anexo"
                           @click="removeAnexo(index)"
