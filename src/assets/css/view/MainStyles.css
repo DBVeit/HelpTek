@@ -85,9 +85,9 @@ body {
     border-bottom: 1px solid #ddd;
 }
 
-.chamados-list-table tbody tr:nth-of-type(even) {
+/*.chamados-list-table tbody tr:nth-of-type(even) {
     background-color: #f3f3f3;
-}
+}*/
 
 .chamados-list-table tbody tr:last-of-type {
     border-bottom: 2px solid #ff5757;
@@ -95,6 +95,14 @@ body {
 
 .chamados-list-table tr:hover {
     background-color: #ddd;
+}
+
+.td-txt-status{
+    width: 125px;
+}
+
+.td-bts-acoes{
+    width: 135px;
 }
 
 .form-tip{

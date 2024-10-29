@@ -28,6 +28,7 @@ class PlanilhaHelper {
         $sheet->setCellValue('S1', 'DTA_CONCLUSAO');
         $sheet->setCellValue('T1', 'OBSERVACAO');
         $sheet->setCellValue('U1', 'TOTAL_ACOES');
+        $sheet->setCellValue('V1', 'TEMPO_ESPERA');
 
         $linha = 2;
         foreach ($dados as $dado) {
@@ -52,6 +53,7 @@ class PlanilhaHelper {
             $sheet->setCellValue('S' . $linha, $dado['DTA_CONCLUSAO']);
             $sheet->setCellValue('T' . $linha, $dado['OBSERVACAO']);
             $sheet->setCellValue('U' . $linha, $dado['TOTAL_ACOES']);
+            $sheet->setCellValue('V' . $linha, $dado['TEMPO_ESPERA']);
             $linha++;
         }
         return $spreadsheet;

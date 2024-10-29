@@ -107,19 +107,19 @@
 
 .confirmation-overlay {
     margin-top: 10px;
-    margin-right: 35%;
     margin-bottom: 20px;
-    width: 75%;
+    width: 95%;
+}
+
+.confirmation-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .confirmation-box p{
     margin-left: 50%;
     width: 100%;
-}
-
-.confirmation-box button{
-    width: 150px;
-    margin-left: 20px;
 }
 
 .cancelaSim{
@@ -232,9 +232,9 @@
 .msg_receive {
     position: relative;
     left: 0;
-    width: 90%;
+    width: 75%;
     height: auto;
-    text-align: justify;
+    text-align: left;
     padding: 16px;
     background-color: #dcd2d2;
     border-radius: 20px 20px 20px;
@@ -243,10 +243,10 @@
 
 .msg_send {
     position: relative;
-    width: 90%;
+    width: 75%;
     right: 0;
     height: auto;
-    text-align: justify;
+    text-align: left;
     padding: 16px;
     background-color: #f0f0f0;
     border-radius: 20px 20px 20px;

@@ -166,6 +166,7 @@
 </template>
 <script>
 import axios from "axios";
+import { storage } from "@/firebase";
 
 export default {
   name: "CriarChamado",
@@ -193,6 +194,7 @@ export default {
       message: "",
       showErrors: false,
       anexos: [], // Array para armazenar os arquivos anexados
+      //anexosUrls: [], // Array para armazenar as URLs dos arquivos no Firebase
     };
   },
   created() {
@@ -253,7 +255,7 @@ export default {
         this.ChamadoData.peso = 1;
       }
     },
-    onCriarChamado() {
+    async onCriarChamado() {
       let data = new FormData();
 
       // Verifique se há algum campo obrigatório vazio
@@ -272,6 +274,22 @@ export default {
 
       this.showErrors = false;
 
+      // Primeiro faz o upload dos arquivos para o Firebase
+      try {
+        const uploadPromises = this.anexos.map((anexo) => {
+          const storageRef = storage.ref(`anexos/${anexo.name}`);
+          return storageRef.put(anexo).then((snapshot) => {
+            return snapshot.ref.getDownloadURL(); // Retorna a URL pública do arquivo
+          });
+        });
+
+        // Aguarda o upload de todos os arquivos e captura as URLs
+        this.anexosUrls = await Promise.all(uploadPromises);
+      } catch (error) {
+        console.error("Erro ao fazer upload dos anexos: ", error);
+        return;
+      }
+
       let id_user = sessionStorage.getItem("id_user");
       let session_token = localStorage.getItem("token");
       data.append("titulo", this.ChamadoData.titulo);
@@ -280,13 +298,17 @@ export default {
       data.append("peso", this.ChamadoData.peso);
       data.append("gravidade", this.ChamadoData.gravidade);
       data.append("urgencia", this.ChamadoData.urgencia);
-      //data.append("diasCProb", this.ChamadoData.diasCProb);
       data.append("tendencia", this.ChamadoData.tendencia);
       data.append("id_user", this.ChamadoData.id_user);
       // Adiciona os arquivos ao FormData
       this.anexos.forEach((anexo, index) => {
         data.append(`anexo${index}`, anexo);
       });
+
+      // Adiciona as URLs dos anexos
+      /*this.anexosUrls.forEach((url, index) => {
+        data.append(`anexoUrl${index}`, url);
+      });*/
 
       // Cria um objeto para armazenar os dados
       let dataEntries = {};
@@ -347,6 +369,7 @@ export default {
       this.ChamadoData.tendencia = "";
       this.$refs.attachment.value = "";
       this.anexos = []; // Limpa a lista de anexos
+      //this.anexosUrls = [];
     },
     handleFileUpload(event) {
       const files = event.target.files;

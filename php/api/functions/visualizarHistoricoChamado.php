@@ -25,7 +25,7 @@ if (isset($_GET['action'])) {
                     chamados.id_user_tecnico,
                     chamados.data_atualizacao,
                     chamados.descricao_solucao,
-                    chamados.justificativa_encam,
+                    chamados.justificativa_encaminhamento,
                     chamados.data_conclusao,
                     chamados.id_usuario_atual,
                     chamados.id_usuario_anterior,

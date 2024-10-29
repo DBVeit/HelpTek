@@ -40,7 +40,13 @@ class QueryHelper {
                         tecnico.name_user AS NOME_TECNICO,
                         DATE_FORMAT(chamados.data_conclusao, '%d/%m/%Y') AS DTA_CONCLUSAO,
                         chamados.observacao AS OBSERVACAO,
-                        chamados.total_acoes AS TOTAL_ACOES
+                        chamados.total_acoes AS TOTAL_ACOES,
+                        -- Cálculo de dias, horas e minutos de espera
+                        CONCAT(
+                            FLOOR(TIMESTAMPDIFF(MINUTE, chamados.data_criacao, IF(chamados.data_conclusao IS NOT NULL, chamados.data_conclusao, NOW())) / 1440), ' dia(s), ',  -- 1440 minutos em um dia
+                            MOD(FLOOR(TIMESTAMPDIFF(MINUTE, chamados.data_criacao, IF(chamados.data_conclusao IS NOT NULL, chamados.data_conclusao, NOW())) / 60), 24), ' hora(s), ',  -- 60 minutos em uma hora, mod 24 para horas no intervalo de um dia
+                            MOD(TIMESTAMPDIFF(MINUTE, chamados.data_criacao, IF(chamados.data_conclusao IS NOT NULL, chamados.data_conclusao, NOW())), 60), ' minuto(s)'  -- minutos restantes após calcular horas e dias
+                        ) AS TEMPO_ESPERA
                     FROM helptek.chamados
                     LEFT JOIN users ON users.id_user = chamados.id_user
                     LEFT JOIN users AS tecnico ON tecnico.id_user = chamados.id_user_tecnico

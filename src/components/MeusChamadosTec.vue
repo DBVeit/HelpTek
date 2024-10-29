@@ -2,20 +2,32 @@
   <div class="ticket-form-container">
     <h1>Meus chamados</h1>
     <div class="filter">
-      Filtros:
-      <select v-model="selectedStatus" @change="filterChamados">
-        <option selected disabled>Selecionar...</option>
-        <option value="1">Em aberto</option>
-        <option value="2">Em atendimento</option>
-        <option value="3">Respondido</option>
-        <option value="4">Concluido</option>
-        <option value="0">Cancelado</option>
-      </select>
-      <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== null"
-        >Limpar filtros</a
-      >
+      <div>
+        <label for="filtro_status">Filtar por status: </label>
+        <select v-model="selectedStatus" @change="filterChamados">
+          <option default disabled="disabled" value>Selecionar...</option>
+          <option value="1">Em aberto</option>
+          <option value="2">Em atendimento</option>
+          <option value="3">Respondido</option>
+          <option value="4">Concluido</option>
+          <option value="0">Cancelado</option>
+        </select>
+        ou
+        <input type="text" placeholder="Pesquisar ID ou título..." />
+        <button class="bt-acoes-chamado">
+          <i class="bi bi-search"></i>
+        </button>
+        <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== ''"
+          >Limpar filtros</a
+        >
+      </div>
     </div>
     <div>
+      <div class="message-box" v-if="showMessage">
+        <div class="message-content">
+          <span>{{ message }}</span>
+        </div>
+      </div>
       <table class="chamados-list-table">
         <thead>
           <tr>
@@ -25,10 +37,7 @@
             <th>Data de criação</th>
             <th>Status</th>
             <th>Prazo</th>
-            <!--<th>Atualizado em</th>
-              <th>Concluído em</th>-->
             <th>Última atualização</th>
-            <!--<th>Dias com Problema</th>-->
             <th></th>
           </tr>
         </thead>
@@ -44,24 +53,14 @@
               ></i>
             </td>
             <td>{{ chamados.data_criacao_fm }}</td>
-            <td>
+            <td class="td-txt-status">
               {{ chamados.status_chamado_desc }}
             </td>
             <td>
               {{ chamados.prazo }}
             </td>
             <td>{{ chamados.data_atualizacao_fm }}</td>
-            <!--<td>{{ chamados.diasCProb }}</td>-->
-            <td>
-              <button
-                class="bt-acoes-chamado"
-                data-bs-toggle="modal"
-                data-bs-target="#modalVisualizarChamado"
-                @click="verChamado(chamados)"
-                title="Ver"
-              >
-                <i class="bi bi-eye"></i>
-              </button>
+            <td class="td-bts-acoes">
               <button
                 class="bt-acoes-chamado"
                 data-bs-toggle="modal"
@@ -75,15 +74,6 @@
               <button
                 class="bt-acoes-chamado"
                 data-bs-toggle="modal"
-                data-bs-target="#modalHistoricoChamado"
-                @click="onVisualizarHistoricoChamado(chamados)"
-                title="Histórico do atendimento"
-              >
-                <i class="bi bi-card-list"></i>
-              </button>
-              <button
-                class="bt-acoes-chamado"
-                data-bs-toggle="modal"
                 data-bs-target="#modalEncaminharChamado"
                 @click="verChamado(chamados)"
                 title="Encaminhar"
@@ -91,8 +81,8 @@
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
+                  width="14"
+                  height="12"
                   fill="currentColor"
                   class="bi bi-send"
                   viewBox="0 0 16 16"
@@ -102,10 +92,57 @@
                   />
                 </svg>
               </button>
+              <button
+                class="bt-acoes-chamado"
+                data-bs-toggle="modal"
+                data-bs-target="#modalVisualizarChamado"
+                @click="verChamado(chamados)"
+                title="Ver"
+              >
+                <i class="bi bi-eye"></i>
+              </button>
+              <button
+                class="bt-acoes-chamado"
+                data-bs-toggle="modal"
+                data-bs-target="#modalHistoricoChamado"
+                @click="onVisualizarHistoricoChamado(chamados)"
+                title="Histórico do atendimento"
+              >
+                <i class="bi bi-card-list"></i>
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
+      <div class="paginacao">
+        <div class="pager">
+          <!-- Tabela ou grid de Chamados -->
+          <div v-for="Chamado in ChamadosPaginados" :key="Chamado.id">
+            {{ Chamado.nome }}
+          </div>
+          <!-- Botões de paginação -->
+          <div>
+            <button
+              class="bt-acoes-chamado"
+              @click="paginaAtual--"
+              :disabled="paginaAtual === 1"
+            >
+              <i class="bi bi-caret-left-fill"></i>
+            </button>
+            <button
+              class="bt-acoes-chamado"
+              @click="paginaAtual++"
+              :disabled="paginaAtual === totalPaginas"
+            >
+              <i class="bi bi-caret-right-fill"></i>
+            </button>
+            <!--<span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>-->
+          </div>
+        </div>
+        <div class="totalizer">
+          <span>Total de registros: {{ totalRegistros }}</span>
+        </div>
+      </div>
       <div class="recover-message" v-if="recoverMessage">
         {{ recoverMessage }}
       </div>
@@ -121,53 +158,57 @@
             </button>
           </div>
           <div class="modal-body">
-            <div style="width: 50%; float: left">
-              <div>
-                <span>
-                  ID:
-                  <h6 style="display: inline">
-                    {{ ChamadoData.idfr_chamado }}
-                  </h6>
-                </span>
+            <div class="top_info">
+              <div class="left_info">
+                <div>
+                  <span>
+                    ID:
+                    <h6 class="inline">
+                      {{ ChamadoData.idfr_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Solicitante:
+                    <h6 class="inline">
+                      {{ ChamadoData.usuario_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Status:
+                    <h6 class="inline">
+                      {{ ChamadoData.status_chamado_desc }}
+                    </h6>
+                  </span>
+                </div>
+                <div v-if="ChamadoData.tecnico_responsavel">
+                  <span>
+                    Técnico:
+                    <h6 class="inline">
+                      {{ ChamadoData.tecnico_responsavel }}
+                    </h6>
+                  </span>
+                </div>
               </div>
-              <div>
-                <span>
-                  Solicitante:
-                  <h6 style="display: inline">
-                    {{ ChamadoData.usuario_chamado }}
-                  </h6>
-                </span>
+              <div class="right-info">
+                <div>
+                  <span>
+                    Tempo de espera:
+                    <h6>{{ ChamadoData.tempo_espera }}</h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Última atualização:
+                    <h6 class="inline">
+                      {{ ChamadoData.data_atualizacao_fm }}
+                    </h6>
+                  </span>
+                </div>
               </div>
-              <div>
-                <span>
-                  Status:
-                  <h6 style="display: inline">
-                    {{ ChamadoData.status_chamado_desc }}
-                  </h6>
-                </span>
-              </div>
-              <div>
-                <span>
-                  Técnico:
-                  <h6 style="display: inline">
-                    {{ ChamadoData.tecnico_responsavel }}
-                  </h6>
-                </span>
-              </div>
-              <div>
-                <span>
-                  Última atualização:
-                  <h6 style="display: inline">
-                    {{ ChamadoData.data_atualizacao_fm }}
-                  </h6>
-                </span>
-              </div>
-            </div>
-            <div style="float: right">
-              <span>
-                Tempo de espera:
-                <h6>{{ ChamadoData.tempo_espera }}</h6>
-              </span>
             </div>
             <div class="message-box" v-if="showMessage">
               <div class="message-content">
@@ -177,11 +218,40 @@
             <form method="POST" @submit.prevent="">
               <div class="form-group-modal">
                 <label>Título</label>
-                <div>{{ ChamadoData.titulo_chamado }}</div>
+                <input
+                  type="text"
+                  id="subject"
+                  v-model="ChamadoData.titulo_chamado"
+                  :disabled="!isEditing"
+                />
               </div>
               <div class="form-group-modal">
                 <label>Descrição</label>
-                <div>{{ ChamadoData.descricao_chamado }}</div>
+                <textarea
+                  id="description"
+                  rows="4"
+                  v-model="ChamadoData.descricao_chamado"
+                  :disabled="!isEditing"
+                ></textarea>
+              </div>
+              <div class="form-group-modal">
+                <label>Setor</label>
+                <select
+                  name="setor"
+                  id="setor"
+                  v-model="ChamadoData.id_setor"
+                  @change="updatePesoSetor"
+                  :disabled="!isEditing"
+                >
+                  <option default value="" disabled>Setor</option>
+                  <option
+                    v-for="subs in subsetores"
+                    :key="subs.id_setor"
+                    :value="subs.id_setor"
+                  >
+                    {{ subs.nome_setor + " (IPS: " + subs.peso + ")" }}
+                  </option>
+                </select>
               </div>
               <div class="form-group-modal">
                 <label>Prioridade</label>
@@ -256,19 +326,83 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div class="modal-body" v-if="ChamadoData.observacao != ''">
-            <div class="form-group-modal">
-              <label>Observação</label>
-              <textarea
-                v-model="ChamadoData.observacao"
-                disabled
-                onresize="false"
-              ></textarea>
+          <div class="modal-body">
+            <div class="top_info">
+              <div class="left_info">
+                <div>
+                  <span>
+                    ID:
+                    <h6 class="inline">
+                      {{ ChamadoData.idfr_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Solicitante:
+                    <h6 class="inline">
+                      {{ ChamadoData.usuario_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Status:
+                    <h6 class="inline">
+                      {{ ChamadoData.status_chamado_desc }}
+                    </h6>
+                  </span>
+                </div>
+                <div v-if="ChamadoData.tecnico_responsavel">
+                  <span>
+                    Técnico:
+                    <h6 class="inline">
+                      {{ ChamadoData.tecnico_responsavel }}
+                    </h6>
+                  </span>
+                </div>
+              </div>
+              <div class="right-info">
+                <div>
+                  <span>
+                    Tempo de espera:
+                    <h6>{{ ChamadoData.tempo_espera }}</h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Última atualização:
+                    <h6 class="inline">
+                      {{ ChamadoData.data_atualizacao_fm }}
+                    </h6>
+                  </span>
+                </div>
+              </div>
             </div>
-            <form method="POST">
+            <div v-if="ChamadoData.observacao">
+              <br />
+              <h5>Retorno da avaliação pelo solicitante:</h5>
               <div class="form-group-modal">
-                <label>Categoria do Serviço</label>
-                <select v-model="ChamadoData.categoriaServico">
+                <label>Observação</label>
+                <textarea
+                  v-model="ChamadoData.observacao"
+                  disabled
+                  onresize="false"
+                ></textarea>
+              </div>
+            </div>
+            <div class="message-box" v-if="showMessage">
+              <div class="message-content">
+                <span>{{ message }}</span>
+              </div>
+            </div>
+            <form method="POST" @submit.prevent="">
+              <div class="form-group-modal">
+                <label>Categoria do Serviço *</label>
+                <select v-model="ChamadoData.id_categoria_servico">
+                  <option default disabled="disabled" value>
+                    Selecionar...
+                  </option>
                   <option
                     v-for="categoriaServ in categoriasServico"
                     :key="categoriaServ.id_categoria_servico"
@@ -277,10 +411,18 @@
                     {{ categoriaServ.descricao_categoria_servico }}
                   </option>
                 </select>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.id_categoria_servico && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
               </div>
               <div class="form-group-modal">
-                <label>Categoria da Ocorrência</label>
-                <select v-model="ChamadoData.categoriaOcorrencia">
+                <label>Categoria da Ocorrência *</label>
+                <select v-model="ChamadoData.id_categoria_ocorrencia">
+                  <option default disabled="disabled" value>
+                    Selecionar...
+                  </option>
                   <option
                     v-for="categoriaOcor in categoriasOcorrencia"
                     :key="categoriaOcor.id_categoria_ocorrencia"
@@ -289,18 +431,25 @@
                     {{ categoriaOcor.descricao_categoria_ocorrencia }}
                   </option>
                 </select>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.id_categoria_ocorrencia && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
               </div>
               <div class="form-group-modal">
-                <label>Descrição da Solução</label>
-                <textarea v-model="ChamadoData.descricaoSolucao"></textarea>
+                <label>Descrição da Solução *</label>
+                <textarea v-model="ChamadoData.descricao_solucao"></textarea>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.descricao_solucao && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
               </div>
               <div class="confirmation-overlay">
                 <div class="confirmation-box">
-                  <button class="submit-button-modal" @click="enviarResposta">
+                  <button class="submit-button" @click="onEnviarResposta">
                     Enviar Resposta
-                  </button>
-                  <button class="submit-button-modal" @click="cancelar">
-                    Cancelar
                   </button>
                 </div>
               </div>
@@ -310,7 +459,7 @@
       </div>
     </div>
     <!----------------------Modal p/ responder chamado---------------------->
-    <!----------------------Modal p/ visualizar histórico do chamado---------------------->
+    <!-----------------------Modal p/ visualizar histórico do chamado----------------------->
     <div class="modal fade bd-example-modal-lg" id="modalHistoricoChamado">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -321,34 +470,42 @@
             </button>
           </div>
           <div class="modal-body">
-            <table
-              class="historico-table"
+            <div
               v-for="historico in Historico"
               :key="historico.id_acompanhamento"
             >
-              <tr>
-                <td rowspan="2" class="historico-info-i">
-                  <i class="bi bi-person-circle"></i>
-                </td>
-                <td class="historico-info1">
-                  {{ historico.data_acao_fm }} <br />
-                  {{ historico.name_user }}
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label>Ação:</label> <label>{{ historico.acao }}</label>
-                  <br />
-                  <label> Descrição:</label>
-                  <label> {{ historico.descricao_acao }}</label>
-                </td>
-              </tr>
-            </table>
+              <div
+                :class="
+                  historico.id_usuario_acao === sessionUser
+                    ? 'msg_send'
+                    : 'msg_receive'
+                "
+              >
+                <table class="historico-table">
+                  <tr>
+                    <td class="historico-info1">
+                      <b>{{ historico.data_acao_fm }}</b> <br />
+                      <b>{{ historico.name_user }}</b>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <label>Ação:</label> <label>{{ historico.acao }}</label>
+                      <br />
+                      <label v-if="historico.descricao_acao"> Descrição:</label>
+                      <label v-if="historico.descricao_acao">
+                        {{ historico.descricao_acao }}</label
+                      >
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <!----------------------Modal p/ visualizar histórico do chamado---------------------->
+    <!-----------------------Modal p/ visualizar histórico do chamado----------------------->
     <!----------------------Modal p/ encaminhar chamado---------------------->
     <div class="modal fade bd-example-modal-lg" id="modalEncaminharChamado">
       <div class="modal-dialog modal-lg">
@@ -360,9 +517,52 @@
             </button>
           </div>
           <div class="modal-body">
-            <form method="POST">
+            <div class="top_info">
+              <div class="left_info">
+                <div>
+                  <span>
+                    ID:
+                    <h6 class="inline">
+                      {{ ChamadoData.idfr_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Solicitante:
+                    <h6 class="inline">
+                      {{ ChamadoData.usuario_chamado }}
+                    </h6>
+                  </span>
+                </div>
+              </div>
+              <div class="right-info">
+                <div>
+                  <span>
+                    Status:
+                    <h6 class="inline">
+                      {{ ChamadoData.status_chamado_desc }}
+                    </h6>
+                  </span>
+                </div>
+                <div v-if="ChamadoData.tecnico_responsavel">
+                  <span>
+                    Técnico atual:
+                    <h6 class="inline">
+                      {{ ChamadoData.tecnico_responsavel }}
+                    </h6>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="message-box" v-if="showMessage">
+              <div class="message-content">
+                <span>{{ message }}</span>
+              </div>
+            </div>
+            <form method="POST" @submit.prevent="">
               <div class="form-group-modal">
-                <label>Selecionar novo responsável</label>
+                <label>Selecionar novo responsável *</label>
                 <select v-model="ChamadoData.novoTecnicoResponsavel">
                   <option value="" disabled>Selecionar...</option>
                   <option
@@ -375,23 +575,27 @@
                     }})
                   </option>
                 </select>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.novoTecnicoResponsavel && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
               </div>
               <div class="form-group-modal">
-                <label>Justificativa do encaminhamento*</label>
+                <label>Justificativa do encaminhamento *</label>
                 <textarea
                   v-model="ChamadoData.justificativaEncaminhamento"
                 ></textarea>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.justificativaEncaminhamento && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
               </div>
               <div class="confirmation-overlay">
                 <div class="confirmation-box">
-                  <button
-                    class="submit-button-modal"
-                    @click="onEncaminharChamado"
-                  >
+                  <button class="submit-button" @click="onEncaminharChamado">
                     Enviar
-                  </button>
-                  <button class="submit-button-modal" @click="cancelar">
-                    Cancelar
                   </button>
                 </div>
               </div>
@@ -422,15 +626,16 @@ export default {
         id_user_tecnico: "",
         data_atualizacao: "",
         data_conclusao: "",
-        //diasCProb: "",
+        id_setor: "",
+        peso: "",
         gravidade: "",
         urgencia: "",
         tendencia: "",
         id_categoria_servico: "",
         id_categoria_ocorrencia: "",
-        categoriaServico: "",
-        categoriaOcorrencia: "",
-        descricaoSolucao: "",
+        categoria_servico: "",
+        categoria_ocorrencia: "",
+        descricao_solucao: "",
         observacao: "",
         novoTecnicoResponsavel: "",
         justificativaEncaminhamento: "",
@@ -440,13 +645,14 @@ export default {
       },
       Chamados: [],
       Historico: [],
-      selectedStatus: null,
+      selectedStatus: "",
       tecnicos: [],
       isEditing: false,
       isConfirmingCancel: false,
       prioridadesGravidade: [],
       prioridadesUrgencia: [],
       prioridadesTendencia: [],
+      subsetores: [],
       showResponderCampos: false,
       showEncaminharCampos: false,
       showBotoesAcao: true,
@@ -454,8 +660,13 @@ export default {
       categoriasOcorrencia: [],
       recoverMessage: "",
       showMessage: false,
+      showErrors: false,
       message: "",
       anexos: [], // Array para armazenar os arquivos anexados
+      totalRegistros: 0,
+      paginaAtual: 1,
+      registrosPorPagina: 50,
+      sessionUser: sessionStorage.getItem("id_user"),
     };
   },
   created() {
@@ -465,13 +676,15 @@ export default {
     this.fetchCategoriasServico();
     this.fetchCategoriasOcorrencia();
     this.fetchUserTecnico();
+    this.fetchSetoresList();
   },
   methods: {
+    //Listagem de chamados
     onListarChamados() {
       const id_user = sessionStorage.getItem("id_user");
       const permission = sessionStorage.getItem("permission");
-      console.log("ID de usuário: ", id_user);
-      console.log("Permissao de usuario: ", permission);
+      /*console.log("ID de usuário: ", id_user);
+      console.log("Permissao de usuario: ", permission);*/
       axios
         .get(
           `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}&permission=${permission}`
@@ -484,6 +697,7 @@ export default {
           console.log(err);
         });
     },
+    //Função para obter as prioridades
     fetchPrioridades() {
       axios
         .get(
@@ -505,6 +719,39 @@ export default {
           console.error("Erro ao buscar prioridades: ", error);
         });
     },
+    //Listagem de setores
+    fetchSetoresList() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/admin/selectSetoresList.php"
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.subsetores = response.data.sub_setores;
+          } else {
+            console.error("Erro ao buscar setores: ", response.data.msg);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar setores:", error);
+        });
+    },
+    // Função para carregar o setor e o peso ao abrir o modal
+    updatePesoSetor() {
+      // Busca o setor selecionado na lista de subsetores
+      const setorSelecionado = this.subsetores.find(
+        (subs) => subs.id_setor === this.ChamadoData.id_setor
+      );
+
+      // Se o setor for encontrado, atualiza o peso no ChamadoData
+      if (setorSelecionado) {
+        this.ChamadoData.peso = setorSelecionado.peso;
+      } else {
+        // Caso contrário, define o peso como 1 ou vazio
+        this.ChamadoData.peso = 1;
+      }
+    },
+    //Função para obter as categorias de serviço
     fetchCategoriasServico() {
       axios
         .get(
@@ -524,6 +771,7 @@ export default {
           console.error("Erro ao buscar categorias do serviço:", error);
         });
     },
+    //Função para obter as categorias de ocorrencia
     fetchCategoriasOcorrencia() {
       axios
         .get(
@@ -543,10 +791,13 @@ export default {
           console.error("Erro ao buscar categorias de ocorrencia:", error);
         });
     },
+    // Função para obter a lista de usuários tecnico
     fetchUserTecnico() {
+      const id_user = sessionStorage.getItem("id_user");
+      const permission = sessionStorage.getItem("permission");
       axios
         .get(
-          "http://localhost/projeto/helptek/php/api/functions/getUserTecnico.php"
+          `http://localhost/projeto/helptek/php/api/functions/getUserTecnico.php?id_user_session=${id_user}&permission_user_session=${permission}`
         )
         .then((response) => {
           this.tecnicos = response.data.tecnicos;
@@ -555,18 +806,23 @@ export default {
           console.error(error);
         });
     },
+    //Função para ver dados de um chamado da lista
     verChamado(chamado) {
       this.ChamadoData = chamado;
       this.isEditing = false;
       this.ChamadoData.gravidade = chamado.gravidade;
       this.ChamadoData.urgencia = chamado.urgencia;
       this.ChamadoData.tendencia = chamado.tendencia;
+      this.showErrors = false;
+      this.ChamadoData.novoTecnicoResponsavel = "";
+      this.ChamadoData.justificativaEncaminhamento = "";
     },
     responderChamado() {
       this.showResponderCampos = true;
       this.showEncaminharCampos = false;
       this.showBotoesAcao = false;
     },
+    //Exibir mensagem de retorno do back-end
     showAlert(message) {
       this.fecharModal();
       this.message = message;
@@ -578,39 +834,77 @@ export default {
     closeMessage() {
       this.showMessage = false;
     },
-    enviarResposta() {
-      const {
-        id_chamado,
-        id_user_tecnico,
-        idfr_chamado,
-        categoriaServico,
-        categoriaOcorrencia,
-        descricaoSolucao,
-      } = this.ChamadoData;
-      console.log("Dados do chamado:", {
-        id_chamado,
-        id_user_tecnico,
-        idfr_chamado,
-        categoriaServico,
-        categoriaOcorrencia,
-        descricaoSolucao,
+    //Função para responder chamado
+    onEnviarResposta() {
+      let data = new FormData();
+
+      const id_user = sessionStorage.getItem("id_user");
+      const session_token = localStorage.getItem("token");
+
+      if (!id_user || !session_token) {
+        this.showAlert("Usuário não autenticado. Faça login novamente.");
+        return;
+      }
+
+      // Verifique se há algum campo obrigatório vazio
+      if (
+        !this.ChamadoData.id_categoria_servico ||
+        !this.ChamadoData.id_categoria_ocorrencia ||
+        !this.ChamadoData.descricao_solucao
+      ) {
+        // Não prosseguir se houver erros
+        this.showErrors = true;
+        return;
+      }
+
+      this.showErrors = false;
+
+      data.append("id_chamado", this.ChamadoData.id_chamado);
+      data.append("id_user_tecnico", this.ChamadoData.id_user_tecnico);
+      data.append("idfr_chamado", this.ChamadoData.idfr_chamado);
+      data.append(
+        "id_categoria_servico",
+        this.ChamadoData.id_categoria_servico
+      );
+      data.append(
+        "id_categoria_ocorrencia",
+        this.ChamadoData.id_categoria_ocorrencia
+      );
+      data.append("descricao_solucao", this.ChamadoData.descricao_solucao);
+      // Cria um objeto para armazenar os dados
+      let dataEntries = {};
+      data.forEach((value, key) => {
+        dataEntries[key] = value;
       });
+      console.log(dataEntries); // Exibe o objeto com os dados
+
       axios
-        .post(
-          "http://localhost/projeto/helptek/php/api/functions/responderChamado.php?action=ResponderChamado",
-          {
-            id_chamado,
-            id_user_tecnico,
-            idfr_chamado,
-            categoriaServico,
-            categoriaOcorrencia,
-            descricaoSolucao,
-          }
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkUser.php?id_user=${id_user}&session_token=${session_token}`
         )
         .then((res) => {
-          console.log("Server response:", res.data);
-          if (res.data.error === true) {
-            this.showAlert(res.data.msg);
+          if (res.data.error === false) {
+            console.log("Server response:", res.data.msg);
+            const idfr_code_user = res.data.user;
+            data.append("idfr_code_user", idfr_code_user);
+            axios
+              .post(
+                "http://localhost/projeto/helptek/php/api/functions/chamados/update/t_responderChamado.php",
+                data
+              )
+              .then((res_responde) => {
+                console.log("Server response:", res_responde.data);
+                if (res_responde.data.error === true) {
+                  this.showAlert(res_responde.data.msg);
+                } else {
+                  this.showAlert(res_responde.data.msg);
+                  this.closeModal("modalResponderChamado");
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            this.showResponderCampos = false;
           } else {
             this.showAlert(res.data.msg);
           }
@@ -618,15 +912,92 @@ export default {
         .catch((err) => {
           console.log(err);
         });
-      this.showResponderCampos = false;
     },
+    //Função para exibir bt encaminhar
     encaminharChamado() {
       this.showResponderCampos = false;
       this.showEncaminharCampos = true;
       this.showBotoesAcao = false;
     },
+    //Função para encamninhar chamado
     onEncaminharChamado() {
-      const {
+      let data = new FormData();
+
+      const id_user = sessionStorage.getItem("id_user");
+      const session_token = localStorage.getItem("token");
+
+      if (!id_user || !session_token) {
+        this.showAlert("Usuário não autenticado. Faça login novamente.");
+        return;
+      }
+
+      // Verifique se há algum campo obrigatório vazio
+      if (
+        !this.ChamadoData.novoTecnicoResponsavel ||
+        !this.ChamadoData.justificativaEncaminhamento
+      ) {
+        // Não prosseguir se houver erros
+        this.showErrors = true;
+        return;
+      }
+
+      this.showErrors = false;
+
+      data.append("id_chamado", this.ChamadoData.id_chamado);
+      data.append("id_user_tecnico", this.ChamadoData.id_user_tecnico);
+      data.append("idfr_chamado", this.ChamadoData.idfr_chamado);
+      data.append(
+        "novoTecnicoResponsavel",
+        this.ChamadoData.novoTecnicoResponsavel
+      );
+      data.append(
+        "justificativaEncaminhamento",
+        this.ChamadoData.justificativaEncaminhamento
+      );
+
+      // Cria um objeto para armazenar os dados
+      let dataEntries = {};
+      data.forEach((value, key) => {
+        dataEntries[key] = value;
+      });
+      console.log(dataEntries); // Exibe o objeto com os dados
+
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkUser.php?id_user=${id_user}&session_token=${session_token}`
+        )
+        .then((res) => {
+          if (res.data.error === false) {
+            console.log("Server response:", res.data.msg);
+            const idfr_code_user = res.data.user;
+            data.append("idfr_code_user", idfr_code_user);
+            axios
+              .post(
+                "http://localhost/projeto/helptek/php/api/functions/chamados/update/t_g_encaminharChamado.php",
+                data
+              )
+              .then((res_encaminha) => {
+                console.log("Server response:", res_encaminha.data);
+                if (res_encaminha.data.error === true) {
+                  this.showAlert(res_encaminha.data.msg);
+                } else {
+                  this.showAlert(res_encaminha.data.msg);
+                  this.closeModal("modalEncaminharChamado");
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            this.showResponderCampos = false;
+          } else {
+            this.showAlert(res.data.msg);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      /*const {
         id_chamado,
         idfr_chamado,
         id_user_tecnico,
@@ -663,7 +1034,7 @@ export default {
         .catch((err) => {
           console.log(err);
         });
-      this.showEncaminharCampos = false;
+      this.showEncaminharCampos = false;*/
     },
     /*enviarChamado() {
       console.log("Novo tecnico responsavel:", this.novoTecnicoResponsavel);
@@ -678,25 +1049,30 @@ export default {
       // Limpar os campos e retornar ao estado anterior do modal
       this.showResponderCampos = false;
       this.showEncaminharCampos = false;
-      this.categoriaServico = "";
-      this.categoriaOcorrencia = "";
-      this.descricaoSolucao = "";
+      this.categoria_servico = "";
+      this.categoria_ocorrencia = "";
+      this.descricao_solucao = "";
+      this.novoTecnicoResponsavel = "";
+      this.justificativaEncaminhamento = "";
     },
     fecharModal() {
       this.showResponderCampos = false;
       this.showEncaminharCampos = false;
       this.showBotoesAcao = true; // Restaurar a visibilidade dos botões
-      this.categoriaServico = "";
-      this.categoriaOcorrencia = "";
-      this.descricaoSolucao = "";
+      this.categoria_servico = "";
+      this.categoria_ocorrencia = "";
+      this.descricao_solucao = "";
+      this.novoTecnicoResponsavel = "";
+      this.justificativaEncaminhamento = "";
     },
+    //Filtro simples de chamados
     filterChamados() {
       const id_user = sessionStorage.getItem("id_user");
       const permission = sessionStorage.getItem("permission");
       if (!this.selectedStatus) return;
       axios
         .get(
-          `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}&permission=${permission}&status_chamado=${this.selectedStatus}`
+          `http://localhost/projeto/helptek/php/api/functions/selectChamados.php?action=selectChamados&id_user=${id_user}&permission=${permission}&status_chamado=${this.selectedStatus}&prioridade_chamado=${this.selectedStatus}`
         )
         //.get(`/api/chamados?status_chamado=${this.selectedStatus}`)
         .then((response) => {
@@ -707,7 +1083,7 @@ export default {
         });
     },
     limparFiltros() {
-      this.selectedStatus = null;
+      this.selectedStatus = "";
       this.onListarChamados();
       // Limpar a lista de chamados filtrados
     },
@@ -746,6 +1122,26 @@ export default {
         default:
           return ""; // Classe vazia para evitar erros
       }
+    },
+    // Código para fechar o modal
+    closeModal(modalId) {
+      // Seleciona o botão de fechar dentro do modal
+      const closeButton = document.querySelector(`#${modalId} .btn-close`);
+      // Simula o clique no botão de fechar para fechar o modal
+      if (closeButton) {
+        closeButton.click();
+      }
+      this.onListarChamados();
+    },
+  },
+  computed: {
+    ChamadosPaginados() {
+      const inicio = (this.paginaAtual - 1) * this.ChamadosPorPagina;
+      const fim = this.paginaAtual * this.ChamadosPorPagina;
+      return this.Chamados.slice(inicio, fim);
+    },
+    totalPaginas() {
+      return Math.ceil(this.Chamados.length / this.ChamadosPorPagina);
     },
   },
 };

@@ -2,29 +2,16 @@
   <div class="ticket-form-container">
     <h1>Meus chamados</h1>
     <div class="filter">
-      <h6>Filtros</h6>
       <div>
-        <label for="filtro_status">Status: </label>
+        <label for="filtro_status">Filtar por status: </label>
         <select v-model="selectedStatus" @change="filterChamados">
-          <option default disabled="disabled" value>Status</option>
+          <option default disabled="disabled" value>Selecionar...</option>
           <option value="1">Em aberto</option>
           <option value="2">Em atendimento</option>
           <option value="3">Respondido</option>
           <option value="4">Concluido</option>
           <option value="0">Cancelado</option>
         </select>
-        <label for="filtro_prioridade">Prioridade: </label>
-        <select>
-          <option>Prioridade</option>
-          <option value="0">Crítica</option>
-          <option value="1">Alta</option>
-          <option value="2">Média</option>
-          <option value="3">Baixa</option>
-        </select>
-        <label for="filtro_dta_cri">Data de criação: </label>
-        <input type="date" />
-      </div>
-      <div>
         ou
         <input type="text" placeholder="Pesquisar ID ou título..." />
         <button class="bt-acoes-chamado">
@@ -36,6 +23,11 @@
       </div>
     </div>
     <div>
+      <div class="message-box" v-if="showMessage">
+        <div class="message-content">
+          <span>{{ message }}</span>
+        </div>
+      </div>
       <table class="chamados-list-table">
         <thead>
           <tr>
@@ -61,24 +53,14 @@
               ></i>
             </td>
             <td>{{ chamados.data_criacao_fm }}</td>
-            <td>
+            <td class="td-txt-status">
               {{ chamados.status_chamado_desc }}
             </td>
             <td>
               {{ chamados.prazo }}
             </td>
             <td>{{ chamados.data_atualizacao_fm }}</td>
-            <!--<td>{{ chamados.diasCProb }}</td>-->
-            <td>
-              <button
-                class="bt-acoes-chamado"
-                data-bs-toggle="modal"
-                data-bs-target="#modalVisualizarEditarChamado"
-                @click="verChamado(chamados)"
-                title="Ver/Editar"
-              >
-                <i class="bi bi-eye"></i>
-              </button>
+            <td class="td-bts-acoes">
               <button
                 class="bt-acoes-chamado"
                 data-bs-toggle="modal"
@@ -88,6 +70,15 @@
                 v-if="chamados.status_chamado == 3"
               >
                 <i class="bi bi-chat-right-dots green"></i>
+              </button>
+              <button
+                class="bt-acoes-chamado"
+                data-bs-toggle="modal"
+                data-bs-target="#modalVisualizarEditarChamado"
+                @click="verChamado(chamados)"
+                title="Ver/Editar"
+              >
+                <i class="bi bi-eye"></i>
               </button>
               <button
                 class="bt-acoes-chamado"
@@ -136,7 +127,6 @@
             >
               <i class="bi bi-caret-right-fill"></i>
             </button>
-            <!--<span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>-->
           </div>
         </div>
         <div class="totalizer">
@@ -234,6 +224,15 @@
                 />
               </div>
               <div class="form-group-modal">
+                <label>Descrição</label>
+                <textarea
+                  id="description"
+                  rows="4"
+                  v-model="ChamadoData.descricao_chamado"
+                  :disabled="!isEditing"
+                ></textarea>
+              </div>
+              <div class="form-group-modal">
                 <label>Setor</label>
                 <select
                   name="setor"
@@ -243,7 +242,6 @@
                   :disabled="!isEditing"
                 >
                   <option default value="" disabled>Setor</option>
-                  <!--<option value="1">Não especificado (IPS: 1)</option>-->
                   <option
                     v-for="subs in subsetores"
                     :key="subs.id_setor"
@@ -252,15 +250,6 @@
                     {{ subs.nome_setor + " (IPS: " + subs.peso + ")" }}
                   </option>
                 </select>
-              </div>
-              <div class="form-group-modal">
-                <label>Descrição</label>
-                <textarea
-                  id="description"
-                  rows="4"
-                  v-model="ChamadoData.descricao_chamado"
-                  :disabled="!isEditing"
-                ></textarea>
               </div>
               <div class="form-group-modal">
                 <label>Prioridade</label>
@@ -332,7 +321,7 @@
                 <div class="confirmation-box">
                   <button
                     type="submit"
-                    class="btEditar"
+                    class="submit-button"
                     @click="editarChamado"
                     v-if="
                       ChamadoData.status_chamado != 4 &&
@@ -343,13 +332,13 @@
                   </button>
                 </div>
               </div>
-              <div v-else>
+              <div class="confirmation-box" v-else>
                 <button
                   type="button"
-                  class="submit-button-modal"
-                  @click="salvarChamado"
+                  class="submit-button"
+                  @click="onSalvarEdicao"
                 >
-                  Salvar
+                  Salvar Alterações
                 </button>
               </div>
             </form>
@@ -374,7 +363,58 @@
                 <span>{{ message }}</span>
               </div>
             </div>
-            <h5 class="modal-title">Retorno do atendimento</h5>
+            <div class="top_info">
+              <div class="left_info">
+                <div>
+                  <span>
+                    ID:
+                    <h6 class="inline">
+                      {{ ChamadoData.idfr_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Solicitante:
+                    <h6 class="inline">
+                      {{ ChamadoData.usuario_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Status:
+                    <h6 class="inline">
+                      {{ ChamadoData.status_chamado_desc }}
+                    </h6>
+                  </span>
+                </div>
+                <div v-if="ChamadoData.tecnico_responsavel">
+                  <span>
+                    Técnico:
+                    <h6 class="inline">
+                      {{ ChamadoData.tecnico_responsavel }}
+                    </h6>
+                  </span>
+                </div>
+              </div>
+              <div class="right-info">
+                <div>
+                  <span>
+                    Tempo de espera:
+                    <h6>{{ ChamadoData.tempo_espera }}</h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Última atualização:
+                    <h6 class="inline">
+                      {{ ChamadoData.data_atualizacao_fm }}
+                    </h6>
+                  </span>
+                </div>
+              </div>
+            </div>
             <div class="form-group-modal">
               <label>Categoria do Serviço</label>
               <select v-model="ChamadoData.id_categoria_servico" disabled>
@@ -412,7 +452,11 @@
                 v-if="!isEditing"
               >
                 <div class="confirmation-box">
-                  <button type="submit" class="btEditar" @click="editarChamado">
+                  <button
+                    type="submit"
+                    class="submit-button"
+                    @click="editarChamado"
+                  >
                     Avaliar
                   </button>
                 </div>
@@ -441,6 +485,11 @@
                   />
                   <label for="radio_nao" class="form-check-label"> Não</label>
                 </div>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.solicitacao_atendida && showErrors"
+                  >*Selecionar uma opção!</span
+                >
                 <div class="form-group-modal">
                   <label>Observação *</label>
                   <textarea
@@ -448,14 +497,21 @@
                     v-model="ChamadoData.observacao"
                     maxlength="255"
                   ></textarea>
+                  <span
+                    class="form-tip"
+                    v-if="!ChamadoData.observacao && showErrors"
+                    >*Preenchimento obrigatório!</span
+                  >
                 </div>
-                <button
-                  type="button"
-                  class="submit-button-modal"
-                  @click="onAvaliarChamado"
-                >
-                  Salvar
-                </button>
+                <div class="confirmation-box">
+                  <button
+                    type="button"
+                    class="submit-button"
+                    @click="onAvaliarChamado"
+                  >
+                    Confirmar
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -487,20 +543,19 @@
               >
                 <table class="historico-table">
                   <tr>
-                    <td rowspan="2" class="historico-info-i">
-                      <i class="bi bi-person-circle"></i>
-                    </td>
                     <td class="historico-info1">
-                      {{ historico.data_acao_fm }} <br />
-                      {{ historico.name_user }}
+                      <b>{{ historico.data_acao_fm }}</b> <br />
+                      <b>{{ historico.name_user }}</b>
                     </td>
                   </tr>
                   <tr>
                     <td>
                       <label>Ação:</label> <label>{{ historico.acao }}</label>
                       <br />
-                      <label> Descrição:</label>
-                      <label> {{ historico.descricao_acao }}</label>
+                      <label v-if="historico.descricao_acao"> Descrição:</label>
+                      <label v-if="historico.descricao_acao">
+                        {{ historico.descricao_acao }}</label
+                      >
                     </td>
                   </tr>
                 </table>
@@ -540,14 +595,21 @@
                     v-model="ChamadoData.observacao"
                     maxlength="255"
                   ></textarea>
+                  <span
+                    class="form-tip"
+                    v-if="!ChamadoData.observacao && showErrors"
+                    >*Preenchimento obrigatório!</span
+                  >
                 </div>
-                <button
-                  type="button"
-                  class="submit-button-modal"
-                  @click="onCancelarChamado"
-                >
-                  Confirmar
-                </button>
+                <div class="confirmation-box">
+                  <button
+                    type="button"
+                    class="submit-button"
+                    @click="onCancelarChamado"
+                  >
+                    Confirmar
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -574,12 +636,11 @@ export default {
         status_chamado: "",
         data_atualizacao: "",
         data_conclusao: "",
-        //diasCProb: "",
         id_setor: "",
+        peso: "",
         gravidade: "",
         urgencia: "",
         tendencia: "",
-        peso: "",
         id_categoria_servico: "",
         id_categoria_ocorrencia: "",
         categoriaServico: "",
@@ -745,9 +806,6 @@ export default {
       this.ChamadoData.gravidade = chamado.gravidade;
       this.ChamadoData.urgencia = chamado.urgencia;
       this.ChamadoData.tendencia = chamado.tendencia;
-      //this.loadChamadoData();
-      //console.log(chamado);
-
       axios
         .get(
           `http://localhost/projeto/helptek/php/api/functions/chamados/read/getAnexosChamados.php?id_chamado=${chamado.id_chamado}`
@@ -768,7 +826,7 @@ export default {
       this.isEditing = true;
     },
     //Função para salvar dados editados do chamado
-    salvarChamado() {
+    onSalvarEdicao() {
       let id_user = sessionStorage.getItem("id_user");
       const {
         id_chamado,
@@ -781,18 +839,6 @@ export default {
         urgencia,
         tendencia,
       } = this.ChamadoData;
-      /*console.log("Dados do chamado:", {
-        id_chamado,
-        id_user,
-        idfr_chamado,
-        titulo_chamado,
-        descricao_chamado,
-        id_setor,
-        peso,
-        gravidade,
-        urgencia,
-        tendencia,
-      });*/
       axios
         .post(
           `http://localhost/projeto/helptek/php/api/functions/updateChamado.php?action=AtualizaChamado`,
@@ -815,6 +861,7 @@ export default {
             this.showAlert(res.data.msg);
           } else {
             this.showAlert(res.data.msg);
+            this.closeModal("modalVisualizarEditarChamado");
           }
         })
         .catch((err) => {
@@ -829,11 +876,25 @@ export default {
     onCancelarChamado() {
       let data = new FormData();
 
-      let id_user = sessionStorage.getItem("id_user");
-      let session_token = localStorage.getItem("token");
+      const id_user = sessionStorage.getItem("id_user");
+      const session_token = localStorage.getItem("token");
+
+      if (!id_user || !session_token) {
+        this.showAlert("Usuário não autenticado. Faça login novamente.");
+        return;
+      }
+
+      // Verifique se há algum campo obrigatório vazio
+      if (!this.ChamadoData.observacao) {
+        // Não prosseguir se houver erros
+        this.showErrors = true;
+        return;
+      }
+
+      this.showErrors = false;
 
       data.append("id_chamado", this.ChamadoData.id_chamado);
-      data.append("id_user", this.ChamadoData.id_user);
+      data.append("id_user", id_user);
       data.append("idfr_chamado", this.ChamadoData.idfr_chamado);
       data.append("observacao", this.ChamadoData.observacao);
 
@@ -856,9 +917,8 @@ export default {
                 if (res_cancela.data.error === true) {
                   this.showAlert(res_cancela.data.msg);
                 } else {
-                  this.isConfirmingCancel = false;
                   this.showAlert(res_cancela.data.msg);
-                  this.onListarChamados();
+                  this.closeModal("modalCancelarChamado");
                 }
               })
               .catch((err) => {
@@ -893,17 +953,78 @@ export default {
         });*/
     },
     onAvaliarChamado() {
-      this.showErrors = true;
+      let data = new FormData();
+
+      const id_user = sessionStorage.getItem("id_user");
+      const session_token = localStorage.getItem("token");
+
+      if (!id_user || !session_token) {
+        this.showAlert("Usuário não autenticado. Faça login novamente.");
+        return;
+      }
 
       // Verifique se há algum campo obrigatório vazio
-      /*if (
+      if (
         !this.ChamadoData.solicitacao_atendida ||
         !this.ChamadoData.observacao
       ) {
         // Não prosseguir se houver erros
+        this.showErrors = true;
         return;
-      }*/
-      const {
+      }
+
+      this.showErrors = false;
+
+      data.append("id_chamado", this.ChamadoData.id_chamado);
+      data.append("id_user", id_user);
+      data.append(
+        "solicitacao_atendida",
+        this.ChamadoData.solicitacao_atendida
+      );
+      data.append("observacao", this.ChamadoData.observacao);
+
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkUser.php?id_user=${id_user}&session_token=${session_token}`
+        )
+        .then((res) => {
+          if (res.data.error === false) {
+            console.log("Server response:", res.data.msg);
+            const idfr_code_user = res.data.user;
+            data.append("idfr_code_user", idfr_code_user);
+            // Cria um objeto para armazenar os dados
+            let dataEntries = {};
+            data.forEach((value, key) => {
+              dataEntries[key] = value;
+            });
+            console.log(dataEntries); // Exibe o objeto com os dados
+            axios
+              .post(
+                "http://localhost/projeto/helptek/php/api/functions/chamados/update/s_avaliarChamado.php",
+                data
+              )
+              .then((res_avalia) => {
+                console.log("Server response:", res_avalia.data);
+                if (res_avalia.data.error === true) {
+                  this.showAlert(res_avalia.data.msg);
+                } else {
+                  this.showAlert(res_avalia.data.msg);
+                  this.closeModal("modalAvaliarResposta");
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+            //this.showAlert(res.data.msg);
+          } else {
+            this.showAlert(res.data.msg);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      /*const {
         id_chamado,
         id_user = sessionStorage.getItem("id_user"),
         idfr_chamado,
@@ -937,7 +1058,7 @@ export default {
         })
         .catch((error) => {
           console.error("Erro ao avaliar chamado:", error);
-        });
+        });*/
     },
     //Filtro simples de chamados
     filterChamados() {
@@ -968,7 +1089,7 @@ export default {
       this.showMessage = true;
       setTimeout(() => {
         this.showMessage = false;
-      }, 8000);
+      }, 6000);
     },
     //Limpar campos de preenchimento
     clearFormFields() {
@@ -1034,9 +1155,19 @@ export default {
           return ""; // Classe vazia para evitar erros
       }
     },
+    // Código para fechar o modal
+    closeModal(modalId) {
+      // Seleciona o botão de fechar dentro do modal
+      const closeButton = document.querySelector(`#${modalId} .btn-close`);
+      // Simula o clique no botão de fechar para fechar o modal
+      if (closeButton) {
+        closeButton.click();
+      }
+      this.onListarChamados();
+    },
   },
   computed: {
-    registrosPaginados() {
+    ChamadosPaginados() {
       const inicio = (this.paginaAtual - 1) * this.ChamadosPorPagina;
       const fim = this.paginaAtual * this.ChamadosPorPagina;
       return this.Chamados.slice(inicio, fim);
