@@ -10,6 +10,7 @@
           <option value="2">Em atendimento</option>
           <option value="3">Respondido</option>
           <option value="4">Concluido</option>
+          <option value="5">Detalhar chamado</option>
           <option value="0">Cancelado</option>
         </select>
         ou
@@ -70,6 +71,16 @@
                 v-if="chamados.status_chamado == 3"
               >
                 <i class="bi bi-chat-right-dots green"></i>
+              </button>
+              <button
+                class="bt-acoes-chamado"
+                data-bs-toggle="modal"
+                data-bs-target="#modalDetalharChamado"
+                @click="verChamado(chamados)"
+                title="Detalhar chamado"
+                v-if="chamados.status_chamado == 5"
+              >
+                <i class="bi bi-exclamation-triangle-fill yellow"></i>
               </button>
               <button
                 class="bt-acoes-chamado"
@@ -151,6 +162,7 @@
               data-bs-dismiss="modal"
               aria-label="Close"
               class="btn-close"
+              @click="clearFormFields()"
             >
               &times;
             </button>
@@ -222,6 +234,11 @@
                   v-model="ChamadoData.titulo_chamado"
                   :disabled="!isEditing"
                 />
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.titulo_chamado && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
               </div>
               <div class="form-group-modal">
                 <label>Descrição</label>
@@ -231,6 +248,11 @@
                   v-model="ChamadoData.descricao_chamado"
                   :disabled="!isEditing"
                 ></textarea>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.descricao_chamado && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
               </div>
               <div class="form-group-modal">
                 <label>Setor</label>
@@ -250,6 +272,11 @@
                     {{ subs.nome_setor + " (IPS: " + subs.peso + ")" }}
                   </option>
                 </select>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.id_setor && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
               </div>
               <div class="form-group-modal">
                 <label>Prioridade</label>
@@ -262,6 +289,11 @@
                     {{ gravidade.descricao_categoria }}
                   </option>
                 </select>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.gravidade && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
                 <select v-model="ChamadoData.urgencia" :disabled="!isEditing">
                   <option
                     v-for="urgencia in prioridadesUrgencia"
@@ -271,6 +303,11 @@
                     {{ urgencia.descricao_categoria }}
                   </option>
                 </select>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.urgencia && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
                 <select v-model="ChamadoData.tendencia" :disabled="!isEditing">
                   <option
                     v-for="tendencia in prioridadesTendencia"
@@ -280,47 +317,43 @@
                     {{ tendencia.descricao_categoria }}
                   </option>
                 </select>
+                <span
+                  class="form-tip"
+                  v-if="!ChamadoData.tendencia && showErrors"
+                  >*Preenchimento obrigatório!</span
+                >
               </div>
               <div class="form-group-modal">
                 <label>Anexos</label>
-                <input
-                  type="file"
-                  id="attachment"
-                  ref="attachment"
-                  name="anexo"
-                  @change="handleFileUpload"
-                  multiple
-                  :disabled="!isEditing"
-                />
-                <table class="anexo-grid" v-if="anexos.length > 0">
-                  <thead>
-                    <tr>
-                      <th>Arquivo</th>
-                      <th>Tamanho</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(anexo, index) in anexos" :key="index">
-                      <td>{{ anexo.name }}</td>
-                      <td>{{ anexo.size }} bytes</td>
-                      <td>
-                        <a :href="anexo.caminho_arquivo" target="_blank">{{
-                          anexo.caminho_arquivo
-                        }}</a>
-                      </td>
-                      <td>
-                        <button
-                          class="bt-remove-anexo"
-                          @click="removeAnexo(index)"
-                          :disabled="!isEditing"
-                        >
-                          <i class="bi bi-x"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div v-if="isEditing">
+                  <input
+                    type="file"
+                    id="attachment"
+                    ref="attachment"
+                    name="anexo"
+                    @change="handleFileUpload"
+                    multiple
+                    :disabled="!isEditing"
+                  />
+                </div>
+                <div class="confirmation-box">
+                  <table class="anexo-grid" v-if="anexos.length > 0">
+                    <thead>
+                      <tr>
+                        <th>Anexos</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(anexo, index) in anexos" :key="index">
+                        <td>
+                          <a :href="anexo.caminho_arquivo" target="_blank"
+                            >Visualizar anexo</a
+                          >
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
               <div class="confirmation-overlay" v-if="!isEditing">
                 <div class="confirmation-box">
@@ -358,7 +391,12 @@
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title">Avaliar resposta</h4>
-            <button type="button" class="btn-close" data-bs-dismiss="modal">
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              @click="clearFormFields()"
+            >
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
@@ -530,7 +568,12 @@
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title">Histórico do atendimento</h4>
-            <button type="button" class="btn-close" data-bs-dismiss="modal">
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              @click="clearFormFields()"
+            >
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
@@ -577,7 +620,12 @@
         <div class="modal-content">
           <div class="modal-header">
             <h4 class="modal-title">Cancelar chamado</h4>
-            <button type="button" class="btn-close" data-bs-dismiss="modal">
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              @click="clearFormFields()"
+            >
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
@@ -596,13 +644,13 @@
                 <div class="form-group-modal">
                   <label>Observação *</label>
                   <textarea
-                    name="observacao"
-                    v-model="ChamadoData.observacao"
+                    name="observacao_cancelamento"
+                    v-model="ChamadoData.observacao_cancelamento"
                     maxlength="255"
                   ></textarea>
                   <span
                     class="form-tip"
-                    v-if="!ChamadoData.observacao && showErrors"
+                    v-if="!ChamadoData.observacao_cancelamento && showErrors"
                     >*Preenchimento obrigatório!</span
                   >
                 </div>
@@ -622,10 +670,134 @@
       </div>
     </div>
     <!----------------------------------Modal p/ cancelar o chamado---------------------------------->
+    <!----------------------------------Modal p/ detalhar o chamado---------------------------------->
+    <div class="modal fade bd-example-modal-lg" id="modalDetalharChamado">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Detalhar chamado</h4>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              @click="clearFormFields()"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="message-box" v-if="showMessage">
+              <div class="message-content">
+                <span>{{ message }}</span>
+              </div>
+            </div>
+            <div class="top_info">
+              <div class="left_info">
+                <div>
+                  <span>
+                    ID:
+                    <h6 class="inline">
+                      {{ ChamadoData.idfr_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Solicitante:
+                    <h6 class="inline">
+                      {{ ChamadoData.usuario_chamado }}
+                    </h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Status:
+                    <h6 class="inline">
+                      {{ ChamadoData.status_chamado_desc }}
+                    </h6>
+                  </span>
+                </div>
+                <div v-if="ChamadoData.tecnico_responsavel">
+                  <span>
+                    Técnico:
+                    <h6 class="inline">
+                      {{ ChamadoData.tecnico_responsavel }}
+                    </h6>
+                  </span>
+                </div>
+              </div>
+              <div class="right-info">
+                <div>
+                  <span>
+                    Tempo de espera:
+                    <h6>{{ ChamadoData.tempo_espera }}</h6>
+                  </span>
+                </div>
+                <div>
+                  <span>
+                    Última atualização:
+                    <h6 class="inline">
+                      {{ ChamadoData.data_atualizacao_fm }}
+                    </h6>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <br />
+            <div>
+              <div>
+                <h5>Detalhamento solicitado:</h5>
+                <div class="form-group-modal">
+                  <label>Observação</label>
+                  <textarea
+                    v-model="ChamadoData.observacao_detalhamento_tecnico"
+                    disabled
+                    onresize="false"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+            <form method="POST" @submit.prevent="">
+              <div>
+                <h5>Resposta:</h5>
+                <div class="form-group-modal">
+                  <label>Observação *</label>
+                  <textarea
+                    name="observacao"
+                    v-model="ChamadoData.observacao_detalhamento_solicitante"
+                    maxlength="255"
+                  ></textarea>
+                  <span
+                    class="form-tip"
+                    v-if="
+                      !ChamadoData.observacao_detalhamento_solicitante &&
+                      showErrors
+                    "
+                    >*Preenchimento obrigatório!</span
+                  >
+                </div>
+                <div class="confirmation-box">
+                  <button
+                    type="button"
+                    class="submit-button"
+                    @click="onDetalharChamado"
+                  >
+                    Responder
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!----------------------------------Modal p/ detalhar o chamado---------------------------------->
   </div>
 </template>
 <script>
 import axios from "axios";
+import { storage } from "@/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default {
   name: "MeusChamados",
@@ -655,6 +827,9 @@ export default {
         observacao: "",
         tempo_espera: "",
         tecnico_responsavel: "",
+        observacao_detalhamento_tecnico: "",
+        observacao_detalhamento_solicitante: "",
+        observacao_cancelamento: "",
       },
       Chamados: [],
       Historico: [],
@@ -671,12 +846,12 @@ export default {
       showMessage: false,
       message: "",
       showErrors: false,
-      btAvaliar: false,
       anexos: [], // Array para armazenar os arquivos anexados
       totalRegistros: 0,
       paginaAtual: 1,
       registrosPorPagina: 50,
       sessionUser: sessionStorage.getItem("id_user"),
+      anexosUrls: [], // Array para armazenar as URLs dos arquivos no Firebase
     };
   },
   created() {
@@ -819,7 +994,7 @@ export default {
           if (!response.data.error) {
             this.anexos = response.data.anexos;
           } else {
-            console.error("Erro ao buscar anexos:", response.data.msg);
+            console.log(response.data.msg);
           }
         })
         .catch((error) => {
@@ -831,9 +1006,108 @@ export default {
       this.isEditing = true;
     },
     //Função para salvar dados editados do chamado
-    onSalvarEdicao() {
-      let id_user = sessionStorage.getItem("id_user");
-      const {
+    async onSalvarEdicao() {
+      let data = new FormData();
+
+      const id_user = sessionStorage.getItem("id_user");
+      const session_token = localStorage.getItem("token");
+
+      if (!id_user || !session_token) {
+        this.showAlert("Usuário não autenticado. Faça login novamente.");
+        return;
+      }
+
+      // Verifique se há algum campo obrigatório vazio
+      if (
+        !this.ChamadoData.titulo_chamado ||
+        !this.ChamadoData.descricao_chamado ||
+        !this.ChamadoData.id_setor ||
+        !this.ChamadoData.gravidade ||
+        !this.ChamadoData.urgencia ||
+        !this.ChamadoData.tendencia
+      ) {
+        // Não prosseguir se houver erros
+        this.showErrors = true;
+        return;
+      }
+
+      this.showErrors = false;
+
+      data.append("id_chamado", this.ChamadoData.id_chamado);
+      data.append("titulo_chamado", this.ChamadoData.titulo_chamado);
+      data.append("descricao_chamado", this.ChamadoData.descricao_chamado);
+      data.append("id_setor", this.ChamadoData.id_setor);
+      data.append("peso", this.ChamadoData.peso);
+      data.append("gravidade", this.ChamadoData.gravidade);
+      data.append("urgencia", this.ChamadoData.urgencia);
+      data.append("tendencia", this.ChamadoData.tendencia);
+      data.append("id_user", id_user);
+
+      // Primeiro faz o upload dos arquivos para o Firebase
+      try {
+        const uploadPromises = this.anexos.map((anexo) => {
+          // Cria uma referência no Firebase Storage para o arquivo
+          const storageRef = ref(storage, `anexos/${anexo.name}`);
+
+          // Realiza o upload do arquivo e retorna a URL pública
+          return uploadBytes(storageRef, anexo).then(async (snapshot) => {
+            return await getDownloadURL(snapshot.ref); // Retorna a URL pública do arquivo
+          });
+        });
+
+        // Aguarda o upload de todos os arquivos e captura as URLs
+        this.anexosUrls = await Promise.all(uploadPromises);
+      } catch (error) {
+        console.error("Erro ao fazer upload dos anexos: ", error);
+        return;
+      }
+
+      this.anexosUrls.forEach((url) => {
+        data.append("anexosUrls[]", url);
+      });
+
+      // Cria um objeto para armazenar os dados
+      let dataEntries = {};
+      data.forEach((value, key) => {
+        dataEntries[key] = value;
+      });
+      console.log(dataEntries); // Exibe o objeto com os dados
+
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkUser.php?id_user=${id_user}&session_token=${session_token}`
+        )
+        .then((res) => {
+          if (res.data.error === false) {
+            console.log("Server response:", res.data.msg);
+            const idfr_code_user = res.data.user;
+            data.append("idfr_code_user", idfr_code_user);
+            axios
+              .post(
+                "http://localhost/projeto/helptek/php/api/functions/chamados/update/s_editarChamado.php",
+                data
+              )
+              .then((res_edita) => {
+                console.log("Server response:", res_edita.data);
+                if (res_edita.data.error === true) {
+                  this.showAlert(res_edita.data.msg);
+                } else {
+                  this.showAlert(res_edita.data.msg);
+                  this.closeModal("modalVisualizarEditarChamado");
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          } else {
+            this.showAlert(res.data.msg);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      /*const {
         id_chamado,
         idfr_chamado,
         titulo_chamado,
@@ -871,7 +1145,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
-        });
+        });*/
     },
     //Botão para liberar cancelamento do chamado
     confirmarCancelamento() {
@@ -890,7 +1164,7 @@ export default {
       }
 
       // Verifique se há algum campo obrigatório vazio
-      if (!this.ChamadoData.observacao) {
+      if (!this.ChamadoData.observacao_cancelamento) {
         // Não prosseguir se houver erros
         this.showErrors = true;
         return;
@@ -901,7 +1175,10 @@ export default {
       data.append("id_chamado", this.ChamadoData.id_chamado);
       data.append("id_user", id_user);
       data.append("idfr_chamado", this.ChamadoData.idfr_chamado);
-      data.append("observacao", this.ChamadoData.observacao);
+      data.append(
+        "observacao_cancelamento",
+        this.ChamadoData.observacao_cancelamento
+      );
 
       axios
         .get(
@@ -929,7 +1206,6 @@ export default {
               .catch((err) => {
                 console.log(err);
               });
-            //this.showAlert(res.data.msg);
           } else {
             this.showAlert(res.data.msg);
           }
@@ -937,25 +1213,6 @@ export default {
         .catch((err) => {
           console.log(err);
         });
-      /*.post(
-          `http://localhost/projeto/helptek/php/api/functions/cancelaChamado.php?action=CancelaChamado`,
-          {
-            id_chamado,
-            id_user,
-            idfr_chamado,
-            observacao,
-          }
-        )
-        .then((res) => {
-          console.log("Server response:", res.data);
-          this.isConfirmingCancel = false;
-          this.showAlert(res.data.msg);
-          this.onListarChamados();
-          //$("#myModal").modal("hide");
-        })
-        .catch((error) => {
-          console.error("Erro ao cancelar chamado:", error);
-        });*/
     },
     onAvaliarChamado() {
       let data = new FormData();
@@ -1020,7 +1277,6 @@ export default {
               .catch((err) => {
                 console.log(err);
               });
-            //this.showAlert(res.data.msg);
           } else {
             this.showAlert(res.data.msg);
           }
@@ -1028,42 +1284,76 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+    //Função para detalhar um chamado
+    onDetalharChamado() {
+      let data = new FormData();
 
-      /*const {
-        id_chamado,
-        id_user = sessionStorage.getItem("id_user"),
-        idfr_chamado,
-        solicitacao_atendida,
-        observacao,
-      } = this.ChamadoData;
-      console.log("Dados do chamado:", {
-        id_chamado,
-        id_user,
-        idfr_chamado,
-        solicitacao_atendida,
-        observacao,
+      const id_user = sessionStorage.getItem("id_user");
+      const session_token = localStorage.getItem("token");
+
+      if (!id_user || !session_token) {
+        this.showAlert("Usuário não autenticado. Faça login novamente.");
+        return;
+      }
+
+      // Verifique se há algum campo obrigatório vazio
+      if (!this.ChamadoData.observacao_detalhamento_solicitante) {
+        // Não prosseguir se houver erros
+        this.showErrors = true;
+        return;
+      }
+
+      this.showErrors = false;
+
+      data.append("id_chamado", this.ChamadoData.id_chamado);
+      data.append("id_user", id_user);
+      data.append("idfr_chamado", this.ChamadoData.idfr_chamado);
+      data.append(
+        "observacao_detalhamento_solicitante",
+        this.ChamadoData.observacao_detalhamento_solicitante
+      );
+
+      // Cria um objeto para armazenar os dados
+      let dataEntries = {};
+      data.forEach((value, key) => {
+        dataEntries[key] = value;
       });
+      console.log(dataEntries); // Exibe o objeto com os dados
+
       axios
-        .post(
-          `http://localhost/projeto/helptek/php/api/functions/avaliarAtendimento.php?action=AvaliarAtendimento`,
-          {
-            id_chamado,
-            id_user,
-            idfr_chamado,
-            solicitacao_atendida,
-            observacao,
-          }
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkUser.php?id_user=${id_user}&session_token=${session_token}`
         )
         .then((res) => {
-          console.log("Server response:", res.data);
-          this.isConfirmingCancel = false;
-          this.showAlert(res.data.msg);
-          this.onListarChamados();
-          //$("#myModal").modal("hide");
+          if (res.data.error === false) {
+            console.log("Server response:", res.data.msg);
+            const idfr_code_user = res.data.user;
+            data.append("idfr_code_user", idfr_code_user);
+            axios
+              .post(
+                "http://localhost/projeto/helptek/php/api/functions/chamados/update/s_detalharChamado.php",
+                data
+              )
+              .then((res_detalhar) => {
+                console.log("Server response:", res_detalhar.data);
+                if (res_detalhar.data.error === true) {
+                  this.showAlert(res_detalhar.data.msg);
+                } else {
+                  this.showAlert(res_detalhar.data.msg);
+                  this.closeModal("modalDetalharChamado");
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          } else {
+            this.showAlert(res.data.msg);
+          }
         })
-        .catch((error) => {
-          console.error("Erro ao avaliar chamado:", error);
-        });*/
+        .catch((err) => {
+          console.log(err);
+        });
     },
     //Filtro simples de chamados
     filterChamados() {
@@ -1098,22 +1388,8 @@ export default {
     },
     //Limpar campos de preenchimento
     clearFormFields() {
-      this.ChamadoData.titulo = "";
-      this.ChamadoData.descricao = "";
-      this.ChamadoData.gravidade = "";
-      this.ChamadoData.urgencia = "";
-      this.ChamadoData.tendencia = "";
       this.$refs.attachment.value = "";
-    },
-    closeMessage() {
-      this.showMessage = false;
-    },
-    //Exibir botão para avaliar o atendimento
-    showBtAvaliar(chamado) {
-      this.ChamadoData = chamado;
-      if (chamado.status_chamado == 3) {
-        this.btAvaliar = true;
-      }
+      this.showErrors = false;
     },
     //Exibir histórico do chamado
     onVisualizarHistoricoChamado(chamado) {

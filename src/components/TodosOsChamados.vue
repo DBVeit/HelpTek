@@ -11,14 +11,23 @@
             <option value="2">Em atendimento</option>
             <option value="3">Respondido</option>
             <option value="4">Concluido</option>
+            <option value="5">Detalhar chamado</option>
             <option value="0">Cancelado</option>
           </select>
           ou
-          <input type="text" placeholder="Pesquisar ID ou título..." />
+          <input
+            type="text"
+            v-model="searchBy"
+            @keyup="filterChamados"
+            placeholder="Pesquisar ID ou título..."
+          />
           <button class="bt-acoes-chamado">
             <i class="bi bi-search"></i>
           </button>
-          <a href="" @click.prevent="limparFiltros" v-if="selectedStatus !== ''"
+          <a
+            href=""
+            @click.prevent="limparFiltros"
+            v-if="selectedStatus !== '' || searchBy !== ''"
             >Limpar filtros</a
           >
         </div>
@@ -78,7 +87,7 @@
                   data-bs-target="#modalEncaminharChamado"
                   @click="verChamado(chamados)"
                   title="Encaminhar"
-                  v-if="chamados.status_chamado == 2 && isGerente"
+                  v-if="chamados.status_chamado == 1 && isGerente"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -525,21 +534,24 @@
                 </div>
                 <div class="form-group-modal">
                   <label>Anexos</label>
-                  <table class="anexo-grid" v-if="anexos.length > 0">
-                    <thead>
-                      <tr>
-                        <th>Arquivo</th>
-                        <th>Tamanho</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(anexo, index) in anexos" :key="index">
-                        <td>{{ anexo.name }}</td>
-                        <td>{{ anexo.size }} bytes</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div class="confirmation-box">
+                    <table class="anexo-grid" v-if="anexos.length > 0">
+                      <thead>
+                        <tr>
+                          <th>Anexos</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(anexo, index) in anexos" :key="index">
+                          <td>
+                            <a :href="anexo.caminho_arquivo" target="_blank"
+                              >Visualizar anexo</a
+                            >
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
                 <!----------------------Assumir chamado (tecnico)---------------------
                 <div v-if="isTecnico">
@@ -675,6 +687,7 @@ export default {
       Chamados: [],
       Historico: [],
       selectedStatus: "",
+      searchBy: "",
       tecnicos: [],
       isTecnico: false,
       isGerente: false,
@@ -714,6 +727,8 @@ export default {
         .then((res) => {
           console.log("Server response:", res.data);
           this.Chamados = res.data.chamados;
+          this.totalRegistros = res.data.total;
+          this.totalRegistros = this.Chamados.length;
         })
         .catch((err) => {
           console.log(err);
@@ -781,6 +796,20 @@ export default {
       this.showErrors = false;
       this.ChamadoData.novoTecnicoResponsavel = "";
       this.ChamadoData.justificativaEncaminhamento = "";
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/chamados/read/getAnexosChamados.php?id_chamado=${chamado.id_chamado}`
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.anexos = response.data.anexos;
+          } else {
+            console.log(response.data.msg);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar anexos:", error);
+        });
     },
     //Verificar tipo de permissão do usuário logado
     checkPermissions() {
@@ -806,13 +835,6 @@ export default {
       data.append("id_chamado", this.ChamadoData.id_chamado);
       data.append("id_user_tecnico", id_user);
       data.append("idfr_chamado", this.ChamadoData.idfr_chamado);
-
-      // Cria um objeto para armazenar os dados
-      let dataEntries = {};
-      data.forEach((value, key) => {
-        dataEntries[key] = value;
-      });
-      console.log(dataEntries); // Exibe o objeto com os dados
 
       axios
         .get(
@@ -849,33 +871,6 @@ export default {
         .catch((err) => {
           console.log(err);
         });
-
-      /*const { id_chamado, idfr_chamado } = this.ChamadoData;
-      console.log("Dados do chamado:", {
-        idfr_chamado,
-      });
-      axios
-        .post(
-          `http://localhost/projeto/helptek/php/api/functions/assumirChamado.php?action=AssumirChamado`,
-          {
-            id_chamado: id_chamado,
-            idfr_chamado: idfr_chamado,
-            id_user_tecnico: sessionStorage.getItem("id_user"),
-          }
-        )
-        .then((res) => {
-          console.log("Server response:", res.data);
-          if (res.data.error === true) {
-            this.showAlert(res.data.msg);
-            this.fecharModal();
-          } else {
-            this.showAlert(res.data.msg);
-            this.onListarChamados();
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });*/
     },
     //Função para encamninhar chamado
     onEncaminharChamado() {
@@ -883,6 +878,7 @@ export default {
 
       const id_user = sessionStorage.getItem("id_user");
       const session_token = localStorage.getItem("token");
+      const permission = sessionStorage.getItem("permission");
 
       if (!id_user || !session_token) {
         this.showAlert("Usuário não autenticado. Faça login novamente.");
@@ -902,7 +898,7 @@ export default {
       this.showErrors = false;
 
       data.append("id_chamado", this.ChamadoData.id_chamado);
-      data.append("id_user_tecnico", this.ChamadoData.id_user_tecnico);
+      data.append("id_user_tecnico", id_user);
       data.append("idfr_chamado", this.ChamadoData.idfr_chamado);
       data.append(
         "novoTecnicoResponsavel",
@@ -912,13 +908,7 @@ export default {
         "justificativaEncaminhamento",
         this.ChamadoData.justificativaEncaminhamento
       );
-
-      // Cria um objeto para armazenar os dados
-      let dataEntries = {};
-      data.forEach((value, key) => {
-        dataEntries[key] = value;
-      });
-      console.log(dataEntries); // Exibe o objeto com os dados
+      data.append("permission", permission);
 
       axios
         .get(
@@ -955,18 +945,6 @@ export default {
           console.log(err);
         });
     },
-    fecharModal() {
-      const modal = document.getElementById("myModal");
-      if (modal) {
-        modal.classList.remove("show");
-        modal.style.display = "none";
-        const modalBackdrop = document.querySelector(".modal-backdrop");
-        if (modalBackdrop) {
-          modalBackdrop.remove();
-        }
-        document.body.classList.remove("modal-open");
-      }
-    },
     filterChamados() {
       const id_user = sessionStorage.getItem("id_user");
       if (!this.selectedStatus) return;
@@ -984,6 +962,7 @@ export default {
     },
     limparFiltros() {
       this.selectedStatus = "";
+      this.searchBy = "";
       this.onListarChamados();
       // Limpar a lista de chamados filtrados
     },
@@ -1043,12 +1022,12 @@ export default {
   },
   computed: {
     ChamadosPaginados() {
-      const inicio = (this.paginaAtual - 1) * this.ChamadosPorPagina;
-      const fim = this.paginaAtual * this.ChamadosPorPagina;
+      const inicio = (this.paginaAtual - 1) * this.registrosPorPagina;
+      const fim = this.paginaAtual * this.registrosPorPagina;
       return this.Chamados.slice(inicio, fim);
     },
     totalPaginas() {
-      return Math.ceil(this.Chamados.length / this.ChamadosPorPagina);
+      return Math.ceil(this.Chamados.length / this.registrosPorPagina);
     },
   },
 };

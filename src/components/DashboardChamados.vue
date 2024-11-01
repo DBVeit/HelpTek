@@ -123,7 +123,14 @@ export default {
         datasets: [
           {
             label: "Dados do chamado",
-            backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
+            backgroundColor: [
+              "#CBFF63FF",
+              "#368AEBFF",
+              "#FF8956FF",
+              "#36CAEBFF",
+              "#4BC051FF",
+              "#DAC023FF",
+            ],
             data: [], // Exemplo de dados
           },
         ],
@@ -150,34 +157,53 @@ export default {
                 2: "Em atendimento",
                 3: "Respondido",
                 4: "Concluído",
+                5: "Detalhar chamado",
               };
 
-              // Atualizar labels e dados do gráfico com as descrições
               this.chamadoData.labels = chamados.map(
                 (item) => statusMap[item.status_chamado] || "Desconhecido"
               );
               console.log(statusMap);
             } else if (consulta === "prioridade") {
-              // Atualizar labels com base na prioridade descrita no back-end
               this.chamadoData.labels = chamados.map(
                 (item) => item.prioridade_chamado || "Desconhecido"
               );
             } else if (consulta === "tecnico") {
-              // Mapa de técnicos (aqui você pode mapear ids para nomes, se necessário)
               this.chamadoData.labels = chamados.map(
-                (item) => `Técnico ${item.id_user_tecnico}`
+                (item) => `${item.nome_tecnico} (${item.idfr_tecnico})`
+              );
+            } else if (consulta === "setor") {
+              this.chamadoData.labels = chamados.map(
+                (item) => `${item.setor} (IPS: ${item.peso})`
+              );
+            } else if (consulta === "solicitante") {
+              this.chamadoData.labels = chamados.map(
+                (item) => `${item.nome_solicitante} (${item.idfr_solicitante})`
+              );
+            } else if (consulta === "cat_serv") {
+              this.chamadoData.labels = chamados.map(
+                (item) => `${item.cat_serv}`
+              );
+            } else if (consulta === "cat_ocor") {
+              this.chamadoData.labels = chamados.map(
+                (item) => `${item.cat_ocor}`
+              );
+            } else if (consulta === "dta_abr") {
+              this.chamadoData.labels = chamados.map(
+                (item) => `${item.dta_criacao}`
+              );
+            } else if (consulta === "dta_conc") {
+              this.chamadoData.labels = chamados.map(
+                (item) => `${item.dta_conclusao}`
               );
             } else {
-              // Para outros tipos de consulta, use o campo 'label'
               this.chamadoData.labels = chamados.map((item) => item.label);
             }
 
-            // Atualizar os dados do gráfico
             this.chamadoData.datasets[0].data = chamados.map(
               (item) => item.total
             );
 
-            // Renderizar o gráfico com os novos dados
             this.renderChart();
           } else {
             console.error("Erro ao buscar dados dos chamados:", res.data.msg);

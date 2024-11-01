@@ -140,6 +140,7 @@ if (isset($_GET['action'])) {
 
                 if ($result){
                     $num = mysqli_num_rows($result);
+                    $res['total'] = $num;
                     $chamados = array();
 
                     if ($num > 0) {
@@ -161,6 +162,9 @@ if (isset($_GET['action'])) {
                                     break;
                                 case 0:
                                     $status_desc = "Cancelado";
+                                    break;
+                                case 5:
+                                    $status_desc = "Detalhar chamado";
                                     break;
                             }
                             $data_criacao = new DateTime($row['data_criacao']);

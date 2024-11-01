@@ -19,7 +19,7 @@
             v-model="ChamadoData.titulo"
           />
           <span class="form-tip" v-if="!ChamadoData.titulo && showErrors"
-            >*Preechimento obrigatório!</span
+            >*Preenchimento obrigatório!</span
           >
         </div>
         <div class="form-group">
@@ -31,7 +31,7 @@
             v-model="ChamadoData.descricao"
           ></textarea>
           <span class="form-tip" v-if="!ChamadoData.descricao && showErrors"
-            >*Preechimento obrigatório!</span
+            >*Preenchimento obrigatório!</span
           >
         </div>
         <div class="form-group">
@@ -43,7 +43,6 @@
             @change="updatePesoSetor"
           >
             <option default value="" disabled>Setor</option>
-            <!--<option value="1">Não especificado (IPS: 1)</option>-->
             <option
               v-for="subs in subsetores"
               :key="subs.id_setor"
@@ -53,7 +52,7 @@
             </option>
           </select>
           <span class="form-tip" v-if="!ChamadoData.setor && showErrors"
-            >*Preechimento obrigatório!</span
+            >*Preenchimento obrigatório!</span
           >
         </div>
         <div class="form-group">
@@ -81,7 +80,7 @@
             </option>
           </select>
           <span class="form-tip" v-if="!ChamadoData.gravidade && showErrors"
-            >*Preechimento obrigatório!</span
+            >*Preenchimento obrigatório!</span
           >
         </div>
         <div class="form-group">
@@ -96,7 +95,7 @@
             </option>
           </select>
           <span class="form-tip" v-if="!ChamadoData.urgencia && showErrors"
-            >*Preechimento obrigatório!</span
+            >*Preenchimento obrigatório!</span
           >
         </div>
         <div class="form-group">
@@ -115,16 +114,10 @@
             </option>
           </select>
           <span class="form-tip" v-if="!ChamadoData.tendencia && showErrors"
-            >*Preechimento obrigatório!</span
+            >*Preenchimento obrigatório!</span
           >
         </div>
         <div class="form-group">
-          <!--<label>Dias com Problema *</label>
-          <input
-            type="number"
-            name="diasCProb"
-            v-model="ChamadoData.diasCProb"
-          />-->
           <div class="form-group">
             <label>Anexo</label>
             <input
@@ -135,27 +128,35 @@
               @change="handleFileUpload"
               multiple
             />
+            <a
+              href=""
+              @click.prevent="limparAnexos"
+              v-if="anexosUrls.length > 0"
+              >Limpar</a
+            >
           </div>
-          <table class="anexo-grid" v-if="anexosUrls.length > 0">
-            <thead>
-              <tr>
-                <th>Arquivo</th>
-                <th>Tamanho</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(anexo, index) in anexosUrls" :key="index">
-                <td>{{ anexo.name }}</td>
-                <td>{{ anexo.size }} bytes</td>
-                <td>
-                  <button class="bt-remove-anexo" @click="removeAnexo(index)">
-                    <i class="bi bi-x"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="confirmation-box">
+            <table class="anexo-grid" v-if="anexosUrls.length > 0">
+              <thead>
+                <tr>
+                  <th>Arquivo</th>
+                  <th>Tamanho</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(anexo, index) in anexosUrls" :key="index">
+                  <td>{{ anexo.name }}</td>
+                  <td>{{ anexo.size }} bytes</td>
+                  <td>
+                    <button class="bt-remove-anexo" @click="removeAnexo(index)">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <div class="criar-chamado-form-confirm">
           <button type="submit" class="submit-button-chamado">Enviar</button>
@@ -178,7 +179,6 @@ export default {
       ChamadoData: {
         titulo: "",
         descricao: "",
-        //diasCProb: "",
         setor: "",
         gravidade: "",
         urgencia: "",
@@ -201,8 +201,6 @@ export default {
   created() {
     this.fetchPrioridades();
     this.fetchSetoresList();
-    /*console.log(sessionStorage.getItem("id_user"));
-    console.log(localStorage.getItem("token"));*/
   },
   methods: {
     fetchPrioridades() {

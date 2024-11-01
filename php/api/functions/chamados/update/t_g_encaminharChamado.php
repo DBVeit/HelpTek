@@ -11,15 +11,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         && isset($_POST['idfr_chamado'])
         && isset($_POST['id_user_tecnico'])
         && isset($_POST['novoTecnicoResponsavel'])
-        && isset($_POST['justificativaEncaminhamento'])) {
+        && isset($_POST['justificativaEncaminhamento'])
+        && isset($_POST['permission'])) {
 
         $id_chamado = $mysqli_con->real_escape_string($_POST['id_chamado']);
         $idfr_chamado = $mysqli_con->real_escape_string($_POST['idfr_chamado']);
         $id_user_tecnico = $mysqli_con->real_escape_string($_POST['id_user_tecnico']);
         $novoTecnicoResponsavel = $mysqli_con->real_escape_string($_POST['novoTecnicoResponsavel']);
         $justificativaEncaminhamento = $mysqli_con->real_escape_string($_POST['justificativaEncaminhamento']);
+        $permission = $mysqli_con->real_escape_string($_POST['permission']);
 
-        if (empty($id_chamado) || empty($id_user_tecnico) || empty($novoTecnicoResponsavel) || strlen($justificativaEncaminhamento) > 500) {
+        if (empty($id_chamado)
+            || empty($id_user_tecnico)
+            || empty($novoTecnicoResponsavel)
+            || strlen($justificativaEncaminhamento) > 500 ) {
             $res_encaminha['error'] = true;
             $res_encaminha['msg'] = "Erro: Parâmetros inválidos!";
         } else {
@@ -29,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
 
                 // Preparar a chamada para a stored procedure
-                $stmt = $mysqli_con->prepare("CALL EncaminharChamado(?, ?, ?, ?)");
-                $stmt->bind_param("iiis", $id_chamado, $id_user_tecnico, $novoTecnicoResponsavel, $justificativaEncaminhamento);
+                $stmt = $mysqli_con->prepare("CALL EncaminharChamado(?, ?, ?, ?, ?)");
+                $stmt->bind_param("iiisi", $id_chamado, $id_user_tecnico, $novoTecnicoResponsavel, $justificativaEncaminhamento, $permission);
 
                 // Executar a query
                 if ($stmt->execute()) {

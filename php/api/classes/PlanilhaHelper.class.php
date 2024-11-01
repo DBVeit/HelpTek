@@ -25,10 +25,14 @@ class PlanilhaHelper {
         $sheet->setCellValue('P1', 'SOLUCAO');
         $sheet->setCellValue('Q1', 'IDFR_TECNICO');
         $sheet->setCellValue('R1', 'NOME_TECNICO');
-        $sheet->setCellValue('S1', 'DTA_CONCLUSAO');
-        $sheet->setCellValue('T1', 'OBSERVACAO');
-        $sheet->setCellValue('U1', 'TOTAL_ACOES');
-        $sheet->setCellValue('V1', 'TEMPO_ESPERA');
+        $sheet->setCellValue('S1', 'ATENDIDO');
+        $sheet->setCellValue('T1', 'OBSERVACAO_AVALIAR');
+        $sheet->setCellValue('U1', 'OBSERVACAO_CANCELA');
+        $sheet->setCellValue('V1', 'SOL_DETALHAMENTO');
+        $sheet->setCellValue('W1', 'RESPOSTA_DETALHAMENTO');
+        $sheet->setCellValue('X1', 'DTA_CONCLUSAO');
+        $sheet->setCellValue('Y1', 'TOTAL_ACOES');
+        $sheet->setCellValue('Z1', 'TEMPO_ESPERA');
 
         $linha = 2;
         foreach ($dados as $dado) {
@@ -50,10 +54,14 @@ class PlanilhaHelper {
             $sheet->setCellValue('P' . $linha, $dado['SOLUCAO']);
             $sheet->setCellValue('Q' . $linha, $dado['IDFR_TECNICO']);
             $sheet->setCellValue('R' . $linha, $dado['NOME_TECNICO']);
-            $sheet->setCellValue('S' . $linha, $dado['DTA_CONCLUSAO']);
+            $sheet->setCellValue('S' . $linha, $dado['ATENDIDO']);
             $sheet->setCellValue('T' . $linha, $dado['OBSERVACAO']);
-            $sheet->setCellValue('U' . $linha, $dado['TOTAL_ACOES']);
-            $sheet->setCellValue('V' . $linha, $dado['TEMPO_ESPERA']);
+            $sheet->setCellValue('U' . $linha, $dado['OBS_CANCELAMENTO']);
+            $sheet->setCellValue('V' . $linha, $dado['SOL_DETALHAMENTO']);
+            $sheet->setCellValue('W' . $linha, $dado['RESPOSTA_DETALHAMENTO']);
+            $sheet->setCellValue('X' . $linha, $dado['DTA_CONCLUSAO']);
+            $sheet->setCellValue('Y' . $linha, $dado['TOTAL_ACOES']);
+            $sheet->setCellValue('Z' . $linha, $dado['TEMPO_ESPERA']);
             $linha++;
         }
         return $spreadsheet;

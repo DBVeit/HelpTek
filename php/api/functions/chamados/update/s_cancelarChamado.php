@@ -7,11 +7,11 @@ $res_cancela = array('error' => false, 'msg' => '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    if (isset($_POST['id_chamado']) && isset($_POST['idfr_chamado']) && isset($_POST['observacao']) && isset($_POST['id_user']) && isset($_POST['idfr_code_user'])) {
+    if (isset($_POST['id_chamado']) && isset($_POST['idfr_chamado']) && isset($_POST['observacao_cancelamento']) && isset($_POST['id_user']) && isset($_POST['idfr_code_user'])) {
 
         $id_chamado = $mysqli_con->real_escape_string($_POST['id_chamado']);
         $idfr_chamado = $mysqli_con->real_escape_string($_POST['idfr_chamado']);
-        $observacao = $mysqli_con->real_escape_string($_POST['observacao']);
+        $observacao_cancelamento = $mysqli_con->real_escape_string($_POST['observacao_cancelamento']);
         $id_user = $_POST['id_user'];
         $idfr_code_user = $_POST['idfr_code_user'];
         $mysqli_con->begin_transaction();
@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Preparar a chamada para a stored procedure
             $stmt = $mysqli_con->prepare("CALL CancelarChamado(?, ?, ?, ?, ?)");
-            $stmt->bind_param("iisss", $id_chamado, $id_user, $idfr_chamado, $observacao, $idfr_code_user);
+            $stmt->bind_param("iisss", $id_chamado, $id_user, $idfr_chamado, $observacao_cancelamento, $idfr_code_user);
 
 
             // Executar a query

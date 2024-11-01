@@ -10,6 +10,7 @@
             <option value="2">Em atendimento</option>
             <option value="3">Respondido</option>
             <option value="4">Concluido</option>
+            <option value="5">Detalhar chamado</option>
             <option value="0">Cancelado</option>
           </select>
         </div>

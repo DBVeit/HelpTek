@@ -166,6 +166,9 @@ if (isset($_GET['action'])) {
                                 case 0:
                                     $status_desc = "Cancelado";
                                     break;
+                                case 5:
+                                    $status_desc = "Detalhar chamado";
+                                    break;
                             }
                             $data_criacao = new DateTime($row['data_criacao']);
                             switch ($prioridade_chamado_ret){

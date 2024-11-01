@@ -30,6 +30,7 @@ class QueryHelper {
                             WHEN chamados.status_chamado = 2 THEN 'Em atendimento'
                             WHEN chamados.status_chamado = 3 THEN 'Respondido'
                             WHEN chamados.status_chamado = 4 THEN 'Concluído'
+                            WHEN chamados.status_chamado = 5 THEN 'Detalhar chamado'
                         END AS STATUS,
                         users.name_user AS NOME_SOLICITANTE,
                         users.idfr_code_user AS IDFR_SOLICITANTE,
@@ -39,7 +40,14 @@ class QueryHelper {
                         tecnico.idfr_code_user AS IDFR_TECNICO,
                         tecnico.name_user AS NOME_TECNICO,
                         DATE_FORMAT(chamados.data_conclusao, '%d/%m/%Y') AS DTA_CONCLUSAO,
+                        CASE
+                            WHEN chamados.solicitacao_atendida = 0 THEN 'Não'
+                            WHEN chamados.solicitacao_atendida = 1 THEN 'Sim'
+                        END AS ATENDIDO,
                         chamados.observacao AS OBSERVACAO,
+                        chamados.observacao_cancelamento AS OBS_CANCELAMENTO,
+                        chamados.observacao_detalhamento_tecnico AS SOL_DETALHAMENTO,
+                        chamados.observacao_detalhamento_solicitante AS RESPOSTA_DETALHAMENTO,
                         chamados.total_acoes AS TOTAL_ACOES,
                         -- Cálculo de dias, horas e minutos de espera
                         CONCAT(
