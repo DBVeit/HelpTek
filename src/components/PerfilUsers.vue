@@ -1,13 +1,16 @@
 <template>
   <div class="ticket-form-container">
-    <h1>Alterar senha para continuar</h1>
+    <h1>Perfil</h1>
     <div class="message-box" v-if="showMessage">
       <div class="message-content">
         <span>{{ message }}</span>
       </div>
     </div>
     <div>
-      <div>
+      <div style="margin-top: 30px; margin-left: 20px">
+        <a href="#" @click.prevent="exibeForm()">Alterar senha</a>
+      </div>
+      <div v-if="alteraSenhaForm" style="margin-left: 60px">
         <form method="POST" @submit.prevent="onRedefinirSenha()">
           <div class="form-group">
             <div class="form-group">
@@ -18,7 +21,6 @@
                 name="senha"
                 v-model="Usuario.password_user"
                 @input="validatePassword"
-                :disabled="disableFields"
               />
               <span class="form-danger-msg"
                 >*A senha deve conter ter no mínimo 8 caracteres, considerando
@@ -42,7 +44,6 @@
                 name="confirma_senha"
                 v-model="Usuario.confirma_senha"
                 @input="validatePasswordMatch"
-                :disabled="disableFields"
               />
               <span
                 class="form-danger-msg"
@@ -59,7 +60,6 @@
                   class="form-check-input check-passw"
                   id="togglePasswordVisibility_pass"
                   v-model="showPassword"
-                  :disabled="disableFields"
                 />
                 <label
                   class="form-check-label check-passw"
@@ -69,26 +69,12 @@
                 </label>
               </div>
             </div>
-            <div class="confirmation-overlay" v-if="showSubmitBtn">
+            <div class="confirmation-overlay">
               <br />
               <div class="confirmation-box">
                 <button type="submit" class="submit-button">
                   Salvar Alterações
                 </button>
-              </div>
-            </div>
-            <div class="confirmation-overlay" v-if="showAcessarBtn">
-              <br />
-              <div class="confirmation-box">
-                <button class="submit-button" @click="reloadPage">
-                  Acessar
-                </button>
-              </div>
-              <div class="confirmation-box">
-                <span class="form-success-msg">
-                  Senha alterada com sucesso! Clique no botão acima para
-                  prosseguir
-                </span>
               </div>
             </div>
           </div>
@@ -98,11 +84,13 @@
   </div>
 </template>
 <script>
-import axios from "axios";
+//import axios from "axios";
+
 import CryptoJS from "crypto-js";
+import axios from "axios";
 
 export default {
-  name: "TrocaSenhaView",
+  name: "PerfilUsers",
   data() {
     return {
       showPassword: false,
@@ -116,13 +104,11 @@ export default {
       usuarioAtual: {},
       validaSenha: false,
       matchSenha: false,
+      alteraSenhaForm: false,
       Usuario: {
         password_user: "",
         confirma_senha: "",
       },
-      showAcessarBtn: false,
-      showSubmitBtn: true,
-      disableFields: false,
     };
   },
   methods: {
@@ -185,7 +171,7 @@ export default {
       data.append("id_user", id_user_session);
       data.append("encryptedPassword", encryptedPassword);
       data.append("encryptedPasswordConf", encryptedPasswordConf);
-      data.append("tela", "TrocaSenhaView");
+      data.append("tela", "Perfil");
 
       axios
         .get(
@@ -209,7 +195,7 @@ export default {
                   this.showAlert(res_redef.data.msg);
                 } else {
                   this.showAlert(res_redef.data.msg);
-                  this.showReload();
+                  this.clearFormFields();
                 }
               })
               .catch((err) => {
@@ -231,22 +217,17 @@ export default {
         this.showMessage = false;
       }, 8000);
     },
-    showReload() {
-      this.showAcessarBtn = true;
-      this.showSubmitBtn = false;
-      this.disableFields = true;
+    clearFormFields() {
       this.Usuario.password_user = "";
       this.Usuario.confirma_senha = "";
       this.showErrors = false;
     },
-    reloadPage() {
-      this.showErrors = false;
-      this.validaSenha = false;
-      this.matchSenha = false;
-      this.passwordValidationMessage = "";
-      this.passwordMatchMessage = "";
-      window.location.reload();
+    exibeForm() {
+      this.alteraSenhaForm = true;
     },
+  },
+  created() {
+    import("../assets/css/component/MeusChamados.css");
   },
 };
 </script>

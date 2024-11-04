@@ -1,9 +1,9 @@
 <?php
-$to = "contato.helptek@gmail.com"; // Substitua pelo seu endereço de e-mail
+$to = "help-tek-sys@outlook.com"; // Substitua pelo seu endereço de e-mail
 $subject = "Teste de Envio de Email";
 $message = "Este é um e-mail de teste.";
-$headers = 'From: contato.helptek@gmail.com' . "\r\n" .
-    'Reply-To: contato.helptek@gmail.com' . "\r\n" .
+$headers = 'From: help-tek-sys@outlook.com' . "\r\n" .
+    'Reply-To: help-tek-sys@outlook.com' . "\r\n" .
     'X-Mailer: PHP/' . phpversion();
 
 if (mail($to, $subject, $message, $headers)) {

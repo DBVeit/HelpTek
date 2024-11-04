@@ -1,4 +1,5 @@
 <?php
+global $mysqli_con;
 include "../../config/dbconnect.php";
 include "../../config/httpaccess.php";
 
@@ -19,7 +20,7 @@ if (isset($_GET['action'])) {
             if ($result_select->num_rows > 0) {
                 $row_select = $result_select->fetch_assoc();
 
-                $updateQuery = "UPDATE users SET user_logado = 0, token_user = NULL WHERE id_user = '$id_user'";
+                $updateQuery = "UPDATE users SET user_logado = 0, token_user = NULL, data_hora_logout = NOW() WHERE id_user = '$id_user'";
                 $mysqli_con->query($updateQuery);
 
                 if ($mysqli_con->affected_rows > 0) {

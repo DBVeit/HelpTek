@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $token_user = $obj->token_user;
         $idfr_code_user = $obj->idfr_code_user;
         if ($session_token == $token_user){
-            $res['msg'] = "Token válido";
+            //$res['msg'] = "Token válido";
             $res['user'] = $idfr_code_user;
         } else {
             $res['error'] = true;

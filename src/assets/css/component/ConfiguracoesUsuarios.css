@@ -160,6 +160,11 @@
     color: red;
 }
 
+.form-success-msg {
+    font-size: 15px;
+    color: limegreen;
+}
+
 .check-passw {
     cursor: pointer;
 }

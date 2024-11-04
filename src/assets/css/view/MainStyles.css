@@ -63,25 +63,37 @@ body {
     width: 98%;
 }
 
-.chamados-list-table th{
+.atualizacoes-list-table{
+    border-collapse: collapse;
+    margin: 35px 90px;
+    font-size: 13px;
+    font-family: sans-serif;
+    min-width: 600px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    text-align: left;
+    table-layout: auto;
+    width: 80%;
+}
+
+.chamados-list-table th, .atualizacoes-list-table th{
     padding-top: 12px;
     padding-bottom: 12px;
     background-color: #ff5757;
     color: white;
 }
 
-.chamados-list-table thead tr{
+.chamados-list-table thead tr, .atualizacoes-list-table thead tr{
     background-color: #ff5757;
     color: white;
     border-radius: 10px;
 }
 
-.chamados-list-table td,th{
+.chamados-list-table td,th, .atualizacoes-list-table td,th{
     border: 1px #ddd;
     padding: 12px 15px;
 }
 
-.chamados-list-table tbody tr{
+.chamados-list-table tbody tr, .atualizacoes-list-table, tbody tr{
     border-bottom: 1px solid #ddd;
 }
 
@@ -89,7 +101,7 @@ body {
     background-color: #f3f3f3;
 }*/
 
-.chamados-list-table tbody tr:last-of-type {
+.chamados-list-table tbody tr:last-of-type, .atualizacoes-list-table tbody tr:last-of-type{
     border-bottom: 2px solid #ff5757;
 }
 

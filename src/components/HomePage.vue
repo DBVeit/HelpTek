@@ -6,8 +6,7 @@
         alt="HelpTek Logo"
         class="logo"
       />
-      <!--<input type="search" placeholder="Pesquisar aqui" class="search-bar" />-->
-      <span> <i class="bi bi-building"></i> CORP </span>
+      <span> <i class="bi bi-building"></i> {{ nome_corporacao }}</span>
     </div>
     <div class="main-container">
       <aside class="sidebar">
@@ -16,7 +15,7 @@
           <br />
           <a href="#" @click.prevent="logout">Logout</a>
         </div>
-        <nav class="nav-menu">
+        <nav class="nav-menu" v-if="!trocaSenhaLogin">
           <div v-for="(menuItem, index) in menuItems" :key="index">
             <a
               href="#"
@@ -37,6 +36,9 @@
         <ConfiguracoesCorp v-if="ConfigCorp" />
         <ConfiguracoesSetores v-if="ConfigSetores" />
         <RelatorioChamados v-if="Relatorios" />
+        <AtualizacoesHome v-if="Atualizacoes" />
+        <PerfilUsers v-if="Perfil" />
+        <TrocaSenhaView v-if="trocaSenhaLogin" />
       </main>
     </div>
   </div>
@@ -52,10 +54,13 @@ import DashboardChamados from "@/components/DashboardChamados.vue";
 import ConfiguracoesCorp from "@/components/ConfiguracoesCorp.vue";
 import ConfiguracoesSetores from "@/components/ConfiguracoesSetores.vue";
 import RelatorioChamados from "@/components/RelatorioChamados.vue";
-//import { Modal } from "bootstrap";
+import AtualizacoesHome from "@/components/AtualizacoesHome.vue";
+import PerfilUsers from "@/components/PerfilUsers.vue";
+import TrocaSenhaView from "@/views/TrocaSenhaView.vue";
 export default {
   name: "HomePage",
   components: {
+    TrocaSenhaView,
     DashboardChamados,
     CriarChamado,
     MeusChamados,
@@ -65,6 +70,8 @@ export default {
     ConfiguracoesCorp,
     ConfiguracoesSetores,
     RelatorioChamados,
+    AtualizacoesHome,
+    PerfilUsers,
   },
 
   data() {
@@ -74,6 +81,7 @@ export default {
       id_user: id_user,
       nameUser: "",
       typeUser: "",
+      nome_corporacao: "",
       CriarChamadoForm: false,
       MeusChamadosList: false,
       TodosOsChamadosList: false,
@@ -82,9 +90,12 @@ export default {
       ConfigCorp: false,
       ConfigSetores: false,
       Relatorios: false,
+      Atualizacoes: false,
+      Perfil: false,
       isTecnico: false,
       showErrors: false,
       showMessage: false,
+      trocaSenhaLogin: false,
     };
   },
 
@@ -101,39 +112,12 @@ export default {
 
     this.nameUser = nameUser || "Usuário";
     this.typeUser = typeUser || "Usuário";
-    //this.checkTrocaSenha();
+    this.checkTrocaSenha();
     this.verificarTipoUsuario();
     this.fetchUserMenus();
+    this.fetchUserCorp();
   },
-  /*mounted() {
-    this.modalRedefinirSenha = new Modal(
-      document.getElementById("modalRedefinirSenha")
-    );
-  },*/
   methods: {
-    /*checkTrocaSenha() {
-      axios
-        .get(
-          `http://localhost/projeto/helptek/php/api/functions/session/checkTrocaSenha.php?action=checkTrocaSenha&id_user=${this.id_user}`
-        )
-        .then((res) => {
-          if (res.data.code === 200) {
-            this.$router.push("/Home");
-            localStorage.setItem("token", res.data.token);
-            sessionStorage.setItem("id_user", res.data.id_user);
-            sessionStorage.setItem("first_name", res.data.first_name);
-            sessionStorage.setItem("level_user", res.data.level_user);
-            sessionStorage.setItem("permission", res.data.user_permission);
-          } else if (res.data.code === 409) {
-            this.openActiveSessionModal(); // Abre o modal ao detectar a sessão ativa
-            this.sessionToken = res.data.token;
-          } else {
-            this.errorMessage = res.data.msg;
-            this.fadeOutErrorMessage();
-          }
-        });
-    },*/
-
     fetchUserMenus() {
       axios
         .get(
@@ -150,6 +134,33 @@ export default {
           console.error("Erro ao buscar menus: ", error);
         });
     },
+    fetchUserCorp() {
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/fetch/fetchCorp.php?action=getUserCorp&id_user=${this.id_user}`
+        )
+        .then((res) => {
+          this.nome_corporacao = res.data.corporacao[0].nome_corporacao;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    checkTrocaSenha() {
+      axios
+        .get(
+          `http://localhost/projeto/helptek/php/api/functions/session/checkTrocaSenha.php?action=checkTrocaSenha&id_user=${this.id_user}`
+        )
+        .then((res) => {
+          if (res.data.code === 428) {
+            this.trocaSenhaLogin = true; // Bloqueia a navegação e ativa o formulário de troca de senha
+          } else {
+            // Se a troca de senha não é necessária, pode prosseguir normalmente
+            this.trocaSenhaLogin = false;
+            this.Atualizacoes = true;
+          }
+        });
+    },
     handleMenuClick(menuItem) {
       if (menuItem === "Criar chamado") {
         this.CriarChamadoForm = true;
@@ -160,6 +171,8 @@ export default {
         this.ConfigCorp = false;
         this.ConfigSetores = false;
         this.Relatorios = false;
+        this.Atualizacoes = false;
+        this.Perfil = false;
       } else if (menuItem === "Meus chamados") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = true;
@@ -169,6 +182,8 @@ export default {
         this.ConfigCorp = false;
         this.ConfigSetores = false;
         this.Relatorios = false;
+        this.Atualizacoes = false;
+        this.Perfil = false;
       } else if (menuItem === "Todos os chamados") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -178,6 +193,8 @@ export default {
         this.ConfigCorp = false;
         this.ConfigSetores = false;
         this.Relatorios = false;
+        this.Atualizacoes = false;
+        this.Perfil = false;
       } else if (menuItem === "Configurações de usuários") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -187,6 +204,8 @@ export default {
         this.ConfigCorp = false;
         this.ConfigSetores = false;
         this.Relatorios = false;
+        this.Atualizacoes = false;
+        this.Perfil = false;
       } else if (menuItem === "Dashboard") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -196,6 +215,8 @@ export default {
         this.ConfigCorp = false;
         this.ConfigSetores = false;
         this.Relatorios = false;
+        this.Atualizacoes = false;
+        this.Perfil = false;
       } else if (menuItem === "Configurações corporação") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -205,6 +226,8 @@ export default {
         this.ConfigCorp = true;
         this.ConfigSetores = false;
         this.Relatorios = false;
+        this.Atualizacoes = false;
+        this.Perfil = false;
       } else if (menuItem === "Configurações setores") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -214,6 +237,8 @@ export default {
         this.ConfigCorp = false;
         this.ConfigSetores = true;
         this.Relatorios = false;
+        this.Atualizacoes = false;
+        this.Perfil = false;
       } else if (menuItem === "Relatórios") {
         this.CriarChamadoForm = false;
         this.MeusChamadosList = false;
@@ -223,6 +248,30 @@ export default {
         this.ConfigCorp = false;
         this.ConfigSetores = false;
         this.Relatorios = true;
+        this.Atualizacoes = false;
+        this.Perfil = false;
+      } else if (menuItem === "Atualizações") {
+        this.CriarChamadoForm = false;
+        this.MeusChamadosList = false;
+        this.TodosOsChamadosList = false;
+        this.ConfigUsuarios = false;
+        this.Dashboard = false;
+        this.ConfigCorp = false;
+        this.ConfigSetores = false;
+        this.Relatorios = false;
+        this.Atualizacoes = true;
+        this.Perfil = false;
+      } else if (menuItem === "Perfil") {
+        this.CriarChamadoForm = false;
+        this.MeusChamadosList = false;
+        this.TodosOsChamadosList = false;
+        this.ConfigUsuarios = false;
+        this.Dashboard = false;
+        this.ConfigCorp = false;
+        this.ConfigSetores = false;
+        this.Relatorios = false;
+        this.Atualizacoes = false;
+        this.Perfil = true;
       }
     },
     verificarTipoUsuario() {
@@ -259,82 +308,6 @@ export default {
           console.log("Err", err);
         });
     },
-    /*openTrocaSenhaModal() {
-      if (this.modalRedefinirSenha) {
-        this.modalRedefinirSenha.show();
-      } else {
-        console.error("Modal não foi inicializado corretamente.");
-      }
-    },
-    onPasswordChange() {
-      if (!this.newPassword || !this.confirmPassword) {
-        alert("Por favor, preencha todos os campos.");
-        return;
-      }
-      if (this.newPassword !== this.confirmPassword) {
-        alert("As senhas não coincidem.");
-        return;
-      }
-
-      let data = new FormData();
-      data.append("id_user", this.userId);
-      data.append("new_password", this.newPassword);
-      axios
-        .post(
-          "http://localhost/projeto/helptek/php/api/functions/changePassword.php",
-          data
-        )
-        .then((res) => {
-          if (res.data.error) {
-            alert(res.data.msg);
-          } else {
-            this.showPasswordChangeForm = false;
-            this.$router.push("/Home");
-          }
-        })
-        .catch((err) => {
-          console.log("Err", err);
-        });
-    },*/
-    // Validação do padrão de senha
-    /*validatePassword() {
-      const password = this.NovaSenha.password_user;
-      const passwordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-      if (!password) {
-        this.passwordValidationMessage = "";
-        this.validaSenha = false;
-      } else if (!passwordRegex.test(password)) {
-        this.passwordValidationMessage = "bi bi-x text-danger";
-        this.validaSenha = false;
-      } else {
-        this.passwordValidationMessage = "bi bi-check2 text-success";
-        this.validaSenha = true;
-      }
-    },*/
-    // Validação de senhas inseridas / comparação
-    /*validatePasswordMatch() {
-      if (this.NovaSenha.password_user !== this.NovaSenha.confirma_senha) {
-        this.passwordMatchMessage = "As senhas não coincidem.";
-        this.matchSenha = false;
-      } else {
-        this.passwordMatchMessage = "";
-        this.matchSenha = true;
-      }
-    },*/
-    /*fadeOutErrorMessage() {
-      let opacity = 1;
-      const interval = setInterval(() => {
-        opacity -= 0.1;
-        this.errorMessageOpacity = opacity;
-        if (opacity <= 0) {
-          clearInterval(interval);
-          this.errorMessage = "";
-          this.errorMessageOpacity = 1;
-        }
-      }, 250);
-    },*/
   },
 };
 </script>

@@ -1,4 +1,5 @@
 <?php
+global $mysqli_con;
 include "../../config/dbconnect.php";
 include "../../config/httpaccess.php";
 include "../../public/jwt.class.php";
@@ -87,7 +88,7 @@ if (isset($_GET['action'])) {
                         $res['level_user'] = $level;
                         $res['user_permission'] = $_SESSION['user_level'];
                         //$res['idfr_code_user'] = $_SESSION['idfr_code_user'];
-                        $updateQuery = "UPDATE users SET user_logado = 1, token_user = '$token' WHERE id_user = '$idDB'";
+                        $updateQuery = "UPDATE users SET user_logado = 1, token_user = '$token', data_hora_login = NOW() WHERE id_user = '$idDB'";
                         $mysqli_con->query($updateQuery);
                         if ($updateQuery) {
                             $res['msg'] = "Token de usuário atualizado com sucesso!";

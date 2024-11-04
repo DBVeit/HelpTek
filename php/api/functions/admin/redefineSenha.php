@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id_user = $mysqli_con->real_escape_string($_POST['id_user']);
         $senha = $mysqli_con->real_escape_string($_POST['encryptedPassword']);
         $confirma_senha = $mysqli_con->real_escape_string($_POST['encryptedPasswordConf']);
+        $tela = $mysqli_con->real_escape_string($_POST['tela']);
         //$idfr_code_user = $_POST['idfr_code_user'];
 
         $senha_confirmada = $senha === $confirma_senha ? true : false;
@@ -22,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
 
                 // Preparar a chamada para a stored procedure
-                $stmt = $mysqli_con->prepare("CALL RedefineSenha(?,?)");
-                $stmt->bind_param("is", $id_user, $senha);
+                $stmt = $mysqli_con->prepare("CALL RedefineSenha(?,?,?)");
+                $stmt->bind_param("iss", $id_user, $senha, $tela);
 
                 // Executar a query
                 if ($stmt->execute()) {

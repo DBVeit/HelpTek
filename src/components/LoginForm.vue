@@ -4,6 +4,11 @@
       <p>Inovação em serviços HelpDesk</p>
     </header>
     <div class="content-wrapper">
+      <div class="message-box" v-if="showMessage">
+        <div class="message-content">
+          <span>{{ message }}</span>
+        </div>
+      </div>
       <div class="container login-box" v-if="!showActiveSessionMessage">
         <div class="login_logo">
           <img src="../assets/img/LogoHelpTek.png" alt="Logo HelpTek" />
@@ -37,10 +42,7 @@
                 ></button>
               </div>
               <div class="modal-body">
-                <p>
-                  Uma sessão ativa foi detectada. Deseja derrubar a sessão
-                  anterior?
-                </p>
+                <p>Usuário conectado. Derrubar sessão ativa?</p>
               </div>
               <div class="modal-footer">
                 <button
@@ -52,7 +54,8 @@
                 </button>
                 <button
                   type="button"
-                  class="btn btn-primary"
+                  class="btn"
+                  style="background-color: #ff5757; color: white"
                   @click="confirmActiveSessionOverride"
                 >
                   Sim
@@ -73,9 +76,11 @@
                 placeholder="Nome de usuário"
                 name="username"
                 autocomplete="off"
-                required
               />
             </div>
+            <span class="form-tip" v-if="!User.username && showErrors"
+              >*Preenchimento obrigatório!</span
+            >
             <div class="input-group">
               <input
                 type="password"
@@ -84,15 +89,19 @@
                 placeholder="Senha"
                 name="password"
                 autocomplete="off"
-                required
               />
             </div>
+            <span class="form-tip" v-if="!User.password && showErrors"
+              >*Preenchimento obrigatório!</span
+            >
             <div class="forgot-recover">
               <a
                 class="recover-password"
                 @click.prevent="
                   recoverform = true;
                   loginform = false;
+                  showErrors = false;
+                  limpaCampos();
                 "
                 >Recuperar Login</a
               >
@@ -112,9 +121,11 @@
                 placeholder="E-Mail"
                 name="email"
                 autocomplete="off"
-                required
               />
             </div>
+            <span class="form-tip" v-if="!Rec.emailUser && showErrors"
+              >*Preenchimento obrigatório!</span
+            >
             <div class="forgot-recover">
               <label>
                 Preencha o e-mail para recuperar o acesso ou clique
@@ -123,6 +134,8 @@
                   @click.prevent="
                     recoverform = false;
                     loginform = true;
+                    showErrors = false;
+                    limpaCampos();
                   "
                   >aqui</a
                 >
@@ -177,6 +190,7 @@ export default {
       showActiveSessionMessage: false,
       sessionToken: null,
       activeSessionModal: null,
+      showErrors: false,
     };
   },
   mounted() {
@@ -189,9 +203,12 @@ export default {
     //*********Função p/ realizar login*********//
     onLogin() {
       if (!this.User.username || !this.User.password) {
-        this.showAlert = "Por favor, preencha todos os campos.";
+        // Não prosseguir se houver erros
+        this.showErrors = true;
         return;
       }
+
+      this.showErrors = false;
 
       let data = new FormData();
 
@@ -200,12 +217,6 @@ export default {
 
       data.append("username", this.User.username);
       data.append("password", encryptedPassword);
-      // Cria um objeto para armazenar os dados
-      /*let dataEntries = {};
-      data.forEach((value, key) => {
-        dataEntries[key] = value;
-      });
-      console.log(dataEntries);*/ // Exibe o objeto com os dados
       axios
         .post(
           "http://localhost/projeto/helptek/php/api/functions/login.php?action=login",
@@ -245,9 +256,12 @@ export default {
     //*********Função p/ recuperar login*********//
     onRecovery() {
       if (!this.Rec.emailUser) {
-        alert("Por favor, preencha o campo.");
+        // Não prosseguir se houver erros
+        this.showErrors = true;
         return;
       }
+
+      this.showErrors = false;
 
       // Gerar uma senha aleatória
       const randomPassword = this.generateRandomPassword();
@@ -256,21 +270,27 @@ export default {
       const encryptedPassword = CryptoJS.SHA256(randomPassword).toString();
 
       let dataRec = new FormData();
+
       dataRec.append("emailUser", this.Rec.emailUser);
       dataRec.append("new_password_email", randomPassword); // Enviar senha para o email ao backend
       dataRec.append("new_password", encryptedPassword); // Enviar senha criptografada ao backend
+
       axios
         .post(
-          "http://localhost/projeto/helptek/php/api/functions/loginRecover.php?action=recover",
+          "http://localhost/projeto/helptek/php/api/functions/loginRecover.php",
           dataRec
         )
-        .then((res) => {
-          if (res.data.error === true) {
-            this.recoverMessage = res.data.msg;
-            this.fadeOutErrorRecMsg();
+        .then((res_rec) => {
+          if (res_rec.data.error === true) {
+            console.log(res_rec.data.msg);
+            this.showAlert(res_rec.data.msg);
+            //this.recoverMessage = res_rec.data.msg;
+            //this.fadeOutErrorRecMsg();
           } else {
-            this.recoverMessage = res.data.msg;
-            this.fadeOutSuccessRecMsg();
+            this.showAlert(res_rec.data.msg);
+            //console.log(res_rec.data.msg);
+            //this.recoverMessage = res_rec.data.msg;
+            //this.fadeOutSuccessRecMsg();
           }
         })
         .catch((err) => {
@@ -347,6 +367,19 @@ export default {
           this.recoverMessageOpacity = 1;
         }
       }, 1000);
+    },
+    //********Função p/ limpar campos de preenchimento//
+    limpaCampos() {
+      this.Rec.emailUser = "";
+      this.User.username = "";
+      this.User.password = "";
+    },
+    showAlert(message) {
+      this.message = message;
+      this.showMessage = true;
+      setTimeout(() => {
+        this.showMessage = false;
+      }, 8000);
     },
   },
 };

@@ -399,6 +399,24 @@
                 >
               </div>
               <div class="form-group-modal">
+                <label>Corporação *</label>
+                <select v-model="NovoUsuario.corporacao">
+                  <option default value="" disabled>Corporacao</option>
+                  <option
+                    v-for="corps in corporacoes"
+                    :key="corps.id_corporacao"
+                    :value="corps.id_corporacao"
+                  >
+                    {{ corps.nome_corporacao }}
+                  </option>
+                </select>
+                <span
+                  class="form-danger-msg"
+                  v-if="!NovoUsuario.corporacao && showErrors"
+                  >*Preechimento obrigatório!</span
+                >
+              </div>
+              <div class="form-group-modal">
                 <label>Permissão *</label>
                 <select
                   class="form-select"
@@ -530,6 +548,7 @@ export default {
         name_user: "",
         first_name: "",
         email_user: "",
+        id_corporacao: "",
         id_permissao: "",
         username_user: "",
         password_user: "",
@@ -541,6 +560,7 @@ export default {
         name_user: "",
         first_name: "",
         email_user: "",
+        id_corporacao: "",
         id_permissao: "",
         username_user: "",
         password_user: "",
@@ -550,6 +570,7 @@ export default {
         status_user: "",
       },
       Usuarios: [],
+      corporacoes: [],
       showMessage: false,
       message: "",
       showErrors: false,
@@ -567,6 +588,7 @@ export default {
     import("../assets/css/component/ConfiguracoesUsuarios.css");
     this.onListarUsuarios();
     this.fetchPermissoes();
+    this.fetchCorporacoes();
   },
   methods: {
     // Listagem de usuarios cadastrados na base
@@ -614,6 +636,23 @@ export default {
           console.error("Erro ao carregar permissões: ", error);
         });
     },
+    //Listar corporacoes
+    fetchCorporacoes() {
+      axios
+        .get(
+          "http://localhost/projeto/helptek/php/api/functions/admin/selectCorporacoes.php"
+        )
+        .then((response) => {
+          if (!response.data.error) {
+            this.corporacoes = response.data.corps;
+          } else {
+            console.error("Erro ao buscar corporacoes: ", response.data.msg);
+          }
+        })
+        .catch((error) => {
+          console.error("Erro ao buscar corporacoes:", error);
+        });
+    },
     // Formulario de cadastro
     onCriarUsuario() {
       let data = new FormData();
@@ -625,6 +664,7 @@ export default {
         !this.NovoUsuario.name_user ||
         !this.NovoUsuario.first_name ||
         !this.NovoUsuario.email_user ||
+        !this.NovoUsuario.corporacao ||
         !this.NovoUsuario.id_permissao ||
         !this.NovoUsuario.username_user ||
         !this.NovoUsuario.password_user ||
@@ -651,10 +691,18 @@ export default {
       data.append("nome", this.NovoUsuario.name_user);
       data.append("primeiro_nome", this.NovoUsuario.first_name);
       data.append("email", this.NovoUsuario.email_user);
+      data.append("corporacao", this.NovoUsuario.corporacao);
       data.append("permissao", this.NovoUsuario.id_permissao);
       data.append("user", this.NovoUsuario.username_user);
       data.append("senha", encryptedPassword);
       data.append("confirma_senha", encryptedPasswordConf);
+
+      // Cria um objeto para armazenar os dados
+      let dataEntries = {};
+      data.forEach((value, key) => {
+        dataEntries[key] = value;
+      });
+      console.log(dataEntries); // Exibe o objeto com os dados
 
       axios
         .post(
@@ -668,7 +716,7 @@ export default {
             //this.clearFormFields();
           } else {
             this.showAlertSuccess(res.data.msg);
-            this.closeModal(); // Fecha o modal
+            this.closeModal("modalCadastro");
           }
         })
         .catch((err) => {
@@ -738,21 +786,6 @@ export default {
       this.passwordMatchMessage = "";
       //this.verUsuario(this.UsuarioData);
     },
-    // Código para fechar o modal após cadastro
-    closeModal() {
-      const closeButton = document.querySelector(
-        '#modalCadastro [data-bs-dismiss="modal"], #myModal [data-bs-dismiss="modal"]'
-      );
-      if (closeButton) {
-        closeButton.click();
-      }
-      this.onListarUsuarios();
-      this.verUsuario(this.UsuarioData);
-      this.showPassword = false;
-      this.passwordMatchMessage = "";
-      // Restaura os dados originais se o modal for fechado sem salvar
-      //this.usuarioAtual = { ...this.originalUsuario };
-    },
     // Edição de dados do usuário
     salvarEditarUsuario() {
       this.showErrors = true;
@@ -784,9 +817,10 @@ export default {
         .then((res) => {
           console.log("Server response:", res.data);
           if (res.data.error === true) {
-            this.showAlert(res.data.msg);
+            this.showAlertError(res.data.msg);
           } else {
-            this.showAlert(res.data.msg);
+            this.showAlertSuccess(res.data.msg);
+            this.closeModal("myModal");
           }
         })
         .catch((err) => {
@@ -795,13 +829,6 @@ export default {
     },
     editarDadosUsuario() {
       this.isEditing = true;
-    },
-    salvarAlteracoesModal() {
-      // Código para salvar as alterações
-      // Se salvo, o modal não precisa restaurar os dados
-      // Atualize o originalUsuario com os novos dados
-      //this.originalUsuario = { ...this.usuarioAtual };
-      //this.closeModal();
     },
     //Redefinir senha de usuario
     onRedefinirSenha() {
@@ -834,6 +861,7 @@ export default {
       data.append("id_user", this.UsuarioData.id_user);
       data.append("encryptedPassword", encryptedPassword);
       data.append("encryptedPasswordConf", encryptedPasswordConf);
+      data.append("tela", "ConfiguracoesUsuarios");
 
       // Cria um objeto para armazenar os dados
       let dataEntries = {};
@@ -866,7 +894,7 @@ export default {
                 } else {
                   this.showAlert(res_redef.data.msg);
                   this.clearFormFields();
-                  this.closeModal(); // Fecha o modal
+                  this.closeModal("modalRedefinirSenha");
                 }
               })
               .catch((err) => {
@@ -892,13 +920,6 @@ export default {
       data.append("id_user", this.UsuarioData.id_user);
       data.append("status_user", this.UpdateStatus.status_user);
 
-      // Cria um objeto para armazenar os dados
-      let dataEntries = {};
-      data.forEach((value, key) => {
-        dataEntries[key] = value;
-      });
-      console.log(dataEntries); // Exibe o objeto com os dados
-
       axios
         .get(
           `http://localhost/projeto/helptek/php/api/functions/session/checkUser.php?id_user=${id_user_session}&session_token=${session_token}`
@@ -907,9 +928,6 @@ export default {
           if (res.data.error === false) {
             console.log("Server response:", res.data.msg);
             this.showAlertError(res.data.msg);
-            //this.clearFormFields();
-            //const idfr_code_user = res.data.user;
-            //data.append("idfr_code_user", idfr_code_user);
             axios
               .post(
                 "http://localhost/projeto/helptek/php/api/functions/admin/updateStatusUser.php",
@@ -919,11 +937,10 @@ export default {
                 console.log("Server response:", res_statuser.data);
                 if (res_statuser.data.error === true) {
                   this.showAlertError(res_statuser.data.msg);
-                  //this.clearFormFields();
                 } else {
                   this.showAlert(res_statuser.data.msg);
                   this.clearFormFields();
-                  this.closeModal(); // Fecha o modal
+                  this.closeModal("modalDesativaAtivaUsuario");
                 }
               })
               .catch((err) => {
@@ -937,6 +954,19 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+    // Código para fechar o modal
+    closeModal(modalId) {
+      // Seleciona o botão de fechar dentro do modal
+      const closeButton = document.querySelector(`#${modalId} .btn-close`);
+      // Simula o clique no botão de fechar para fechar o modal
+      if (closeButton) {
+        closeButton.click();
+      }
+      this.onListarUsuarios();
+      this.verUsuario(this.UsuarioData);
+      this.showPassword = false;
+      this.passwordMatchMessage = "";
     },
   },
 };

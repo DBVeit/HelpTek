@@ -1,6 +1,6 @@
 <?php
 // Inclua o autoloader do Composer
-require '../../vendor/autoload.php';
+include "../../../../vendor/autoload.php";
 include "../../config/dbconnect.php";
 include "../../config/httpaccess.php";
 

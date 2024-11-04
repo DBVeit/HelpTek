@@ -14,6 +14,7 @@ if (isset($_GET['action'])) {
         $nome = $mysqli_con->real_escape_string($_POST['nome']);
         $primeiro_nome = $mysqli_con->real_escape_string($_POST['primeiro_nome']);
         $email = $mysqli_con->real_escape_string($_POST['email']);
+        $corporacao = $mysqli_con->real_escape_string($_POST['corporacao']);
         $permissao = $mysqli_con->real_escape_string($_POST['permissao']);
         $user = $mysqli_con->real_escape_string($_POST['user']);
         $senha = $mysqli_con->real_escape_string($_POST['senha']);
@@ -30,8 +31,8 @@ if (isset($_GET['action'])) {
 
             if ($result_select == 0) {
 
-                $sql_insert = "INSERT INTO users(`name_user`,`first_name`,`username_user`,`email_user`,`password_user`,`id_permissao`,`level_user`) 
-                    VALUES('$nome','$primeiro_nome','$user','$email','$senha','$permissao','$permissao')";
+                $sql_insert = "INSERT INTO users(`name_user`,`first_name`,`username_user`,`email_user`,`password_user`,`id_corporacao`,`id_permissao`,`level_user`) 
+                    VALUES('$nome','$primeiro_nome','$user','$email','$senha','$corporacao','$permissao','$permissao')";
                 $query_insert = $mysqli_con->query($sql_insert);
 
                 if ($query_insert) {

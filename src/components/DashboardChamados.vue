@@ -118,19 +118,13 @@ export default {
       showDashboard: false, // Controla a exibição da div main-dash-area
       chart: null, // Referência ao gráfico Chart.js
       modalChart: null, // Referência ao gráfico Chart.js no modal
+      chartLabel: "Dados do chamado", // Label padrão
       chamadoData: {
         labels: [],
         datasets: [
           {
-            label: "Dados do chamado",
-            backgroundColor: [
-              "#CBFF63FF",
-              "#368AEBFF",
-              "#FF8956FF",
-              "#36CAEBFF",
-              "#4BC051FF",
-              "#DAC023FF",
-            ],
+            label: "",
+            backgroundColor: [], // Será preenchido dinamicamente
             data: [], // Exemplo de dados
           },
         ],
@@ -138,8 +132,65 @@ export default {
     };
   },
   methods: {
+    getConsultaColors(consulta) {
+      const colors = {
+        status: [
+          "#A2A2A2FF",
+          "#CBB604FF",
+          "#FF0000FF",
+          "#36CAEBFF",
+          "#32CD32FF",
+        ],
+        prioridade: ["#32CD32FF", "#FFAE00EF", "#FF0000FF", "#000000FF"],
+        tecnico: [
+          "#368AEBFF",
+          "#FF8956FF",
+          "#36CAEBFF",
+          "#4BC051FF",
+          "#DAC023FF",
+        ],
+        setor: ["#DAC023FF", "#CBFF63FF", "#FF3B3BFF", "#4BC051FF"],
+        solicitante: ["#4BC051FF", "#36CAEBFF", "#FF8956FF", "#CBFF63FF"],
+        cat_serv: ["#FF8956FF", "#DAC023FF", "#CBFF63FF", "#368AEBFF"],
+        cat_ocor: ["#36CAEBFF", "#4BC051FF", "#FF3B3BFF", "#DAC023FF"],
+        dta_abr: ["#CBFF63FF", "#368AEBFF", "#FF8956FF"],
+        dta_conc: ["#FF3B3BFF", "#36CAEBFF", "#4BC051FF"],
+      };
+      return colors[consulta] || ["#CBFF63FF"]; // Cor padrão
+    },
     fetchChamadosData(consulta) {
       // Requisição ao back-end para obter os dados
+      switch (consulta) {
+        case "status":
+          this.chartLabel = "Chamados por Status";
+          break;
+        case "prioridade":
+          this.chartLabel = "Chamados por Prioridade";
+          break;
+        case "tecnico":
+          this.chartLabel = "Chamados por Usuário Técnico";
+          break;
+        case "setor":
+          this.chartLabel = "Chamados por Setor";
+          break;
+        case "solicitante":
+          this.chartLabel = "Chamados por Usuário Solicitante";
+          break;
+        case "cat_serv":
+          this.chartLabel = "Chamados por Categoria de Serviço";
+          break;
+        case "cat_ocor":
+          this.chartLabel = "Chamados por Categoria de Ocorrência";
+          break;
+        case "dta_abr":
+          this.chartLabel = "Chamados por Data de Abertura";
+          break;
+        case "dta_conc":
+          this.chartLabel = "Chamados por Data de Conclusão";
+          break;
+        default:
+          this.chartLabel = "Dados do Chamado";
+      }
       axios
         .get(
           `http://localhost/projeto/helptek/php/api/functions/dashboard/getChamadosData.php?action=getChamadosData&consulta=${consulta}`
@@ -204,6 +255,10 @@ export default {
               (item) => item.total
             );
 
+            // Define as cores com base no tipo de consulta
+            this.chamadoData.datasets[0].backgroundColor =
+              this.getConsultaColors(consulta);
+
             this.renderChart();
           } else {
             console.error("Erro ao buscar dados dos chamados:", res.data.msg);
@@ -237,7 +292,7 @@ export default {
             },
             title: {
               display: true,
-              text: "Relatório de Chamados",
+              text: this.chartLabel, // Usa o label personalizado como título
             },
           },
         },
